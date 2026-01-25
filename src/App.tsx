@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { PlanosProvider } from "@/contexts/PlanosContext";
+import { ReferralProvider } from "@/contexts/ReferralContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { AlunoLayout } from "@/components/layout/AlunoLayout";
@@ -58,6 +59,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <AuthProvider>
+            <ReferralProvider>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
@@ -132,6 +134,7 @@ const App = () => (
 
               <Route path="*" element={<NotFound />} />
             </Routes>
+            </ReferralProvider>
             </AuthProvider>
           </BrowserRouter>
         </TooltipProvider>

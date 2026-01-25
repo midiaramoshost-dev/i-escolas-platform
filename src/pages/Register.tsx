@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { School, Mail, Lock, Eye, EyeOff, User, Phone, ArrowLeft } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { School, Mail, Lock, Eye, EyeOff, User, Phone, ArrowLeft, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,9 +8,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
+import { useReferral } from "@/contexts/ReferralContext";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Register() {
+  const [searchParams] = useSearchParams();
+  const refCode = searchParams.get('ref');
+  
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -21,10 +25,12 @@ export default function Register() {
     confirmPassword: "",
     role: "" as UserRole | "",
     acceptTerms: false,
+    referralCode: refCode || "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { register } = useAuth();
+  const { applyReferralCode } = useReferral();
   const { toast } = useToast();
 
   const handleChange = (field: string, value: string | boolean) => {
@@ -82,9 +88,17 @@ export default function Register() {
       });
 
       if (success) {
+        // Apply referral code if provided
+        if (formData.referralCode) {
+          // We need to apply after login, so store the code
+          localStorage.setItem('pending_referral_code', formData.referralCode);
+        }
+        
         toast({
           title: "Conta criada com sucesso!",
-          description: "Você já pode fazer login com suas credenciais.",
+          description: formData.referralCode 
+            ? "Faça login para ativar sua indicação e benefícios." 
+            : "Você já pode fazer login com suas credenciais.",
         });
         navigate("/login");
       } else {
@@ -173,6 +187,27 @@ export default function Register() {
                     onChange={(e) => handleChange("phone", e.target.value)}
                   />
                 </div>
+              </div>
+
+              {/* Código de Indicação */}
+              <div className="space-y-2">
+                <Label htmlFor="referralCode" className="flex items-center gap-2">
+                  <Gift className="h-4 w-4 text-primary" />
+                  Código de indicação (opcional)
+                </Label>
+                <Input
+                  id="referralCode"
+                  type="text"
+                  placeholder="IESC-XXXXXX"
+                  className="font-mono uppercase"
+                  value={formData.referralCode}
+                  onChange={(e) => handleChange("referralCode", e.target.value.toUpperCase())}
+                />
+                {formData.referralCode && (
+                  <p className="text-xs text-muted-foreground">
+                    Você foi indicado! O código será validado após o cadastro.
+                  </p>
+                )}
               </div>
 
               {/* Tipo de Perfil */}

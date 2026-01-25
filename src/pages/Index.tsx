@@ -46,6 +46,7 @@ import {
 import { useTheme } from "@/hooks/useTheme";
 import { usePlanos } from "@/contexts/PlanosContext";
 import { ContactForm } from "@/components/landing/ContactForm";
+import { ReferralSection } from "@/components/landing/ReferralSection";
 import {
   ScrollReveal,
   FadeUp,
@@ -600,6 +601,9 @@ const Index = () => {
           </FadeUp>
         </div>
       </section>
+
+      {/* Referral Program Section */}
+      <ReferralSection />
 
       {/* Features Section - Bento Grid with Enhanced Scroll Animations */}
       <section id="recursos" className="py-24 relative">
