@@ -23,11 +23,14 @@ import AlunoNotas from "./pages/aluno/Notas";
 import AlunoFrequencia from "./pages/aluno/Frequencia";
 import AlunoTarefas from "./pages/aluno/Tarefas";
 import AlunoComunicados from "./pages/aluno/Comunicados";
+import AlunoMateriais from "./pages/aluno/Materiais";
+import AlunoPerfil from "./pages/aluno/Perfil";
 import ResponsavelDashboard from "./pages/responsavel/Dashboard";
 import ResponsavelNotas from "./pages/responsavel/Notas";
 import ResponsavelFrequencia from "./pages/responsavel/Frequencia";
 import ResponsavelTarefas from "./pages/responsavel/Tarefas";
 import ResponsavelComunicados from "./pages/responsavel/Comunicados";
+import ResponsavelPerfil from "./pages/responsavel/Perfil";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -65,6 +68,8 @@ const App = () => (
               <Route path="frequencia" element={<AlunoFrequencia />} />
               <Route path="tarefas" element={<AlunoTarefas />} />
               <Route path="comunicados" element={<AlunoComunicados />} />
+              <Route path="materiais" element={<AlunoMateriais />} />
+              <Route path="perfil" element={<AlunoPerfil />} />
             </Route>
 
             {/* Portal do Responsável Routes */}
@@ -75,6 +80,7 @@ const App = () => (
               <Route path="frequencia" element={<ResponsavelFrequencia />} />
               <Route path="tarefas" element={<ResponsavelTarefas />} />
               <Route path="comunicados" element={<ResponsavelComunicados />} />
+              <Route path="perfil" element={<ResponsavelPerfil />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
