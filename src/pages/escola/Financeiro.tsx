@@ -73,6 +73,7 @@ import { EnviarCobrancaDialog, Inadimplente } from "@/components/financeiro/Envi
 import { AgendarLembreteDialog } from "@/components/financeiro/AgendarLembreteDialog";
 import { HistoricoNegociacaoDialog, getAllHistoricos, type StatusNegociacao } from "@/components/financeiro/HistoricoNegociacaoDialog";
 import { RelatorioInadimplenciaDialog } from "@/components/financeiro/RelatorioInadimplenciaDialog";
+import { MetricasCobrancaDialog } from "@/components/financeiro/MetricasCobrancaDialog";
 import { useToast } from "@/hooks/use-toast";
 
 // Mock data
@@ -245,6 +246,7 @@ export default function EscolaFinanceiro() {
   const [lembreteDialogOpen, setLembreteDialogOpen] = useState(false);
   const [historicoDialogOpen, setHistoricoDialogOpen] = useState(false);
   const [relatorioDialogOpen, setRelatorioDialogOpen] = useState(false);
+  const [metricasDialogOpen, setMetricasDialogOpen] = useState(false);
   const [selectedInadimplente, setSelectedInadimplente] = useState<Inadimplente | null>(null);
   const [inadimplentes, setInadimplentes] = useState<Inadimplente[]>(inadimplentesData);
   const { toast } = useToast();
@@ -357,6 +359,10 @@ export default function EscolaFinanceiro() {
           <Button variant="outline" onClick={() => setRelatorioDialogOpen(true)}>
             <BarChart3 className="mr-2 h-4 w-4" />
             Relatórios
+          </Button>
+          <Button variant="outline" onClick={() => setMetricasDialogOpen(true)}>
+            <TrendingUp className="mr-2 h-4 w-4" />
+            Métricas
           </Button>
           <Button variant="outline">
             <Download className="mr-2 h-4 w-4" />
@@ -839,6 +845,12 @@ export default function EscolaFinanceiro() {
         open={relatorioDialogOpen}
         onOpenChange={setRelatorioDialogOpen}
         inadimplentes={inadimplentes}
+      />
+
+      {/* Dialog de Métricas de Cobrança */}
+      <MetricasCobrancaDialog
+        open={metricasDialogOpen}
+        onOpenChange={setMetricasDialogOpen}
       />
     </motion.div>
   );
