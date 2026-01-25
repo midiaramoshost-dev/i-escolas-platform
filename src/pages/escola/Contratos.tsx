@@ -670,26 +670,24 @@ ${contrato.observacoes ? `\nObservações: ${contrato.observacoes}` : ''}
       
       // Marca d'água diagonal - usando cor clara para simular transparência
       if (incluirMarcaDagua) {
-        if (contrato.status === "pendente") {
-          doc.setTextColor(252, 220, 220); // Rosa claro (simula vermelho com transparência)
-          doc.setFontSize(70);
+        const texto = textoMarcaDagua.trim() || (contrato.status === "pendente" ? "RASCUNHO" : contrato.status === "expirado" || contrato.status === "cancelado" ? "CÓPIA" : "");
+        
+        if (texto) {
+          // Cor baseada no status
+          if (contrato.status === "pendente") {
+            doc.setTextColor(252, 220, 220); // Rosa claro
+          } else {
+            doc.setTextColor(230, 230, 230); // Cinza claro
+          }
+          
+          // Ajustar tamanho da fonte baseado no tamanho do texto
+          const fontSize = texto.length > 10 ? 50 : texto.length > 6 ? 60 : 70;
+          doc.setFontSize(fontSize);
           doc.setFont('helvetica', 'bold');
           
-          // Posicionar a marca d'água no centro
           const centerX = pageWidth / 2;
           const centerY = pageHeight / 2;
-          doc.text('RASCUNHO', centerX, centerY, { 
-            align: 'center', 
-            angle: 45,
-          });
-        } else if (contrato.status === "expirado" || contrato.status === "cancelado") {
-          doc.setTextColor(230, 230, 230); // Cinza claro
-          doc.setFontSize(70);
-          doc.setFont('helvetica', 'bold');
-          
-          const centerX = pageWidth / 2;
-          const centerY = pageHeight / 2;
-          doc.text('CÓPIA', centerX, centerY, { 
+          doc.text(texto.toUpperCase(), centerX, centerY, { 
             align: 'center', 
             angle: 45,
           });
@@ -874,7 +872,9 @@ ${contrato.observacoes ? `\nObservações: ${contrato.observacoes}` : ''}
   
   // Estado para controlar marca d'água
   const [incluirMarcaDagua, setIncluirMarcaDagua] = useState(true);
+  const [textoMarcaDagua, setTextoMarcaDagua] = useState("");
   const [incluirMarcaDaguaPreview, setIncluirMarcaDaguaPreview] = useState(true);
+  const [textoMarcaDaguaPreview, setTextoMarcaDaguaPreview] = useState("RASCUNHO");
 
   const handleOpenGerarContrato = (modelo: ModeloContrato) => {
     setModeloParaGerar(modelo);
@@ -1009,15 +1009,19 @@ ${contrato.observacoes ? `\nObservações: ${contrato.observacoes}` : ''}
     for (let i = 1; i <= numPages; i++) {
       doc.setPage(i);
       
-      // Marca d'água "RASCUNHO" - contratos gerados do preview são sempre pendentes
-      if (incluirMarcaDaguaPreview) {
+      // Marca d'água personalizada
+      if (incluirMarcaDaguaPreview && textoMarcaDaguaPreview.trim()) {
         doc.setTextColor(252, 220, 220); // Rosa claro (simula vermelho com transparência)
-        doc.setFontSize(70);
+        
+        // Ajustar tamanho da fonte baseado no tamanho do texto
+        const texto = textoMarcaDaguaPreview.trim().toUpperCase();
+        const fontSize = texto.length > 10 ? 50 : texto.length > 6 ? 60 : 70;
+        doc.setFontSize(fontSize);
         doc.setFont('helvetica', 'bold');
         
         const centerX = pageWidth / 2;
         const centerY = pageHeight / 2;
-        doc.text('RASCUNHO', centerX, centerY, { 
+        doc.text(texto, centerX, centerY, { 
           align: 'center', 
           angle: 45,
         });
@@ -1565,7 +1569,7 @@ ${contrato.observacoes ? `\nObservações: ${contrato.observacoes}` : ''}
               )}
             </div>
           )}
-          <div className="flex items-center justify-between border-t pt-4">
+          <div className="space-y-3 border-t pt-4">
             <div className="flex items-center space-x-2">
               <Switch
                 id="marca-dagua"
@@ -1576,6 +1580,20 @@ ${contrato.observacoes ? `\nObservações: ${contrato.observacoes}` : ''}
                 Incluir marca d'água no PDF
               </Label>
             </div>
+            {incluirMarcaDagua && (
+              <div className="ml-6">
+                <Input
+                  placeholder="Texto personalizado (deixe vazio para padrão)"
+                  value={textoMarcaDagua}
+                  onChange={(e) => setTextoMarcaDagua(e.target.value.slice(0, 20))}
+                  maxLength={20}
+                  className="max-w-xs text-sm"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Padrão: "RASCUNHO" ou "CÓPIA" conforme status
+                </p>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => handlePrint(selectedContrato!)}>
@@ -1961,7 +1979,7 @@ ${contrato.observacoes ? `\nObservações: ${contrato.observacoes}` : ''}
             </div>
           )}
 
-          <div className="flex items-center justify-between border-t pt-4">
+          <div className="space-y-3 border-t pt-4">
             <div className="flex items-center space-x-2">
               <Switch
                 id="marca-dagua-preview"
@@ -1969,9 +1987,23 @@ ${contrato.observacoes ? `\nObservações: ${contrato.observacoes}` : ''}
                 onCheckedChange={setIncluirMarcaDaguaPreview}
               />
               <Label htmlFor="marca-dagua-preview" className="text-sm cursor-pointer">
-                Incluir marca d'água "RASCUNHO" no PDF
+                Incluir marca d'água no PDF
               </Label>
             </div>
+            {incluirMarcaDaguaPreview && (
+              <div className="ml-6">
+                <Input
+                  placeholder="Texto da marca d'água"
+                  value={textoMarcaDaguaPreview}
+                  onChange={(e) => setTextoMarcaDaguaPreview(e.target.value.slice(0, 20))}
+                  maxLength={20}
+                  className="max-w-xs text-sm"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Máximo de 20 caracteres
+                </p>
+              </div>
+            )}
           </div>
 
           <DialogFooter className="flex-wrap gap-2">
