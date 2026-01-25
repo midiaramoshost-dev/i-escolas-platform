@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { jsPDF } from "jspdf";
 import {
   Plus,
   Search,
@@ -18,6 +19,7 @@ import {
   Save,
   FileSignature,
   BookTemplate,
+  FileDown,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -595,6 +597,149 @@ ${contrato.observacoes ? `\nObservações: ${contrato.observacoes}` : ''}
     toast.success("Contrato baixado!");
   };
 
+  // Função para gerar PDF profissional do contrato
+  const handleGeneratePDF = (contrato: Contrato) => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20;
+    const contentWidth = pageWidth - 2 * margin;
+    let yPosition = margin;
+
+    // Função auxiliar para adicionar texto com quebra de linha
+    const addWrappedText = (text: string, x: number, y: number, maxWidth: number, lineHeight: number = 7): number => {
+      const lines = doc.splitTextToSize(text, maxWidth);
+      lines.forEach((line: string) => {
+        if (y > pageHeight - margin - 20) {
+          doc.addPage();
+          y = margin;
+        }
+        doc.text(line, x, y);
+        y += lineHeight;
+      });
+      return y;
+    };
+
+    // Cabeçalho
+    doc.setFillColor(37, 99, 235); // Azul institucional
+    doc.rect(0, 0, pageWidth, 35, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text(dadosEscola.nome.toUpperCase(), pageWidth / 2, 15, { align: 'center' });
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`CNPJ: ${dadosEscola.cnpj}`, pageWidth / 2, 23, { align: 'center' });
+    doc.text(dadosEscola.endereco, pageWidth / 2, 30, { align: 'center' });
+
+    yPosition = 50;
+
+    // Título do contrato
+    doc.setTextColor(37, 99, 235);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`CONTRATO Nº ${contrato.numero}`, pageWidth / 2, yPosition, { align: 'center' });
+    
+    yPosition += 5;
+    doc.setDrawColor(37, 99, 235);
+    doc.setLineWidth(0.5);
+    doc.line(margin + 40, yPosition, pageWidth - margin - 40, yPosition);
+    
+    yPosition += 15;
+
+    // Informações do contrato em box
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(margin, yPosition - 5, contentWidth, 35, 3, 3, 'F');
+    
+    doc.setTextColor(100, 116, 139);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    
+    const col1 = margin + 5;
+    const col2 = margin + contentWidth / 2;
+    
+    doc.text('TIPO:', col1, yPosition + 5);
+    doc.text('PARTE CONTRATANTE:', col2, yPosition + 5);
+    
+    doc.setTextColor(30, 41, 59);
+    doc.setFont('helvetica', 'bold');
+    doc.text(contrato.tipo, col1, yPosition + 12);
+    doc.text(contrato.parte.substring(0, 40) + (contrato.parte.length > 40 ? '...' : ''), col2, yPosition + 12);
+    
+    doc.setTextColor(100, 116, 139);
+    doc.setFont('helvetica', 'normal');
+    doc.text('VIGÊNCIA:', col1, yPosition + 20);
+    doc.text('VALOR MENSAL:', col2, yPosition + 20);
+    
+    doc.setTextColor(30, 41, 59);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`${new Date(contrato.dataInicio).toLocaleDateString('pt-BR')} a ${new Date(contrato.dataFim).toLocaleDateString('pt-BR')}`, col1, yPosition + 27);
+    doc.text(contrato.valorMensal ? `R$ ${contrato.valorMensal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : 'Não especificado', col2, yPosition + 27);
+    
+    yPosition += 45;
+
+    // Conteúdo do contrato
+    if (contrato.observacoes) {
+      doc.setTextColor(30, 41, 59);
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      yPosition = addWrappedText(contrato.observacoes, margin, yPosition, contentWidth, 6);
+    } else {
+      // Se não houver conteúdo completo, exibe descrição
+      doc.setTextColor(37, 99, 235);
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text('DESCRIÇÃO', margin, yPosition);
+      yPosition += 8;
+      
+      doc.setTextColor(30, 41, 59);
+      doc.setFont('helvetica', 'normal');
+      yPosition = addWrappedText(contrato.descricao, margin, yPosition, contentWidth, 6);
+    }
+
+    // Área de assinaturas (no final da página ou próxima página se necessário)
+    if (yPosition > pageHeight - 80) {
+      doc.addPage();
+      yPosition = margin + 20;
+    } else {
+      yPosition = pageHeight - 70;
+    }
+
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.3);
+    
+    // Linha de assinatura contratante
+    const signWidth = (contentWidth - 30) / 2;
+    doc.line(margin, yPosition, margin + signWidth, yPosition);
+    doc.line(margin + signWidth + 30, yPosition, pageWidth - margin, yPosition);
+    
+    doc.setTextColor(100, 116, 139);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text('CONTRATANTE', margin + signWidth / 2, yPosition + 8, { align: 'center' });
+    doc.text('CONTRATADA', margin + signWidth + 30 + signWidth / 2, yPosition + 8, { align: 'center' });
+    
+    // Data
+    yPosition += 25;
+    doc.setTextColor(100, 116, 139);
+    doc.setFontSize(9);
+    doc.text(`${dadosEscola.cidade}, ${new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}`, pageWidth / 2, yPosition, { align: 'center' });
+
+    // Rodapé
+    doc.setFillColor(248, 250, 252);
+    doc.rect(0, pageHeight - 15, pageWidth, 15, 'F');
+    
+    doc.setTextColor(148, 163, 184);
+    doc.setFontSize(8);
+    doc.text(`Documento gerado em ${new Date().toLocaleString('pt-BR')} • ${dadosEscola.nome}`, pageWidth / 2, pageHeight - 6, { align: 'center' });
+
+    // Salvar PDF
+    doc.save(`${contrato.numero}.pdf`);
+    toast.success("PDF gerado com sucesso!");
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "ativo":
@@ -816,6 +961,91 @@ ${contrato.observacoes ? `\nObservações: ${contrato.observacoes}` : ''}
     conteudo = conteudo.replace(/\{\{DATA_ASSINATURA\}\}/g, dataAtual);
 
     setPreviewConteudo(conteudo);
+  };
+
+  // Função para gerar PDF do preview diretamente
+  const handleGeneratePDFFromPreview = () => {
+    if (!modeloParaGerar || !selectedAlunoId || !previewConteudo) {
+      toast.error("Gere o preview primeiro");
+      return;
+    }
+
+    const aluno = alunosResponsaveis.find(a => a.id === selectedAlunoId);
+    if (!aluno) return;
+
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20;
+    const contentWidth = pageWidth - 2 * margin;
+    let yPosition = margin;
+
+    // Função auxiliar para adicionar texto com quebra de linha
+    const addWrappedText = (text: string, x: number, y: number, maxWidth: number, lineHeight: number = 6): number => {
+      const lines = doc.splitTextToSize(text, maxWidth);
+      lines.forEach((line: string) => {
+        if (y > pageHeight - margin - 20) {
+          doc.addPage();
+          y = margin;
+        }
+        doc.text(line, x, y);
+        y += lineHeight;
+      });
+      return y;
+    };
+
+    // Cabeçalho
+    doc.setFillColor(37, 99, 235);
+    doc.rect(0, 0, pageWidth, 35, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text(dadosEscola.nome.toUpperCase(), pageWidth / 2, 15, { align: 'center' });
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`CNPJ: ${dadosEscola.cnpj}`, pageWidth / 2, 23, { align: 'center' });
+    doc.text(dadosEscola.endereco, pageWidth / 2, 30, { align: 'center' });
+
+    yPosition = 50;
+
+    // Título do contrato
+    doc.setTextColor(37, 99, 235);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text(modeloParaGerar.nome.toUpperCase(), pageWidth / 2, yPosition, { align: 'center' });
+    
+    yPosition += 5;
+    doc.setDrawColor(37, 99, 235);
+    doc.setLineWidth(0.5);
+    doc.line(margin + 30, yPosition, pageWidth - margin - 30, yPosition);
+    
+    yPosition += 15;
+
+    // Conteúdo do contrato
+    doc.setTextColor(30, 41, 59);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    yPosition = addWrappedText(previewConteudo, margin, yPosition, contentWidth, 5);
+
+    // Rodapé
+    const numPages = doc.internal.pages.length - 1;
+    for (let i = 1; i <= numPages; i++) {
+      doc.setPage(i);
+      doc.setFillColor(248, 250, 252);
+      doc.rect(0, pageHeight - 15, pageWidth, 15, 'F');
+      
+      doc.setTextColor(148, 163, 184);
+      doc.setFontSize(8);
+      doc.text(`Página ${i} de ${numPages}`, pageWidth / 2, pageHeight - 8, { align: 'center' });
+      doc.text(`Documento gerado em ${new Date().toLocaleString('pt-BR')} • ${dadosEscola.nome}`, pageWidth / 2, pageHeight - 3, { align: 'center' });
+    }
+
+    // Nome do arquivo
+    const nomeArquivo = `Contrato_${aluno.nomeAluno.replace(/\s+/g, '_')}_${new Date().getFullYear()}.pdf`;
+    doc.save(nomeArquivo);
+    toast.success("PDF gerado com sucesso!");
   };
 
   const handleGerarContrato = () => {
@@ -1062,9 +1292,13 @@ ${contrato.observacoes ? `\nObservações: ${contrato.observacoes}` : ''}
                               <Printer className="mr-2 h-4 w-4" />
                               Imprimir
                             </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleGeneratePDF(contrato)}>
+                              <FileDown className="mr-2 h-4 w-4" />
+                              Baixar PDF
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleDownloadContrato(contrato)}>
                               <Download className="mr-2 h-4 w-4" />
-                              Baixar
+                              Baixar TXT
                             </DropdownMenuItem>
                             {contrato.status !== "cancelado" && (
                               <DropdownMenuItem className="text-destructive" onClick={() => handleOpenDelete(contrato)}>
@@ -1345,9 +1579,13 @@ ${contrato.observacoes ? `\nObservações: ${contrato.observacoes}` : ''}
               <Printer className="h-4 w-4 mr-2" />
               Imprimir
             </Button>
+            <Button variant="outline" onClick={() => handleGeneratePDF(selectedContrato!)}>
+              <FileDown className="h-4 w-4 mr-2" />
+              Baixar PDF
+            </Button>
             <Button onClick={() => handleDownloadContrato(selectedContrato!)}>
               <Download className="h-4 w-4 mr-2" />
-              Baixar
+              Baixar TXT
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1720,9 +1958,17 @@ ${contrato.observacoes ? `\nObservações: ${contrato.observacoes}` : ''}
             </div>
           )}
 
-          <DialogFooter>
+          <DialogFooter className="flex-wrap gap-2">
             <Button variant="outline" onClick={() => setIsGerarContratoDialogOpen(false)}>
               Cancelar
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={handleGeneratePDFFromPreview}
+              disabled={!previewConteudo}
+            >
+              <FileDown className="h-4 w-4 mr-2" />
+              Baixar PDF
             </Button>
             <Button 
               onClick={handleGerarContrato}
