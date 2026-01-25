@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useState, useMemo } from "react";
 import { 
@@ -22,6 +23,7 @@ import {
   Moon,
   Sun,
   Star,
+  HelpCircle,
   Zap,
   Globe,
   Lock,
@@ -258,7 +260,8 @@ const Index = () => {
               { href: "#recursos", label: "Recursos" },
               { href: "#planos", label: "Planos" },
               { href: "#depoimentos", label: "Depoimentos" },
-              { href: "#comparativo", label: "Comparativo" }
+              { href: "#comparativo", label: "Comparativo" },
+              { href: "#faq", label: "FAQ" }
             ].map((item, index) => (
               <motion.a 
                 key={item.href}
@@ -828,6 +831,105 @@ const Index = () => {
               </ScrollReveal>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section id="faq" className="py-24 bg-muted/30">
+        <div className="container">
+          <div className="text-center mb-16">
+            <ScaleUp delay={0.1}>
+              <Badge variant="outline" className="mb-4">
+                <HelpCircle className="mr-2 h-4 w-4" />
+                Dúvidas Frequentes
+              </Badge>
+            </ScaleUp>
+            <SlideUp delay={0.2}>
+              <h2 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
+                Perguntas Frequentes
+              </h2>
+            </SlideUp>
+            <Blur delay={0.3}>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Encontre respostas para as dúvidas mais comuns sobre o i ESCOLAS
+              </p>
+            </Blur>
+          </div>
+
+          <FadeUp delay={0.2}>
+            <div className="max-w-3xl mx-auto">
+              <Accordion type="single" collapsible className="w-full space-y-4">
+                {[
+                  {
+                    question: "Como funciona o período de teste gratuito?",
+                    answer: "Oferecemos um plano Free permanente com até 50 alunos, ideal para escolas pequenas ou para testar a plataforma. Não é necessário cartão de crédito. Você pode migrar para um plano pago quando precisar de mais recursos ou capacidade."
+                  },
+                  {
+                    question: "Posso migrar meus dados de outro sistema?",
+                    answer: "Sim! Nossa equipe de suporte oferece assistência gratuita para migração de dados. Importamos alunos, professores, turmas, notas e históricos de planilhas Excel ou de outros sistemas de gestão escolar."
+                  },
+                  {
+                    question: "O sistema funciona em dispositivos móveis?",
+                    answer: "Absolutamente! O i ESCOLAS é totalmente responsivo e funciona perfeitamente em smartphones, tablets e computadores. Professores podem lançar notas e frequência de qualquer lugar, e pais acompanham tudo pelo celular."
+                  },
+                  {
+                    question: "Como funciona a cobrança por aluno?",
+                    answer: "Além do valor base mensal do plano, há uma taxa adicional por aluno ativo. Por exemplo, no plano Pro (R$399/mês + R$2/aluno), uma escola com 200 alunos pagaria R$799/mês. Quanto maior o plano, menor o custo por aluno."
+                  },
+                  {
+                    question: "Meus dados estão seguros?",
+                    answer: "Sim! Utilizamos criptografia de ponta a ponta, servidores seguros no Brasil (conformidade com LGPD), backups diários automáticos e autenticação em dois fatores. Seus dados são 100% protegidos."
+                  },
+                  {
+                    question: "Posso personalizar a plataforma com a marca da minha escola?",
+                    answer: "Sim, no plano Premium você pode personalizar completamente a plataforma com o logo, cores e identidade visual da sua escola. Os portais de alunos e responsáveis refletem sua marca."
+                  },
+                  {
+                    question: "Qual o prazo de implementação?",
+                    answer: "A maioria das escolas está operando em menos de uma semana. O setup inicial leva cerca de 5 minutos, e nossa equipe oferece treinamento online gratuito para toda a equipe."
+                  },
+                  {
+                    question: "Posso cancelar a qualquer momento?",
+                    answer: "Sim, não há fidelidade ou multa de cancelamento. Você pode fazer downgrade para o plano Free ou cancelar completamente quando quiser. Seus dados ficam disponíveis para exportação."
+                  }
+                ].map((faq, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <AccordionItem 
+                      value={`item-${index}`} 
+                      className="bg-card border rounded-xl px-6 shadow-sm hover:shadow-md transition-shadow"
+                    >
+                      <AccordionTrigger className="text-left text-lg font-medium hover:no-underline py-5">
+                        {faq.question}
+                      </AccordionTrigger>
+                      <AccordionContent className="text-muted-foreground pb-5 leading-relaxed">
+                        {faq.answer}
+                      </AccordionContent>
+                    </AccordionItem>
+                  </motion.div>
+                ))}
+              </Accordion>
+            </div>
+          </FadeUp>
+
+          <FadeUp delay={0.5}>
+            <div className="text-center mt-12">
+              <p className="text-muted-foreground mb-4">
+                Ainda tem dúvidas?
+              </p>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button variant="outline" size="lg" className="gap-2">
+                  <MessageSquare className="h-5 w-5" />
+                  Falar com Especialista
+                </Button>
+              </motion.div>
+            </div>
+          </FadeUp>
         </div>
       </section>
 
