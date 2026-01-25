@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/hooks/useTheme";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { AlunoLayout } from "@/components/layout/AlunoLayout";
 import { ResponsavelLayout } from "@/components/layout/ResponsavelLayout";
@@ -49,60 +51,78 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            
-            {/* Escola Routes */}
-            <Route path="/escola" element={<MainLayout />}>
-              <Route index element={<Navigate to="/escola/dashboard" replace />} />
-              <Route path="dashboard" element={<EscolaDashboard />} />
-              <Route path="turmas" element={<Turmas />} />
-              <Route path="professores" element={<Professores />} />
-              <Route path="alunos" element={<Alunos />} />
-              <Route path="diario" element={<DiarioClasse />} />
-              <Route path="notas" element={<Notas />} />
-              <Route path="frequencia" element={<Frequencia />} />
-              <Route path="boletins" element={<Boletins />} />
-              <Route path="configuracoes" element={<Configuracoes />} />
-            </Route>
+          <AuthProvider>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              
+              {/* Escola Routes - Protected */}
+              <Route path="/escola" element={
+                <ProtectedRoute allowedRoles={['escola']}>
+                  <MainLayout />
+                </ProtectedRoute>
+              }>
+                <Route index element={<Navigate to="/escola/dashboard" replace />} />
+                <Route path="dashboard" element={<EscolaDashboard />} />
+                <Route path="turmas" element={<Turmas />} />
+                <Route path="professores" element={<Professores />} />
+                <Route path="alunos" element={<Alunos />} />
+                <Route path="diario" element={<DiarioClasse />} />
+                <Route path="notas" element={<Notas />} />
+                <Route path="frequencia" element={<Frequencia />} />
+                <Route path="boletins" element={<Boletins />} />
+                <Route path="configuracoes" element={<Configuracoes />} />
+              </Route>
 
-            {/* Portal do Aluno Routes */}
-            <Route path="/aluno" element={<AlunoLayout />}>
-              <Route index element={<Navigate to="/aluno/dashboard" replace />} />
-              <Route path="dashboard" element={<AlunoDashboard />} />
-              <Route path="notas" element={<AlunoNotas />} />
-              <Route path="frequencia" element={<AlunoFrequencia />} />
-              <Route path="tarefas" element={<AlunoTarefas />} />
-              <Route path="comunicados" element={<AlunoComunicados />} />
-              <Route path="materiais" element={<AlunoMateriais />} />
-              <Route path="perfil" element={<AlunoPerfil />} />
-            </Route>
+              {/* Portal do Aluno Routes - Protected */}
+              <Route path="/aluno" element={
+                <ProtectedRoute allowedRoles={['aluno']}>
+                  <AlunoLayout />
+                </ProtectedRoute>
+              }>
+                <Route index element={<Navigate to="/aluno/dashboard" replace />} />
+                <Route path="dashboard" element={<AlunoDashboard />} />
+                <Route path="notas" element={<AlunoNotas />} />
+                <Route path="frequencia" element={<AlunoFrequencia />} />
+                <Route path="tarefas" element={<AlunoTarefas />} />
+                <Route path="comunicados" element={<AlunoComunicados />} />
+                <Route path="materiais" element={<AlunoMateriais />} />
+                <Route path="perfil" element={<AlunoPerfil />} />
+              </Route>
 
-            {/* Portal do Responsável Routes */}
-            <Route path="/responsavel" element={<ResponsavelLayout />}>
-              <Route index element={<Navigate to="/responsavel/dashboard" replace />} />
-              <Route path="dashboard" element={<ResponsavelDashboard />} />
-              <Route path="notas" element={<ResponsavelNotas />} />
-              <Route path="frequencia" element={<ResponsavelFrequencia />} />
-              <Route path="tarefas" element={<ResponsavelTarefas />} />
-              <Route path="comunicados" element={<ResponsavelComunicados />} />
-              <Route path="financeiro" element={<ResponsavelFinanceiro />} />
-              <Route path="perfil" element={<ResponsavelPerfil />} />
-            </Route>
+              {/* Portal do Responsável Routes - Protected */}
+              <Route path="/responsavel" element={
+                <ProtectedRoute allowedRoles={['responsavel']}>
+                  <ResponsavelLayout />
+                </ProtectedRoute>
+              }>
+                <Route index element={<Navigate to="/responsavel/dashboard" replace />} />
+                <Route path="dashboard" element={<ResponsavelDashboard />} />
+                <Route path="notas" element={<ResponsavelNotas />} />
+                <Route path="frequencia" element={<ResponsavelFrequencia />} />
+                <Route path="tarefas" element={<ResponsavelTarefas />} />
+                <Route path="comunicados" element={<ResponsavelComunicados />} />
+                <Route path="financeiro" element={<ResponsavelFinanceiro />} />
+                <Route path="perfil" element={<ResponsavelPerfil />} />
+              </Route>
 
-            {/* Admin Master Routes */}
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<Navigate to="/admin/dashboard" replace />} />
-              <Route path="dashboard" element={<AdminDashboard />} />
-              <Route path="escolas" element={<AdminEscolas />} />
-              <Route path="planos" element={<AdminPlanos />} />
-              <Route path="financeiro" element={<AdminFinanceiro />} />
-              <Route path="monitoramento" element={<AdminMonitoramento />} />
-            </Route>
+              {/* Admin Master Routes - Protected */}
+              <Route path="/admin" element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminLayout />
+                </ProtectedRoute>
+              }>
+                <Route index element={<Navigate to="/admin/dashboard" replace />} />
+                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="escolas" element={<AdminEscolas />} />
+                <Route path="planos" element={<AdminPlanos />} />
+                <Route path="financeiro" element={<AdminFinanceiro />} />
+                <Route path="monitoramento" element={<AdminMonitoramento />} />
+              </Route>
 
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>

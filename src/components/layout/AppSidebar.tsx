@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
@@ -37,6 +37,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 const menuItems = [
   {
@@ -93,7 +94,9 @@ const menuItems = [
 
 export function AppSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { state } = useSidebar();
+  const { logout } = useAuth();
   const isCollapsed = state === "collapsed";
   const [openMenus, setOpenMenus] = useState<string[]>(["Gestão Escolar", "Pessoas", "Acadêmico"]);
 
@@ -108,6 +111,11 @@ export function AppSidebar() {
   const isActive = (url: string) => location.pathname === url;
   const isSubmenuActive = (submenu: { url: string }[]) =>
     submenu.some((item) => location.pathname === item.url);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -207,14 +215,12 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
-              asChild
-              className="text-sidebar-foreground/70 hover:text-destructive"
+              className="text-sidebar-foreground/70 hover:text-destructive cursor-pointer"
               tooltip="Sair"
+              onClick={handleLogout}
             >
-              <Link to="/login">
-                <LogOut className="h-5 w-5" />
-                {!isCollapsed && <span>Sair</span>}
-              </Link>
+              <LogOut className="h-5 w-5" />
+              {!isCollapsed && <span>Sair</span>}
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

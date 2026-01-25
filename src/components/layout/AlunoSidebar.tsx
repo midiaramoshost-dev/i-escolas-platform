@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   BookOpen,
@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/contexts/AuthContext";
 
 const menuItems = [
   {
@@ -68,10 +69,17 @@ const menuItems = [
 
 export function AlunoSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { state } = useSidebar();
+  const { user, logout } = useAuth();
   const isCollapsed = state === "collapsed";
 
   const isActive = (url: string) => location.pathname === url;
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -100,10 +108,12 @@ export function AlunoSidebar() {
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10">
                 <AvatarImage src="/placeholder.svg" />
-                <AvatarFallback className="bg-emerald-500 text-white">AB</AvatarFallback>
+                <AvatarFallback className="bg-emerald-500 text-white">
+                  {user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2) || 'AL'}
+                </AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
-                <span className="text-sm font-medium text-sidebar-foreground">Ana Beatriz</span>
+                <span className="text-sm font-medium text-sidebar-foreground">{user?.name || 'Aluno'}</span>
                 <span className="text-xs text-sidebar-foreground/60">5º Ano A • Manhã</span>
               </div>
             </div>
@@ -139,14 +149,12 @@ export function AlunoSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
-              asChild
-              className="text-sidebar-foreground/70 hover:text-destructive"
+              className="text-sidebar-foreground/70 hover:text-destructive cursor-pointer"
               tooltip="Sair"
+              onClick={handleLogout}
             >
-              <Link to="/login">
-                <LogOut className="h-5 w-5" />
-                {!isCollapsed && <span>Sair</span>}
-              </Link>
+              <LogOut className="h-5 w-5" />
+              {!isCollapsed && <span>Sair</span>}
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
