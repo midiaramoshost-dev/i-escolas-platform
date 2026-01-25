@@ -24,6 +24,10 @@ import {
   Sun,
   Star,
   HelpCircle,
+  Send,
+  MapPin,
+  Mail,
+  Phone,
   Zap,
   Globe,
   Lock,
@@ -41,6 +45,7 @@ import {
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { usePlanos } from "@/contexts/PlanosContext";
+import { ContactForm } from "@/components/landing/ContactForm";
 import {
   ScrollReveal,
   FadeUp,
@@ -965,6 +970,77 @@ const Index = () => {
               </motion.div>
             </div>
           </FadeUp>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section id="contato" className="py-24">
+        <div className="container">
+          <div className="grid lg:grid-cols-2 gap-12 items-start">
+            {/* Left Column - Info */}
+            <div>
+              <ScaleUp delay={0.1}>
+                <Badge variant="outline" className="mb-4">
+                  <Send className="mr-2 h-4 w-4" />
+                  Entre em Contato
+                </Badge>
+              </ScaleUp>
+              <SlideUp delay={0.2}>
+                <h2 className="text-4xl font-bold tracking-tight sm:text-5xl mb-6">
+                  Fale com nossa equipe
+                </h2>
+              </SlideUp>
+              <Blur delay={0.3}>
+                <p className="text-xl text-muted-foreground mb-8">
+                  Tire suas dúvidas, agende uma demonstração ou solicite um orçamento personalizado para sua escola.
+                </p>
+              </Blur>
+
+              <FadeUp delay={0.4}>
+                <div className="space-y-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Mail className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold mb-1">E-mail</h3>
+                      <p className="text-muted-foreground">contato@iescolas.com.br</p>
+                      <p className="text-muted-foreground">suporte@iescolas.com.br</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Phone className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold mb-1">Telefone</h3>
+                      <p className="text-muted-foreground">(11) 4000-1234</p>
+                      <p className="text-muted-foreground text-sm">Seg à Sex, 8h às 18h</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <MapPin className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold mb-1">Endereço</h3>
+                      <p className="text-muted-foreground">Av. Paulista, 1000 - Bela Vista</p>
+                      <p className="text-muted-foreground">São Paulo - SP, 01310-100</p>
+                    </div>
+                  </div>
+                </div>
+              </FadeUp>
+            </div>
+
+            {/* Right Column - Form */}
+            <FadeUp delay={0.3}>
+              <Card className="p-6 md:p-8 shadow-xl border-border/50">
+                <ContactForm />
+              </Card>
+            </FadeUp>
+          </div>
         </div>
       </section>
 
