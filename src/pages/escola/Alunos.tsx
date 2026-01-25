@@ -60,170 +60,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-
-interface Aluno {
-  id: string;
-  matricula: string;
-  nome: string;
-  turma: string;
-  serie: string;
-  turno: string;
-  responsavel: string;
-  telefone: string;
-  email: string;
-  cpf: string;
-  dataNascimento: string;
-  endereco: string;
-  frequencia: number;
-  media: number;
-  status: string;
-}
-
-const initialAlunosData: Aluno[] = [
-  {
-    id: "1",
-    matricula: "2024001",
-    nome: "Ana Beatriz Silva",
-    turma: "5º Ano A",
-    serie: "5º Ano",
-    turno: "Manhã",
-    responsavel: "Maria Silva",
-    telefone: "(11) 98888-1111",
-    email: "maria.silva@email.com",
-    cpf: "123.456.789-00",
-    dataNascimento: "2014-03-15",
-    endereco: "Rua das Flores, 123 - Centro",
-    frequencia: 96,
-    media: 8.5,
-    status: "regular",
-  },
-  {
-    id: "2",
-    matricula: "2024002",
-    nome: "Bruno Costa Santos",
-    turma: "5º Ano A",
-    serie: "5º Ano",
-    turno: "Manhã",
-    responsavel: "Carlos Santos",
-    telefone: "(11) 98888-2222",
-    email: "carlos.santos@email.com",
-    cpf: "234.567.890-11",
-    dataNascimento: "2014-05-20",
-    endereco: "Av. Principal, 456 - Jardim",
-    frequencia: 88,
-    media: 7.2,
-    status: "alerta",
-  },
-  {
-    id: "3",
-    matricula: "2024003",
-    nome: "Carolina Mendes",
-    turma: "7º Ano B",
-    serie: "7º Ano",
-    turno: "Tarde",
-    responsavel: "Paula Mendes",
-    telefone: "(11) 98888-3333",
-    email: "paula.mendes@email.com",
-    cpf: "345.678.901-22",
-    dataNascimento: "2012-08-10",
-    endereco: "Rua Nova, 789 - Vila Nova",
-    frequencia: 94,
-    media: 9.1,
-    status: "regular",
-  },
-  {
-    id: "4",
-    matricula: "2024004",
-    nome: "Daniel Oliveira",
-    turma: "9º Ano A",
-    serie: "9º Ano",
-    turno: "Manhã",
-    responsavel: "Roberto Oliveira",
-    telefone: "(11) 98888-4444",
-    email: "roberto.oliveira@email.com",
-    cpf: "456.789.012-33",
-    dataNascimento: "2010-11-25",
-    endereco: "Rua do Sol, 321 - Centro",
-    frequencia: 72,
-    media: 5.8,
-    status: "critico",
-  },
-  {
-    id: "5",
-    matricula: "2024005",
-    nome: "Eduarda Lima",
-    turma: "3º Ano A",
-    serie: "3º Ano",
-    turno: "Manhã",
-    responsavel: "Fernanda Lima",
-    telefone: "(11) 98888-5555",
-    email: "fernanda.lima@email.com",
-    cpf: "567.890.123-44",
-    dataNascimento: "2016-02-14",
-    endereco: "Rua Verde, 654 - Parque",
-    frequencia: 98,
-    media: 8.9,
-    status: "regular",
-  },
-  {
-    id: "6",
-    matricula: "2024006",
-    nome: "Felipe Almeida",
-    turma: "1º Ano A",
-    serie: "1º Ano",
-    turno: "Manhã",
-    responsavel: "Juliana Almeida",
-    telefone: "(11) 98888-6666",
-    email: "juliana.almeida@email.com",
-    cpf: "678.901.234-55",
-    dataNascimento: "2018-06-30",
-    endereco: "Av. Brasil, 987 - Centro",
-    frequencia: 95,
-    media: 8.0,
-    status: "regular",
-  },
-  {
-    id: "7",
-    matricula: "2024007",
-    nome: "Gabriela Ferreira",
-    turma: "3º EM A",
-    serie: "3º Médio",
-    turno: "Manhã",
-    responsavel: "Marcos Ferreira",
-    telefone: "(11) 98888-7777",
-    email: "marcos.ferreira@email.com",
-    cpf: "789.012.345-66",
-    dataNascimento: "2007-09-18",
-    endereco: "Rua da Paz, 147 - Jardim",
-    frequencia: 91,
-    media: 7.8,
-    status: "regular",
-  },
-  {
-    id: "8",
-    matricula: "2024008",
-    nome: "Henrique Souza",
-    turma: "7º Ano B",
-    serie: "7º Ano",
-    turno: "Tarde",
-    responsavel: "Luciana Souza",
-    telefone: "(11) 98888-8888",
-    email: "luciana.souza@email.com",
-    cpf: "890.123.456-77",
-    dataNascimento: "2012-12-05",
-    endereco: "Rua Central, 258 - Vila",
-    frequencia: 85,
-    media: 6.5,
-    status: "alerta",
-  },
-];
-
-const statsCards = [
-  { title: "Total de Alunos", value: "1.247", icon: Users, color: "primary" },
-  { title: "Frequência Regular", value: "1.180", icon: UserCheck, color: "success" },
-  { title: "Em Alerta", value: "52", icon: AlertTriangle, color: "warning" },
-  { title: "Situação Crítica", value: "15", icon: AlertTriangle, color: "destructive" },
-];
+import { useAlunosResponsaveis, type Aluno } from "@/contexts/AlunosResponsaveisContext";
 
 const turmasOptions = [
   "1º Ano A", "1º Ano B", "2º Ano A", "3º Ano A", "4º Ano A",
@@ -239,8 +76,16 @@ const seriesOptions = [
 
 const turnoOptions = ["Manhã", "Tarde", "Integral"];
 
+const statsCards = [
+  { title: "Total de Alunos", value: "1.247", icon: Users, color: "primary" },
+  { title: "Frequência Regular", value: "1.180", icon: UserCheck, color: "success" },
+  { title: "Em Alerta", value: "52", icon: AlertTriangle, color: "warning" },
+  { title: "Situação Crítica", value: "15", icon: AlertTriangle, color: "destructive" },
+];
+
 export default function Alunos() {
-  const [alunos, setAlunos] = useState<Aluno[]>(initialAlunosData);
+  // Usar dados do contexto compartilhado
+  const { alunos, responsaveis, updateAluno, deleteAluno, setAlunos } = useAlunosResponsaveis();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterTurma, setFilterTurma] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
@@ -355,24 +200,23 @@ export default function Alunos() {
       return;
     }
 
+    // Encontrar o responsável selecionado para vincular
+    const responsavelSelecionado = responsaveis.find(r => r.nome === formData.responsavel);
+
     if (isEditing && selectedAluno) {
-      setAlunos(alunos.map(a => 
-        a.id === selectedAluno.id 
-          ? {
-              ...a,
-              nome: formData.nome,
-              cpf: formData.cpf,
-              dataNascimento: formData.dataNascimento,
-              endereco: formData.endereco,
-              serie: formData.serie,
-              turma: formData.turma,
-              turno: formData.turno,
-              responsavel: formData.responsavel,
-              telefone: formData.telefone,
-              email: formData.email,
-            }
-          : a
-      ));
+      updateAluno(selectedAluno.id, {
+        nome: formData.nome,
+        cpf: formData.cpf,
+        dataNascimento: formData.dataNascimento,
+        endereco: formData.endereco,
+        serie: formData.serie,
+        turma: formData.turma,
+        turno: formData.turno,
+        responsavel: formData.responsavel,
+        responsavelId: responsavelSelecionado?.id,
+        telefone: formData.telefone,
+        email: formData.email,
+      });
       toast.success("Aluno atualizado com sucesso!");
     } else {
       const novoAluno: Aluno = {
@@ -386,13 +230,14 @@ export default function Alunos() {
         turma: formData.turma,
         turno: formData.turno,
         responsavel: formData.responsavel,
+        responsavelId: responsavelSelecionado?.id,
         telefone: formData.telefone,
         email: formData.email,
         frequencia: 100,
         media: 0,
         status: "regular",
       };
-      setAlunos([...alunos, novoAluno]);
+      setAlunos(prev => [...prev, novoAluno]);
       toast.success("Aluno matriculado com sucesso!");
     }
     
@@ -402,7 +247,7 @@ export default function Alunos() {
 
   const handleDelete = () => {
     if (selectedAluno) {
-      setAlunos(alunos.filter(a => a.id !== selectedAluno.id));
+      deleteAluno(selectedAluno.id);
       toast.success("Matrícula cancelada com sucesso!");
       setIsDeleteDialogOpen(false);
       setSelectedAluno(null);

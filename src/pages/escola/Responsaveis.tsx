@@ -57,28 +57,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-
-interface Responsavel {
-  id: string;
-  nome: string;
-  cpf: string;
-  email: string;
-  telefone: string;
-  parentesco: string;
-  alunos: string[];
-  status: "ativo" | "inativo";
-}
-
-const initialResponsaveis: Responsavel[] = [
-  { id: "1", nome: "Maria Silva", cpf: "123.456.789-00", email: "maria.silva@email.com", telefone: "(11) 98888-1111", parentesco: "Mãe", alunos: ["Ana Beatriz Silva"], status: "ativo" },
-  { id: "2", nome: "Carlos Santos", cpf: "234.567.890-11", email: "carlos.santos@email.com", telefone: "(11) 98888-2222", parentesco: "Pai", alunos: ["Bruno Costa Santos"], status: "ativo" },
-  { id: "3", nome: "Paula Mendes", cpf: "345.678.901-22", email: "paula.mendes@email.com", telefone: "(11) 98888-3333", parentesco: "Mãe", alunos: ["Carolina Mendes", "Lucas Mendes"], status: "ativo" },
-  { id: "4", nome: "Roberto Oliveira", cpf: "456.789.012-33", email: "roberto.oliveira@email.com", telefone: "(11) 98888-4444", parentesco: "Pai", alunos: ["Daniel Oliveira"], status: "ativo" },
-  { id: "5", nome: "Fernanda Lima", cpf: "567.890.123-44", email: "fernanda.lima@email.com", telefone: "(11) 98888-5555", parentesco: "Mãe", alunos: ["Eduarda Lima"], status: "ativo" },
-  { id: "6", nome: "Juliana Almeida", cpf: "678.901.234-55", email: "juliana.almeida@email.com", telefone: "(11) 98888-6666", parentesco: "Mãe", alunos: ["Felipe Almeida", "Marina Almeida"], status: "ativo" },
-  { id: "7", nome: "Marcos Ferreira", cpf: "789.012.345-66", email: "marcos.ferreira@email.com", telefone: "(11) 98888-7777", parentesco: "Pai", alunos: ["Gabriela Ferreira"], status: "ativo" },
-  { id: "8", nome: "Luciana Souza", cpf: "890.123.456-77", email: "luciana.souza@email.com", telefone: "(11) 98888-8888", parentesco: "Mãe", alunos: ["Henrique Souza"], status: "inativo" },
-];
+import { useAlunosResponsaveis, type Responsavel } from "@/contexts/AlunosResponsaveisContext";
 
 const statsCards = [
   { title: "Total de Responsáveis", value: "892", icon: Users, color: "primary" },
@@ -87,7 +66,8 @@ const statsCards = [
 ];
 
 export default function Responsaveis() {
-  const [responsaveis, setResponsaveis] = useState<Responsavel[]>(initialResponsaveis);
+  // Usar dados do contexto compartilhado
+  const { responsaveis, updateResponsavel, deleteResponsavel, setResponsaveis } = useAlunosResponsaveis();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -160,20 +140,28 @@ export default function Responsaveis() {
     }
 
     if (isEditMode && selectedResponsavel) {
-      setResponsaveis(responsaveis.map(r =>
-        r.id === selectedResponsavel.id
-          ? { ...r, ...formData }
-          : r
-      ));
+      updateResponsavel(selectedResponsavel.id, {
+        nome: formData.nome,
+        cpf: formData.cpf,
+        email: formData.email,
+        telefone: formData.telefone,
+        parentesco: formData.parentesco,
+      });
       toast.success("Responsável atualizado com sucesso!");
     } else {
       const newResponsavel: Responsavel = {
         id: String(Date.now()),
-        ...formData,
+        nome: formData.nome,
+        cpf: formData.cpf,
+        email: formData.email,
+        telefone: formData.telefone,
+        endereco: "", // Campo será preenchido posteriormente
+        parentesco: formData.parentesco,
         alunos: [],
+        alunoIds: [],
         status: "ativo",
       };
-      setResponsaveis([...responsaveis, newResponsavel]);
+      setResponsaveis(prev => [...prev, newResponsavel]);
       toast.success("Responsável cadastrado com sucesso!");
     }
     setIsDialogOpen(false);
@@ -181,7 +169,7 @@ export default function Responsaveis() {
 
   const handleDelete = () => {
     if (selectedResponsavel) {
-      setResponsaveis(responsaveis.filter(r => r.id !== selectedResponsavel.id));
+      deleteResponsavel(selectedResponsavel.id);
       toast.success("Responsável excluído com sucesso!");
       setIsDeleteDialogOpen(false);
       setSelectedResponsavel(null);
