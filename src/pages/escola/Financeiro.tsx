@@ -21,6 +21,8 @@ import {
   CreditCard,
   FileText,
   QrCode,
+  MessageCircle,
+  Mail,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -46,6 +48,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Progress } from "@/components/ui/progress";
@@ -64,6 +67,8 @@ import {
   Bar,
   Legend,
 } from "recharts";
+import { EnviarCobrancaDialog, Inadimplente } from "@/components/financeiro/EnviarCobrancaDialog";
+import { useToast } from "@/hooks/use-toast";
 
 // Mock data
 const kpis = {
@@ -164,7 +169,7 @@ const pagamentosRecentes = [
   },
 ];
 
-const inadimplentes = [
+const inadimplentesData: Inadimplente[] = [
   {
     id: "INAD001",
     aluno: "Pedro Henrique Lima",
@@ -231,6 +236,10 @@ const itemVariants = {
 export default function EscolaFinanceiro() {
   const [searchTerm, setSearchTerm] = useState("");
   const [periodoFiltro, setPeriodoFiltro] = useState("mes");
+  const [cobrancaDialogOpen, setCobrancaDialogOpen] = useState(false);
+  const [selectedInadimplente, setSelectedInadimplente] = useState<string | null>(null);
+  const [inadimplentes, setInadimplentes] = useState<Inadimplente[]>(inadimplentesData);
+  const { toast } = useToast();
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -264,6 +273,47 @@ export default function EscolaFinanceiro() {
         {config?.label || metodo}
       </Badge>
     );
+  };
+
+  const handleContatoRegistrado = (id: string, tipo: 'whatsapp' | 'email') => {
+    // Update ultimo contato
+    setInadimplentes(prev => prev.map(i => 
+      i.id === id 
+        ? { ...i, ultimoContato: new Date().toISOString().split('T')[0] }
+        : i
+    ));
+  };
+
+  const enviarWhatsAppIndividual = (inadimplente: Inadimplente) => {
+    const phone = inadimplente.telefone.replace(/\D/g, "");
+    const phoneWithCountry = phone.startsWith("55") ? phone : `55${phone}`;
+    const mesesTexto = inadimplente.mesesDevidos === 1 ? "1 mensalidade" : `${inadimplente.mesesDevidos} mensalidades`;
+    const mensagem = `Olá ${inadimplente.responsavel.split(" ")[0]}! Identificamos que há ${mesesTexto} em aberto referente ao(à) aluno(a) *${inadimplente.aluno}* (${inadimplente.turma}). Valor: ${formatCurrency(inadimplente.valorTotal)}. Entre em contato para regularizar.`;
+    const encodedMessage = encodeURIComponent(mensagem);
+    
+    window.open(`https://wa.me/${phoneWithCountry}?text=${encodedMessage}`, "_blank");
+    handleContatoRegistrado(inadimplente.id, 'whatsapp');
+    
+    toast({
+      title: "WhatsApp aberto",
+      description: `Mensagem preparada para ${inadimplente.responsavel}`,
+    });
+  };
+
+  const enviarEmailIndividual = (inadimplente: Inadimplente) => {
+    const assunto = encodeURIComponent(`Pendência financeira - ${inadimplente.aluno}`);
+    const mesesTexto = inadimplente.mesesDevidos === 1 ? "1 mensalidade" : `${inadimplente.mesesDevidos} mensalidades`;
+    const corpo = encodeURIComponent(
+      `Prezado(a) ${inadimplente.responsavel},\n\nIdentificamos que há ${mesesTexto} em aberto referente ao(à) aluno(a) ${inadimplente.aluno} (${inadimplente.turma}).\n\nValor total pendente: ${formatCurrency(inadimplente.valorTotal)}\n\nPor favor, entre em contato conosco para regularizar a situação.\n\nAtenciosamente,\nSecretaria Financeira`
+    );
+    
+    window.open(`mailto:${inadimplente.email}?subject=${assunto}&body=${corpo}`, "_blank");
+    handleContatoRegistrado(inadimplente.id, 'email');
+    
+    toast({
+      title: "E-mail preparado",
+      description: `Mensagem preparada para ${inadimplente.email}`,
+    });
   };
 
   const variacaoReceita = ((kpis.receitaMes - kpis.receitaMesAnterior) / kpis.receitaMesAnterior) * 100;
@@ -632,7 +682,10 @@ export default function EscolaFinanceiro() {
                     </CardDescription>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline">
+                    <Button 
+                      variant="outline"
+                      onClick={() => setCobrancaDialogOpen(true)}
+                    >
                       <Send className="mr-2 h-4 w-4" />
                       Enviar Cobranças
                     </Button>
@@ -695,10 +748,16 @@ export default function EscolaFinanceiro() {
                                 <Eye className="mr-2 h-4 w-4" />
                                 Ver detalhes
                               </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Send className="mr-2 h-4 w-4" />
-                                Enviar cobrança
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => enviarWhatsAppIndividual(item)}>
+                                <MessageCircle className="mr-2 h-4 w-4 text-emerald-600" />
+                                Cobrar via WhatsApp
                               </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => enviarEmailIndividual(item)}>
+                                <Mail className="mr-2 h-4 w-4 text-blue-600" />
+                                Cobrar via E-mail
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
                               <DropdownMenuItem>
                                 <FileText className="mr-2 h-4 w-4" />
                                 Registrar contato
@@ -715,6 +774,14 @@ export default function EscolaFinanceiro() {
           </TabsContent>
         </Tabs>
       </motion.div>
+
+      {/* Dialog de Envio de Cobranças */}
+      <EnviarCobrancaDialog
+        open={cobrancaDialogOpen}
+        onOpenChange={setCobrancaDialogOpen}
+        inadimplentes={inadimplentes}
+        onContatoRegistrado={handleContatoRegistrado}
+      />
     </motion.div>
   );
 }
