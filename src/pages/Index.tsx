@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { 
   GraduationCap, 
   Users, 
@@ -97,6 +97,7 @@ const slideInRight = {
 
 const Index = () => {
   const { theme, toggleTheme } = useTheme();
+  const [isAnnual, setIsAnnual] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -148,7 +149,8 @@ const Index = () => {
   const plans = [
     {
       name: "Free",
-      price: "0",
+      monthlyPrice: 0,
+      annualPrice: 0,
       period: "para sempre",
       description: "Perfeito para começar",
       features: [
@@ -164,8 +166,9 @@ const Index = () => {
     },
     {
       name: "Start",
-      price: "199",
-      period: "/mês",
+      monthlyPrice: 199,
+      annualPrice: Math.round(199 * 12 * 0.8 / 12), // 20% desconto anual
+      period: isAnnual ? "/mês (anual)" : "/mês",
       description: "Para escolas em crescimento",
       features: [
         { text: "Até 200 alunos", included: true },
@@ -180,8 +183,9 @@ const Index = () => {
     },
     {
       name: "Pro",
-      price: "399",
-      period: "/mês",
+      monthlyPrice: 399,
+      annualPrice: Math.round(399 * 12 * 0.8 / 12), // 20% desconto anual
+      period: isAnnual ? "/mês (anual)" : "/mês",
       description: "Para quem busca excelência",
       features: [
         { text: "Até 500 alunos", included: true },
@@ -196,8 +200,9 @@ const Index = () => {
     },
     {
       name: "Premium",
-      price: "699",
-      period: "/mês",
+      monthlyPrice: 699,
+      annualPrice: Math.round(699 * 12 * 0.8 / 12), // 20% desconto anual
+      period: isAnnual ? "/mês (anual)" : "/mês",
       description: "Para redes de escolas",
       features: [
         { text: "Alunos ilimitados", included: true },
@@ -211,6 +216,11 @@ const Index = () => {
       cta: "Falar com Vendas"
     }
   ];
+
+  const getPrice = (plan: typeof plans[0]) => {
+    if (plan.monthlyPrice === 0) return "0";
+    return isAnnual ? plan.annualPrice.toString() : plan.monthlyPrice.toString();
+  };
 
   const testimonials = [
     {
@@ -572,6 +582,43 @@ const Index = () => {
                 Planos flexíveis que crescem com sua escola. Comece grátis, evolua quando quiser.
               </p>
             </FadeUp>
+            
+            {/* Toggle Mensal/Anual */}
+            <FadeUp delay={0.4}>
+              <div className="flex items-center justify-center gap-4 mt-8">
+                <span className={`text-sm font-medium transition-colors ${!isAnnual ? 'text-foreground' : 'text-muted-foreground'}`}>
+                  Mensal
+                </span>
+                <button
+                  onClick={() => setIsAnnual(!isAnnual)}
+                  className={`relative w-16 h-8 rounded-full transition-colors duration-300 ${
+                    isAnnual ? 'bg-primary' : 'bg-muted-foreground/30'
+                  }`}
+                  aria-label="Alternar entre plano mensal e anual"
+                >
+                  <motion.div
+                    className="absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-md"
+                    animate={{ x: isAnnual ? 32 : 0 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  />
+                </button>
+                <span className={`text-sm font-medium transition-colors ${isAnnual ? 'text-foreground' : 'text-muted-foreground'}`}>
+                  Anual
+                </span>
+                {isAnnual && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8, x: -10 }}
+                    animate={{ opacity: 1, scale: 1, x: 0 }}
+                    className="ml-2"
+                  >
+                    <Badge className="bg-green-500/90 text-white border-0 shadow-lg shadow-green-500/25">
+                      <Sparkles className="h-3 w-3 mr-1" />
+                      Economize 20%
+                    </Badge>
+                  </motion.div>
+                )}
+              </div>
+            </FadeUp>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -609,10 +656,28 @@ const Index = () => {
                     )}
                     <CardHeader className="text-center pt-8">
                       <CardTitle className="text-xl">{plan.name}</CardTitle>
-                      <div className="mt-4">
+                      <div className="mt-4 relative">
                         <span className="text-sm text-muted-foreground">R$</span>
-                        <span className="text-5xl font-bold">{plan.price}</span>
+                        <motion.span 
+                          key={`${plan.name}-${isAnnual}`}
+                          initial={{ opacity: 0, y: -20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="text-5xl font-bold"
+                        >
+                          {getPrice(plan)}
+                        </motion.span>
                         <span className="text-muted-foreground">{plan.period}</span>
+                        {isAnnual && plan.monthlyPrice > 0 && (
+                          <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="mt-1"
+                          >
+                            <span className="text-xs text-muted-foreground line-through">
+                              R$ {plan.monthlyPrice}/mês
+                            </span>
+                          </motion.div>
+                        )}
                       </div>
                       <CardDescription className="mt-2">{plan.description}</CardDescription>
                     </CardHeader>
