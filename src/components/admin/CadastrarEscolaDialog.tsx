@@ -109,6 +109,27 @@ const generateLogin = (nome: string) => {
   return `${base}${suffix}`;
 };
 
+const formatCNPJ = (value: string): string => {
+  const digits = value.replace(/\D/g, "").slice(0, 14);
+  return digits
+    .replace(/^(\d{2})(\d)/, "$1.$2")
+    .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/\.(\d{3})(\d)/, ".$1/$2")
+    .replace(/(\d{4})(\d)/, "$1-$2");
+};
+
+const formatPhone = (value: string): string => {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 10) {
+    return digits
+      .replace(/^(\d{2})(\d)/, "($1) $2")
+      .replace(/(\d{4})(\d)/, "$1-$2");
+  }
+  return digits
+    .replace(/^(\d{2})(\d)/, "($1) $2")
+    .replace(/(\d{5})(\d)/, "$1-$2");
+};
+
 export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarEscolaDialogProps) {
   const [activeTab, setActiveTab] = useState("dados");
   const [showPassword, setShowPassword] = useState(false);
@@ -325,8 +346,9 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                 <Input
                   id="cnpj"
                   value={formData.cnpj}
-                  onChange={(e) => handleInputChange("cnpj", e.target.value)}
+                  onChange={(e) => handleInputChange("cnpj", formatCNPJ(e.target.value))}
                   placeholder="00.000.000/0001-00"
+                  maxLength={18}
                 />
               </div>
             </div>
@@ -400,8 +422,9 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
               <Input
                 id="telefoneDiretor"
                 value={formData.telefoneDiretor}
-                onChange={(e) => handleInputChange("telefoneDiretor", e.target.value)}
+                onChange={(e) => handleInputChange("telefoneDiretor", formatPhone(e.target.value))}
                 placeholder="(11) 99999-9999"
+                maxLength={15}
               />
             </div>
           </TabsContent>
