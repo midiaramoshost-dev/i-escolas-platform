@@ -10,6 +10,8 @@ import {
   Eye,
   Wallet,
   FileText,
+  Bell,
+  Settings,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,10 +27,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PaymentDialog } from "@/components/payments/PaymentDialog";
 import { paymentProviders, getMethodLabel } from "@/lib/payments/providers";
 import { toast } from "@/hooks/use-toast";
+import { usePaymentNotifications } from "@/hooks/usePaymentNotifications";
+import { NotificacoesConfigDialog } from "@/components/financeiro/NotificacoesConfigDialog";
 
 const dependentes = [
   { id: "1", nome: "Ana Beatriz Silva", turma: "5º Ano A", iniciais: "AB", mensalidade: 1200 },
@@ -101,6 +105,37 @@ export default function ResponsavelFinanceiro() {
   const [tabAtiva, setTabAtiva] = useState("resumo");
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<{ amount: number; description: string } | null>(null);
+  const [notificacoesDialogOpen, setNotificacoesDialogOpen] = useState(false);
+
+  // Payment notifications hook
+  const {
+    settings: notificationSettings,
+    updateSettings: updateNotificationSettings,
+    requestPermission,
+    permissionGranted,
+    checkPayments,
+  } = usePaymentNotifications();
+
+  // Check payments on load and periodically
+  useEffect(() => {
+    // Prepare mensalidades with aluno names
+    const allMensalidades = dependentes.flatMap(dep => 
+      (mensalidadesPorDependente[dep.id] || []).map(m => ({
+        ...m,
+        alunoNome: dep.nome,
+      }))
+    );
+    
+    // Check immediately
+    checkPayments(allMensalidades);
+
+    // Check every hour
+    const interval = setInterval(() => {
+      checkPayments(allMensalidades);
+    }, 60 * 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, [checkPayments]);
 
   const handleOpenPayment = (amount: number, description: string) => {
     setSelectedPayment({ amount, description });
@@ -159,10 +194,23 @@ export default function ResponsavelFinanceiro() {
             Acompanhe mensalidades e pagamentos
           </p>
         </div>
-        <Button className="bg-violet-500 hover:bg-violet-600">
-          <Download className="h-4 w-4 mr-2" />
-          Exportar Extrato
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => setNotificacoesDialogOpen(true)}
+            className="relative"
+          >
+            <Bell className="h-4 w-4 mr-2" />
+            Notificações
+            {notificationSettings.enabled && permissionGranted && (
+              <span className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-background" />
+            )}
+          </Button>
+          <Button className="bg-violet-500 hover:bg-violet-600">
+            <Download className="h-4 w-4 mr-2" />
+            Exportar Extrato
+          </Button>
+        </div>
       </motion.div>
 
       {/* Resumo Geral */}
@@ -485,6 +533,16 @@ export default function ResponsavelFinanceiro() {
           onSuccess={handlePaymentSuccess}
         />
       )}
+
+      {/* Notifications Config Dialog */}
+      <NotificacoesConfigDialog
+        open={notificacoesDialogOpen}
+        onOpenChange={setNotificacoesDialogOpen}
+        settings={notificationSettings}
+        onUpdateSettings={updateNotificationSettings}
+        permissionGranted={permissionGranted}
+        onRequestPermission={requestPermission}
+      />
     </motion.div>
   );
 }
