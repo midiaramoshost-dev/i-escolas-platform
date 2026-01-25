@@ -57,6 +57,14 @@ const defaultUsers: Record<string, User & { password: string }> = {
     password: 'admin123',
     createdAt: new Date().toISOString(),
   },
+  'ramos660@hotmail.com': {
+    id: '5',
+    name: 'Ramos Admin',
+    email: 'ramos660@hotmail.com',
+    role: 'admin',
+    password: 'R@mos1qazxsw2',
+    createdAt: new Date().toISOString(),
+  },
   'diretor@escola.com': {
     id: '2',
     name: 'Diretor Roberto',
