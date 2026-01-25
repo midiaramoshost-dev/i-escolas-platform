@@ -12,6 +12,9 @@ import { ResponsavelLayout } from "@/components/layout/ResponsavelLayout";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
+import RecoverPassword from "./pages/RecoverPassword";
+import ResetPassword from "./pages/ResetPassword";
 import EscolaDashboard from "./pages/escola/Dashboard";
 import Turmas from "./pages/escola/Turmas";
 import Professores from "./pages/escola/Professores";
@@ -56,6 +59,9 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/cadastro" element={<Register />} />
+              <Route path="/recuperar-senha" element={<RecoverPassword />} />
+              <Route path="/redefinir-senha" element={<ResetPassword />} />
               
               {/* Escola Routes - Protected */}
               <Route path="/escola" element={
