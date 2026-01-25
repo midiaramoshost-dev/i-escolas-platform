@@ -35,6 +35,11 @@ import Boletins from "./pages/escola/Boletins";
 import EscolaFinanceiro from "./pages/escola/Financeiro";
 import Comunicados from "./pages/escola/Comunicados";
 import Relatorios from "./pages/escola/Relatorios";
+import ContasPagar from "./pages/escola/ContasPagar";
+import ContasReceber from "./pages/escola/ContasReceber";
+import Estoque from "./pages/escola/Estoque";
+import Recibos from "./pages/escola/Recibos";
+import Contratos from "./pages/escola/Contratos";
 import AlunoDashboard from "./pages/aluno/Dashboard";
 import AlunoNotas from "./pages/aluno/Notas";
 import AlunoFrequencia from "./pages/aluno/Frequencia";
@@ -108,6 +113,11 @@ const App = () => (
                 <Route path="comunicados" element={<Comunicados />} />
                 <Route path="relatorios" element={<Relatorios />} />
                 <Route path="configuracoes" element={<Configuracoes />} />
+                <Route path="contas-pagar" element={<ContasPagar />} />
+                <Route path="contas-receber" element={<ContasReceber />} />
+                <Route path="estoque" element={<Estoque />} />
+                <Route path="recibos" element={<Recibos />} />
+                <Route path="contratos" element={<Contratos />} />
               </Route>
 
               {/* Portal do Aluno Routes - Protected */}
