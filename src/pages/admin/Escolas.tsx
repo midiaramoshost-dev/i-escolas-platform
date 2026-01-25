@@ -39,19 +39,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { EditarEscolaDialog, Escola } from "@/components/admin/EditarEscolaDialog";
 import { DetalhesEscolaDialog } from "@/components/admin/DetalhesEscolaDialog";
+import { CadastrarEscolaDialog } from "@/components/admin/CadastrarEscolaDialog";
 import { toast } from "sonner";
 
 const escolasIniciais: Escola[] = [
@@ -116,6 +107,10 @@ export default function AdminEscolas() {
     setEscolas(escolas.map(e => e.id === escolaAtualizada.id ? escolaAtualizada : e));
   };
 
+  const handleAddEscola = (novaEscola: Escola) => {
+    setEscolas([novaEscola, ...escolas]);
+  };
+
   const handleDesativarEscola = (escola: Escola) => {
     const novoStatus = escola.status === "inativo" ? "ativo" : "inativo";
     setEscolas(escolas.map(e => e.id === escola.id ? { ...e, status: novoStatus } : e));
@@ -158,92 +153,16 @@ export default function AdminEscolas() {
             Cadastre e gerencie escolas na plataforma
           </p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-rose-500 hover:bg-rose-600">
-              <Plus className="mr-2 h-4 w-4" />
-              Nova Escola
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Cadastrar Nova Escola</DialogTitle>
-              <DialogDescription>
-                Preencha os dados da escola para cadastrá-la na plataforma.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>Nome da Escola</Label>
-                  <Input placeholder="Ex: Colégio São Paulo" />
-                </div>
-                <div className="space-y-2">
-                  <Label>CNPJ</Label>
-                  <Input placeholder="00.000.000/0001-00" />
-                </div>
-              </div>
-              <div className="grid gap-4 md:grid-cols-3">
-                <div className="space-y-2">
-                  <Label>Cidade</Label>
-                  <Input placeholder="São Paulo" />
-                </div>
-                <div className="space-y-2">
-                  <Label>UF</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="SP">SP</SelectItem>
-                      <SelectItem value="RJ">RJ</SelectItem>
-                      <SelectItem value="MG">MG</SelectItem>
-                      <SelectItem value="PR">PR</SelectItem>
-                      <SelectItem value="BA">BA</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Porte</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pequeno">Pequeno</SelectItem>
-                      <SelectItem value="medio">Médio</SelectItem>
-                      <SelectItem value="grande">Grande</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>Plano</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o plano" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="free">Free</SelectItem>
-                      <SelectItem value="start">Start</SelectItem>
-                      <SelectItem value="pro">Pro</SelectItem>
-                      <SelectItem value="premium">Premium</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>E-mail do Diretor</Label>
-                  <Input type="email" placeholder="diretor@escola.com.br" />
-                </div>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-              <Button className="bg-rose-500 hover:bg-rose-600">Cadastrar Escola</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <Button className="bg-rose-500 hover:bg-rose-600" onClick={() => setDialogOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Nova Escola
+        </Button>
+
+        <CadastrarEscolaDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          onSave={handleAddEscola}
+        />
       </motion.div>
 
       {/* Resumo */}
