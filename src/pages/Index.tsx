@@ -333,8 +333,8 @@ const Index = () => {
               { href: "#recursos", label: "Recursos" },
               { href: "#planos", label: "Planos" },
               { href: "#depoimentos", label: "Depoimentos" },
-              { href: "#comparativo", label: "Comparativo" },
-              { href: "#faq", label: "FAQ" }
+              { href: "#faq", label: "FAQ" },
+              { href: "#contato", label: "Contato" }
             ].map((item, index) => (
               <motion.a 
                 key={item.href}
@@ -1161,7 +1161,7 @@ const Index = () => {
                 <li><a href="#" className="hover:text-foreground transition-colors">Central de Ajuda</a></li>
                 <li><a href="#" className="hover:text-foreground transition-colors">Documentação</a></li>
                 <li><a href="#" className="hover:text-foreground transition-colors">Status</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Contato</a></li>
+                <li><a href="#contato" className="hover:text-foreground transition-colors">Contato</a></li>
               </ul>
             </div>
           </div>
