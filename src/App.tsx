@@ -60,6 +60,7 @@ import AdminModulos from "./pages/admin/Modulos";
 import AdminLogAtividades from "./pages/admin/LogAtividades";
 import NotFound from "./pages/NotFound";
 import { ActivityLogProvider } from "./contexts/ActivityLogContext";
+import { AuthActivityMonitor } from "./components/auth/AuthActivityMonitor";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +74,7 @@ const App = () => (
           <BrowserRouter>
             <AuthProvider>
             <ActivityLogProvider>
+            <AuthActivityMonitor>
             <ReferralProvider>
             <Routes>
               <Route path="/" element={<Index />} />
@@ -161,6 +163,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
             </ReferralProvider>
+            </AuthActivityMonitor>
             </ActivityLogProvider>
             </AuthProvider>
           </BrowserRouter>
