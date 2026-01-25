@@ -49,6 +49,7 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useActivityLog } from "@/contexts/ActivityLogContext";
 
 interface Usuario {
   id: string;
@@ -99,6 +100,7 @@ export default function AdminUsuarios() {
     email: "",
     perfil: "suporte" as Usuario["perfil"],
   });
+  const { registrarAtividade } = useActivityLog();
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -148,6 +150,13 @@ export default function AdminUsuarios() {
           : u
       ));
       toast.success("Usuário atualizado com sucesso!");
+      registrarAtividade(
+        "usuario_editado",
+        `Usuário "${formData.nome}" foi editado`,
+        `Perfil: ${formData.perfil}, E-mail: ${formData.email}`,
+        "Usuário",
+        editando.id
+      );
     } else {
       const novoUsuario: Usuario = {
         id: Date.now().toString(),
@@ -160,6 +169,13 @@ export default function AdminUsuarios() {
       };
       setUsuarios([novoUsuario, ...usuarios]);
       toast.success("Usuário criado com sucesso! Credenciais enviadas por e-mail.");
+      registrarAtividade(
+        "usuario_criado",
+        `Novo usuário "${formData.nome}" foi criado`,
+        `Perfil: ${formData.perfil}, E-mail: ${formData.email}`,
+        "Usuário",
+        novoUsuario.id
+      );
     }
     setDialogOpen(false);
   };
@@ -168,10 +184,24 @@ export default function AdminUsuarios() {
     const novoStatus = usuario.status === "ativo" ? "inativo" : "ativo";
     setUsuarios(usuarios.map(u => u.id === usuario.id ? { ...u, status: novoStatus } : u));
     toast.success(`Usuário ${novoStatus === "ativo" ? "ativado" : "desativado"} com sucesso!`);
+    registrarAtividade(
+      novoStatus === "ativo" ? "usuario_ativado" : "usuario_desativado",
+      `Usuário "${usuario.nome}" foi ${novoStatus === "ativo" ? "ativado" : "desativado"}`,
+      `E-mail: ${usuario.email}`,
+      "Usuário",
+      usuario.id
+    );
   };
 
   const handleResetSenha = (usuario: Usuario) => {
     toast.success(`Link de redefinição de senha enviado para ${usuario.email}`);
+    registrarAtividade(
+      "usuario_senha_resetada",
+      `Senha do usuário "${usuario.nome}" foi resetada`,
+      `E-mail de recuperação enviado para: ${usuario.email}`,
+      "Usuário",
+      usuario.id
+    );
   };
 
   return (

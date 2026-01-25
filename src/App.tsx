@@ -50,7 +50,9 @@ import AdminMonitoramento from "./pages/admin/Monitoramento";
 import AdminUsuarios from "./pages/admin/Usuarios";
 import AdminConfiguracoes from "./pages/admin/Configuracoes";
 import AdminModulos from "./pages/admin/Modulos";
+import AdminLogAtividades from "./pages/admin/LogAtividades";
 import NotFound from "./pages/NotFound";
+import { ActivityLogProvider } from "./contexts/ActivityLogContext";
 
 const queryClient = new QueryClient();
 
@@ -63,6 +65,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <AuthProvider>
+            <ActivityLogProvider>
             <ReferralProvider>
             <Routes>
               <Route path="/" element={<Index />} />
@@ -138,11 +141,13 @@ const App = () => (
                 <Route path="usuarios" element={<AdminUsuarios />} />
                 <Route path="configuracoes" element={<AdminConfiguracoes />} />
                 <Route path="modulos" element={<AdminModulos />} />
+                <Route path="log-atividades" element={<AdminLogAtividades />} />
               </Route>
 
               <Route path="*" element={<NotFound />} />
             </Routes>
             </ReferralProvider>
+            </ActivityLogProvider>
             </AuthProvider>
           </BrowserRouter>
         </TooltipProvider>

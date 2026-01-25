@@ -12,6 +12,7 @@ import {
   DollarSign,
   Activity,
   Puzzle,
+  ClipboardList,
 } from "lucide-react";
 import {
   Sidebar,
@@ -65,6 +66,11 @@ const menuItems = [
     title: "Usuários",
     icon: Users,
     url: "/admin/usuarios",
+  },
+  {
+    title: "Log de Atividades",
+    icon: ClipboardList,
+    url: "/admin/log-atividades",
   },
   {
     title: "Configurações",

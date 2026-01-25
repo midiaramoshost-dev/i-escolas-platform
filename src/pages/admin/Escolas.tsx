@@ -44,6 +44,7 @@ import { EditarEscolaDialog, Escola } from "@/components/admin/EditarEscolaDialo
 import { DetalhesEscolaDialog } from "@/components/admin/DetalhesEscolaDialog";
 import { CadastrarEscolaDialog } from "@/components/admin/CadastrarEscolaDialog";
 import { toast } from "sonner";
+import { useActivityLog } from "@/contexts/ActivityLogContext";
 
 const escolasIniciais: Escola[] = [
   { id: "1", nome: "Colégio São Paulo", cnpj: "12.345.678/0001-90", cidade: "São Paulo", uf: "SP", porte: "Grande", plano: "Premium", alunos: 1250, professores: 85, status: "ativo", datacadastro: "2023-01-15" },
@@ -92,6 +93,7 @@ export default function AdminEscolas() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [detalhesDialogOpen, setDetalhesDialogOpen] = useState(false);
   const [escolaSelecionada, setEscolaSelecionada] = useState<Escola | null>(null);
+  const { registrarAtividade } = useActivityLog();
 
   const handleVerDetalhes = (escola: Escola) => {
     setEscolaSelecionada(escola);
@@ -105,16 +107,37 @@ export default function AdminEscolas() {
 
   const handleSaveEscola = (escolaAtualizada: Escola) => {
     setEscolas(escolas.map(e => e.id === escolaAtualizada.id ? escolaAtualizada : e));
+    registrarAtividade(
+      "escola_editada",
+      `Escola "${escolaAtualizada.nome}" foi editada`,
+      `Plano: ${escolaAtualizada.plano}, Cidade: ${escolaAtualizada.cidade}`,
+      "Escola",
+      escolaAtualizada.id
+    );
   };
 
   const handleAddEscola = (novaEscola: Escola) => {
     setEscolas([novaEscola, ...escolas]);
+    registrarAtividade(
+      "escola_criada",
+      `Nova escola "${novaEscola.nome}" foi cadastrada`,
+      `Plano: ${novaEscola.plano}, Cidade: ${novaEscola.cidade}`,
+      "Escola",
+      novaEscola.id
+    );
   };
 
   const handleDesativarEscola = (escola: Escola) => {
     const novoStatus = escola.status === "inativo" ? "ativo" : "inativo";
     setEscolas(escolas.map(e => e.id === escola.id ? { ...e, status: novoStatus } : e));
     toast.success(`Escola ${novoStatus === "inativo" ? "desativada" : "ativada"} com sucesso!`);
+    registrarAtividade(
+      novoStatus === "ativo" ? "escola_ativada" : "escola_desativada",
+      `Escola "${escola.nome}" foi ${novoStatus === "ativo" ? "ativada" : "desativada"}`,
+      `Status anterior: ${escola.status}`,
+      "Escola",
+      escola.id
+    );
   };
 
   const containerVariants = {
