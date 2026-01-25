@@ -68,6 +68,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { useAlunosResponsaveis, type AlunoComResponsavel } from "@/contexts/AlunosResponsaveisContext";
 
 interface Contrato {
   id: string;
@@ -296,78 +297,11 @@ const dadosEscola = {
   cidade: "São Paulo",
 };
 
-// Dados de alunos com responsáveis (mock)
-interface AlunoResponsavel {
-  id: string;
-  nomeAluno: string;
-  dataNascimento: string;
-  serieTurma: string;
-  nomeResponsavel: string;
-  cpfResponsavel: string;
-  enderecoResponsavel: string;
-  telefoneResponsavel: string;
-  emailResponsavel: string;
-}
-
-const alunosResponsaveis: AlunoResponsavel[] = [
-  {
-    id: "1",
-    nomeAluno: "Ana Beatriz Silva",
-    dataNascimento: "2014-05-15",
-    serieTurma: "5º Ano A",
-    nomeResponsavel: "Maria Silva",
-    cpfResponsavel: "123.456.789-00",
-    enderecoResponsavel: "Av. Brasil, 456 - Jardim América - São Paulo/SP",
-    telefoneResponsavel: "(11) 98765-4321",
-    emailResponsavel: "maria.silva@email.com",
-  },
-  {
-    id: "2",
-    nomeAluno: "Bruno Costa Santos",
-    dataNascimento: "2013-08-22",
-    serieTurma: "6º Ano B",
-    nomeResponsavel: "Carlos Santos",
-    cpfResponsavel: "987.654.321-00",
-    enderecoResponsavel: "Rua São Paulo, 789 - Centro - São Paulo/SP",
-    telefoneResponsavel: "(11) 91234-5678",
-    emailResponsavel: "carlos.santos@email.com",
-  },
-  {
-    id: "3",
-    nomeAluno: "Carolina Mendes",
-    dataNascimento: "2012-03-10",
-    serieTurma: "7º Ano A",
-    nomeResponsavel: "Fernanda Mendes",
-    cpfResponsavel: "456.789.123-00",
-    enderecoResponsavel: "Rua das Palmeiras, 321 - Vila Nova - São Paulo/SP",
-    telefoneResponsavel: "(11) 95555-1234",
-    emailResponsavel: "fernanda.mendes@email.com",
-  },
-  {
-    id: "4",
-    nomeAluno: "Daniel Oliveira",
-    dataNascimento: "2011-11-30",
-    serieTurma: "8º Ano A",
-    nomeResponsavel: "Roberto Oliveira",
-    cpfResponsavel: "321.654.987-00",
-    enderecoResponsavel: "Av. Paulista, 1000 - Bela Vista - São Paulo/SP",
-    telefoneResponsavel: "(11) 94444-9876",
-    emailResponsavel: "roberto.oliveira@email.com",
-  },
-  {
-    id: "5",
-    nomeAluno: "Eduarda Lima",
-    dataNascimento: "2010-07-18",
-    serieTurma: "9º Ano A",
-    nomeResponsavel: "Juliana Lima",
-    cpfResponsavel: "654.987.321-00",
-    enderecoResponsavel: "Rua Augusta, 555 - Consolação - São Paulo/SP",
-    telefoneResponsavel: "(11) 93333-6543",
-    emailResponsavel: "juliana.lima@email.com",
-  },
-];
-
 export default function Contratos() {
+  // Usar dados do contexto compartilhado
+  const { getAlunosComResponsaveis } = useAlunosResponsaveis();
+  const alunosResponsaveis = getAlunosComResponsaveis();
+  
   const [contratos, setContratos] = useState<Contrato[]>(initialContratos);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");

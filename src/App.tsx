@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/hooks/useTheme";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { PlanosProvider } from "@/contexts/PlanosContext";
 import { ReferralProvider } from "@/contexts/ReferralContext";
+import { AlunosResponsaveisProvider } from "@/contexts/AlunosResponsaveisContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { AlunoLayout } from "@/components/layout/AlunoLayout";
@@ -92,7 +93,9 @@ const App = () => (
               {/* Escola Routes - Protected */}
               <Route path="/escola" element={
                 <ProtectedRoute allowedRoles={['escola']}>
-                  <MainLayout />
+                  <AlunosResponsaveisProvider>
+                    <MainLayout />
+                  </AlunosResponsaveisProvider>
                 </ProtectedRoute>
               }>
                 <Route index element={<Navigate to="/escola/dashboard" replace />} />
