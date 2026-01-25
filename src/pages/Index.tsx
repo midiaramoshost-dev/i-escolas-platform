@@ -2,7 +2,8 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
 import { 
   GraduationCap, 
   Users, 
@@ -20,12 +21,27 @@ import {
   CreditCard,
   Moon,
   Sun,
-  Star
+  Star,
+  Zap,
+  Globe,
+  Lock,
+  TrendingUp,
+  Play,
+  ChevronRight,
+  Sparkles,
+  Award,
+  Clock,
+  Heart,
+  Check,
+  X,
+  ArrowUpRight,
+  MousePointer2
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 
+// Animation variants
 const fadeInUp = {
-  hidden: { opacity: 0, y: 40 },
+  hidden: { opacity: 0, y: 60 },
   visible: { opacity: 1, y: 0 }
 };
 
@@ -39,266 +55,370 @@ const staggerContainer = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1
+      staggerChildren: 0.08,
+      delayChildren: 0.1
     }
   }
 };
 
 const scaleIn = {
-  hidden: { opacity: 0, scale: 0.9 },
+  hidden: { opacity: 0, scale: 0.8 },
   visible: { opacity: 1, scale: 1 }
+};
+
+const slideInLeft = {
+  hidden: { opacity: 0, x: -100 },
+  visible: { opacity: 1, x: 0 }
+};
+
+const slideInRight = {
+  hidden: { opacity: 0, x: 100 },
+  visible: { opacity: 1, x: 0 }
 };
 
 const Index = () => {
   const { theme, toggleTheme } = useTheme();
+  const heroRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"]
+  });
+  
+  const heroY = useTransform(scrollYProgress, [0, 1], [0, 200]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
   const features = [
     {
       icon: Users,
       title: "Gestão de Usuários",
-      description: "Controle completo de professores, alunos, responsáveis e equipe administrativa com permissões personalizadas."
+      description: "Controle completo de professores, alunos e responsáveis com permissões granulares.",
+      gradient: "from-blue-500 to-cyan-500"
     },
     {
       icon: BookOpen,
       title: "Diário de Classe Digital",
-      description: "Registro de aulas, frequência e conteúdos ministrados de forma simples e intuitiva."
+      description: "Registro de aulas, frequência e conteúdos de forma simples e intuitiva.",
+      gradient: "from-violet-500 to-purple-500"
     },
     {
       icon: BarChart3,
       title: "Dashboard Inteligente",
-      description: "Indicadores em tempo real sobre desempenho, frequência e alertas de risco acadêmico."
+      description: "Indicadores em tempo real sobre desempenho e alertas de risco acadêmico.",
+      gradient: "from-emerald-500 to-teal-500"
     },
     {
       icon: FileText,
       title: "Boletins Automáticos",
-      description: "Geração automática de boletins, históricos escolares e relatórios pedagógicos."
+      description: "Geração automática de boletins, históricos e relatórios pedagógicos.",
+      gradient: "from-orange-500 to-amber-500"
     },
     {
       icon: MessageSquare,
       title: "Comunicação Integrada",
-      description: "Mural de comunicados, mensagens diretas e notificações para toda a comunidade escolar."
+      description: "Mural de comunicados e notificações para toda a comunidade escolar.",
+      gradient: "from-pink-500 to-rose-500"
     },
     {
-      icon: Calendar,
-      title: "Calendário Escolar",
-      description: "Gestão de eventos, feriados, períodos avaliativos e agenda acadêmica completa."
+      icon: CreditCard,
+      title: "Gestão Financeira",
+      description: "Controle de mensalidades, cobranças automáticas e relatórios financeiros.",
+      gradient: "from-indigo-500 to-blue-500"
     }
   ];
 
   const plans = [
     {
       name: "Free",
-      price: "Grátis",
-      description: "Para escolas conhecerem a plataforma",
+      price: "0",
+      period: "para sempre",
+      description: "Perfeito para começar",
       features: [
-        "Até 50 alunos",
-        "1 usuário administrador",
-        "Diário de classe básico",
-        "Suporte por email"
+        { text: "Até 50 alunos", included: true },
+        { text: "1 administrador", included: true },
+        { text: "Diário de classe básico", included: true },
+        { text: "Suporte por email", included: true },
+        { text: "Portal do aluno", included: false },
+        { text: "Relatórios avançados", included: false }
       ],
-      highlighted: false
+      highlighted: false,
+      cta: "Começar Grátis"
     },
     {
       name: "Start",
-      price: "R$ 299",
+      price: "299",
       period: "/mês",
       description: "Para escolas em crescimento",
       features: [
-        "Até 200 alunos",
-        "5 usuários administradores",
-        "Diário de classe completo",
-        "Portal do aluno e responsável",
-        "Relatórios básicos",
-        "Suporte prioritário"
+        { text: "Até 200 alunos", included: true },
+        { text: "5 administradores", included: true },
+        { text: "Diário completo", included: true },
+        { text: "Portal do aluno", included: true },
+        { text: "Relatórios básicos", included: true },
+        { text: "Suporte prioritário", included: true }
       ],
-      highlighted: false
+      highlighted: false,
+      cta: "Iniciar Trial"
     },
     {
       name: "Pro",
-      price: "R$ 599",
+      price: "599",
       period: "/mês",
-      description: "Para escolas que buscam excelência",
+      description: "Para quem busca excelência",
       features: [
-        "Até 500 alunos",
-        "Usuários ilimitados",
-        "Todos os módulos",
-        "Dashboard avançado",
-        "Alertas inteligentes",
-        "API de integração",
-        "Suporte 24/7"
+        { text: "Até 500 alunos", included: true },
+        { text: "Usuários ilimitados", included: true },
+        { text: "Todos os módulos", included: true },
+        { text: "Dashboard avançado", included: true },
+        { text: "API de integração", included: true },
+        { text: "Suporte 24/7", included: true }
       ],
-      highlighted: true
+      highlighted: true,
+      cta: "Escolher Pro"
     },
     {
       name: "Premium",
-      price: "R$ 999",
+      price: "999",
       period: "/mês",
       description: "Para redes de escolas",
       features: [
-        "Alunos ilimitados",
-        "Multi-unidades",
-        "Personalização completa",
-        "Módulo financeiro",
-        "Relatórios comparativos",
-        "Gerente de conta dedicado",
-        "SLA garantido"
+        { text: "Alunos ilimitados", included: true },
+        { text: "Multi-unidades", included: true },
+        { text: "Personalização total", included: true },
+        { text: "Módulo financeiro", included: true },
+        { text: "Gerente dedicado", included: true },
+        { text: "SLA garantido", included: true }
       ],
-      highlighted: false
+      highlighted: false,
+      cta: "Falar com Vendas"
     }
   ];
 
   const testimonials = [
     {
-      quote: "O i ESCOLAS transformou a gestão da nossa escola. Reduzimos em 70% o tempo gasto com processos administrativos.",
+      quote: "Reduzimos 70% do tempo gasto com processos administrativos. Uma transformação completa na nossa gestão.",
       author: "Maria Silva",
       role: "Diretora",
-      school: "Colégio São Paulo"
+      school: "Colégio São Paulo",
+      avatar: "MS",
+      rating: 5
     },
     {
-      quote: "A comunicação com os pais melhorou drasticamente. Agora eles acompanham tudo em tempo real pelo portal.",
+      quote: "A comunicação com os pais melhorou drasticamente. Agora eles acompanham tudo em tempo real.",
       author: "Carlos Santos",
       role: "Coordenador Pedagógico",
-      school: "Escola Nova Era"
+      school: "Escola Nova Era",
+      avatar: "CS",
+      rating: 5
     },
     {
       quote: "O diário digital facilitou muito meu trabalho. Lanço notas e frequência de qualquer lugar.",
       author: "Ana Oliveira",
       role: "Professora",
-      school: "Instituto Educacional ABC"
+      school: "Instituto Educacional ABC",
+      avatar: "AO",
+      rating: 5
     }
   ];
 
   const stats = [
-    { value: "500+", label: "Escolas ativas" },
-    { value: "150.000+", label: "Alunos cadastrados" },
-    { value: "12.000+", label: "Professores" },
-    { value: "98%", label: "Satisfação" }
+    { value: "500+", label: "Escolas Ativas", icon: School },
+    { value: "150k+", label: "Alunos", icon: Users },
+    { value: "12k+", label: "Professores", icon: GraduationCap },
+    { value: "98%", label: "Satisfação", icon: Heart }
+  ];
+
+  const comparisonItems = [
+    { feature: "Gestão de alunos e turmas", iescolas: true, traditional: true },
+    { feature: "Diário de classe digital", iescolas: true, traditional: false },
+    { feature: "Portal do aluno/responsável", iescolas: true, traditional: false },
+    { feature: "Comunicação integrada", iescolas: true, traditional: false },
+    { feature: "Relatórios automáticos", iescolas: true, traditional: false },
+    { feature: "Acesso mobile", iescolas: true, traditional: false },
+    { feature: "Atualizações em tempo real", iescolas: true, traditional: false },
+    { feature: "Suporte especializado", iescolas: true, traditional: false },
   ];
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
-      {/* Header */}
+      {/* Header - Glassmorphism Effect */}
       <motion.header 
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className="fixed top-0 left-0 right-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60"
       >
-        <div className="container flex h-16 items-center justify-between">
+        <nav className="container flex h-16 items-center justify-between" aria-label="Navegação principal">
           <motion.div 
-            className="flex items-center gap-2"
+            className="flex items-center gap-3"
             whileHover={{ scale: 1.02 }}
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
+            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/25">
               <GraduationCap className="h-5 w-5 text-primary-foreground" />
+              <div className="absolute -inset-1 rounded-xl bg-primary/20 blur-lg" />
             </div>
-            <span className="text-xl font-bold text-primary">i ESCOLAS</span>
+            <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              i ESCOLAS
+            </span>
           </motion.div>
           
-          <nav className="hidden md:flex items-center gap-6">
-            {["recursos", "planos", "depoimentos", "contato"].map((item, index) => (
+          <div className="hidden md:flex items-center gap-8">
+            {[
+              { href: "#recursos", label: "Recursos" },
+              { href: "#planos", label: "Planos" },
+              { href: "#depoimentos", label: "Depoimentos" },
+              { href: "#comparativo", label: "Comparativo" }
+            ].map((item, index) => (
               <motion.a 
-                key={item}
-                href={`#${item}`} 
-                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors capitalize"
+                key={item.href}
+                href={item.href} 
+                className="relative text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 * index }}
-                whileHover={{ y: -2 }}
               >
-                {item}
+                {item.label}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
               </motion.a>
             ))}
-          </nav>
+          </div>
 
           <div className="flex items-center gap-3">
-            <motion.div whileHover={{ rotate: 180 }} transition={{ duration: 0.3 }}>
+            <motion.div whileHover={{ rotate: 180 }} transition={{ duration: 0.4 }}>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={toggleTheme}
                 className="rounded-full"
+                aria-label={theme === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro'}
               >
                 {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               </Button>
             </motion.div>
             <Link to="/login">
-              <Button variant="outline">Entrar</Button>
+              <Button variant="ghost" className="hidden sm:flex">Entrar</Button>
             </Link>
-            <Link to="/login" className="hidden sm:block">
+            <Link to="/login">
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button>Começar Agora</Button>
+                <Button className="gap-2 shadow-lg shadow-primary/25">
+                  Começar Agora
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
               </motion.div>
             </Link>
           </div>
-        </div>
+        </nav>
       </motion.header>
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 md:py-32">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10" />
-        <div className="container relative">
+      {/* Hero Section - Modern with Parallax */}
+      <section ref={heroRef} className="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden">
+        {/* Animated Background */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10" />
+          <div className="absolute top-1/4 -left-1/4 w-1/2 h-1/2 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-primary/5 rounded-full blur-3xl animate-pulse delay-1000" />
+          
+          {/* Grid Pattern */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border)/0.3)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border)/0.3)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
+        </div>
+
+        <motion.div 
+          className="container relative z-10"
+          style={{ y: heroY, opacity: heroOpacity }}
+        >
           <motion.div 
-            className="mx-auto max-w-4xl text-center"
+            className="mx-auto max-w-5xl text-center"
             initial="hidden"
             animate="visible"
             variants={staggerContainer}
           >
-            <motion.div variants={fadeInUp} transition={{ duration: 0.5 }}>
-              <Badge variant="secondary" className="mb-4">
-                <Star className="mr-1 h-3 w-3" /> Plataforma #1 em Gestão Escolar
+            {/* Badge */}
+            <motion.div variants={fadeInUp} transition={{ duration: 0.6 }}>
+              <Badge className="mb-6 py-2 px-4 text-sm bg-primary/10 text-primary border-primary/20 hover:bg-primary/15">
+                <Sparkles className="mr-2 h-4 w-4" />
+                Plataforma #1 em Gestão Escolar no Brasil
               </Badge>
             </motion.div>
+
+            {/* Main Heading */}
             <motion.h1 
-              className="mb-6 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl"
+              className="mb-6 text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl lg:text-8xl"
               variants={fadeInUp}
-              transition={{ duration: 0.6, delay: 0.1 }}
+              transition={{ duration: 0.7, delay: 0.1 }}
             >
-              A escola ensina.
-              <motion.span 
-                className="block text-primary"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-              >
-                O i ESCOLAS cuida do resto.
-              </motion.span>
+              <span className="block text-foreground">A escola ensina.</span>
+              <span className="block mt-2 bg-gradient-to-r from-primary via-primary to-primary/70 bg-clip-text text-transparent">
+                Nós cuidamos do resto.
+              </span>
             </motion.h1>
+
+            {/* Subheadline */}
             <motion.p 
-              className="mb-8 text-lg text-muted-foreground md:text-xl max-w-2xl mx-auto"
+              className="mb-10 text-xl text-muted-foreground md:text-2xl max-w-3xl mx-auto leading-relaxed"
               variants={fadeInUp}
-              transition={{ duration: 0.6, delay: 0.2 }}
+              transition={{ duration: 0.7, delay: 0.2 }}
             >
-              Plataforma completa de gestão escolar para educação infantil, fundamental e médio. 
-              Simplifique processos, melhore a comunicação e foque no que realmente importa: a educação.
+              Automatize processos, melhore a comunicação e transforme a gestão da sua escola com a plataforma mais completa do mercado.
             </motion.p>
+
+            {/* CTA Buttons */}
             <motion.div 
               className="flex flex-col sm:flex-row gap-4 justify-center"
               variants={fadeInUp}
-              transition={{ duration: 0.6, delay: 0.3 }}
+              transition={{ duration: 0.7, delay: 0.3 }}
             >
               <Link to="/login">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button size="lg" className="w-full sm:w-auto gap-2">
-                    Começar Gratuitamente <ArrowRight className="h-4 w-4" />
+                <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
+                  <Button size="lg" className="w-full sm:w-auto gap-2 text-lg px-8 py-6 shadow-xl shadow-primary/30">
+                    Começar Gratuitamente
+                    <ArrowRight className="h-5 w-5" />
                   </Button>
                 </motion.div>
               </Link>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2">
-                  <School className="h-4 w-4" /> Agendar Demonstração
+              <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
+                <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 text-lg px-8 py-6 group">
+                  <Play className="h-5 w-5 group-hover:text-primary transition-colors" />
+                  Ver Demonstração
                 </Button>
               </motion.div>
             </motion.div>
+
+            {/* Trust Indicators */}
+            <motion.div 
+              className="mt-16 flex flex-wrap items-center justify-center gap-8 text-muted-foreground"
+              variants={fadeIn}
+              transition={{ duration: 0.8, delay: 0.5 }}
+            >
+              <div className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-primary" />
+                <span className="text-sm">Dados 100% seguros</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-primary" />
+                <span className="text-sm">Setup em 5 minutos</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Award className="h-5 w-5 text-primary" />
+                <span className="text-sm">+500 escolas confiam</span>
+              </div>
+            </motion.div>
           </motion.div>
-        </div>
+        </motion.div>
+
+        {/* Scroll Indicator */}
+        <motion.div 
+          className="absolute bottom-8 left-1/2 -translate-x-1/2"
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <MousePointer2 className="h-6 w-6 text-muted-foreground" />
+        </motion.div>
       </section>
 
-      {/* Stats Section */}
-      <section className="border-y bg-muted/30 py-12">
+      {/* Stats Section - Floating Cards */}
+      <section className="relative py-20 -mt-20">
         <div className="container">
           <motion.div 
-            className="grid grid-cols-2 md:grid-cols-4 gap-8"
+            className="grid grid-cols-2 md:grid-cols-4 gap-4"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
@@ -306,44 +426,51 @@ const Index = () => {
           >
             {stats.map((stat, index) => (
               <motion.div 
-                key={index} 
-                className="text-center"
+                key={index}
                 variants={scaleIn}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
+                whileHover={{ y: -8, scale: 1.02 }}
               >
-                <motion.div 
-                  className="text-3xl md:text-4xl font-bold text-primary"
-                  initial={{ scale: 0 }}
-                  whileInView={{ scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ type: "spring", stiffness: 100, delay: index * 0.1 }}
-                >
-                  {stat.value}
-                </motion.div>
-                <div className="text-sm text-muted-foreground mt-1">{stat.label}</div>
+                <Card className="relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm">
+                  <CardContent className="p-6 text-center">
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 text-primary mb-4">
+                      <stat.icon className="h-6 w-6" />
+                    </div>
+                    <motion.div 
+                      className="text-4xl font-bold text-foreground"
+                      initial={{ scale: 0 }}
+                      whileInView={{ scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ type: "spring", stiffness: 100, delay: index * 0.15 }}
+                    >
+                      {stat.value}
+                    </motion.div>
+                    <div className="text-sm text-muted-foreground mt-1">{stat.label}</div>
+                  </CardContent>
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-primary/5 rounded-full blur-2xl" />
+                </Card>
               </motion.div>
             ))}
           </motion.div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="recursos" className="py-20 md:py-28">
+      {/* Features Section - Bento Grid */}
+      <section id="recursos" className="py-24 relative">
         <div className="container">
           <motion.div 
-            className="text-center mb-12"
+            className="text-center mb-16"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
             variants={fadeInUp}
-            transition={{ duration: 0.6 }}
           >
             <Badge variant="outline" className="mb-4">Recursos</Badge>
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
+            <h2 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
               Tudo que sua escola precisa
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Uma plataforma completa para gerenciar todos os aspectos da sua instituição de ensino.
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Uma plataforma completa para gerenciar todos os aspectos da sua instituição
             </p>
           </motion.div>
           
@@ -358,88 +485,83 @@ const Index = () => {
               <motion.div
                 key={index}
                 variants={fadeInUp}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
+                transition={{ duration: 0.5 }}
               >
                 <motion.div
-                  whileHover={{ y: -8, boxShadow: "0 20px 40px -20px rgba(0,0,0,0.15)" }}
+                  whileHover={{ y: -8 }}
                   transition={{ duration: 0.3 }}
+                  className="h-full"
                 >
-                  <Card className="group h-full">
-                    <CardHeader>
-                      <motion.div 
-                        className="mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
-                        whileHover={{ rotate: [0, -10, 10, 0] }}
-                        transition={{ duration: 0.5 }}
-                      >
-                        <feature.icon className="h-6 w-6" />
-                      </motion.div>
-                      <CardTitle className="text-xl">{feature.title}</CardTitle>
+                  <Card className="group h-full border-border/50 hover:border-primary/50 transition-all duration-300 overflow-hidden">
+                    <CardHeader className="pb-4">
+                      <div className={`mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${feature.gradient} text-white shadow-lg`}>
+                        <feature.icon className="h-7 w-7" />
+                      </div>
+                      <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                        {feature.title}
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <CardDescription className="text-base">{feature.description}</CardDescription>
+                      <CardDescription className="text-base leading-relaxed">
+                        {feature.description}
+                      </CardDescription>
                     </CardContent>
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ backgroundImage: `linear-gradient(to right, var(--tw-gradient-stops))` }} />
                   </Card>
                 </motion.div>
               </motion.div>
             ))}
           </motion.div>
 
+          {/* Extra Features */}
           <motion.div 
-            className="mt-12 text-center"
+            className="mt-12 flex flex-wrap justify-center gap-3"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            variants={fadeIn}
-            transition={{ duration: 0.6, delay: 0.3 }}
+            variants={staggerContainer}
           >
-            <p className="text-muted-foreground mb-4">E muito mais recursos avançados:</p>
-            <motion.div 
-              className="flex flex-wrap justify-center gap-3"
-              variants={staggerContainer}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-            >
-              {[
-                { icon: Bell, label: "Alertas Inteligentes" },
-                { icon: Shield, label: "Segurança Avançada" },
-                { icon: Smartphone, label: "100% Responsivo" },
-                { icon: CreditCard, label: "Módulo Financeiro" }
-              ].map((item, index) => (
-                <motion.div
-                  key={index}
-                  variants={scaleIn}
-                  transition={{ duration: 0.4, delay: index * 0.1 }}
-                  whileHover={{ scale: 1.1 }}
-                >
-                  <Badge variant="secondary" className="gap-1.5 py-2 px-4">
-                    <item.icon className="h-4 w-4" />
-                    {item.label}
-                  </Badge>
-                </motion.div>
-              ))}
-            </motion.div>
+            {[
+              { icon: Bell, label: "Alertas Inteligentes" },
+              { icon: Shield, label: "Segurança Avançada" },
+              { icon: Smartphone, label: "100% Responsivo" },
+              { icon: Zap, label: "Alta Performance" },
+              { icon: Globe, label: "Acesso em Qualquer Lugar" },
+              { icon: Lock, label: "LGPD Compliance" }
+            ].map((item, index) => (
+              <motion.div
+                key={index}
+                variants={scaleIn}
+                transition={{ duration: 0.4, delay: index * 0.05 }}
+                whileHover={{ scale: 1.1, y: -2 }}
+              >
+                <Badge variant="secondary" className="gap-2 py-2 px-4 text-sm">
+                  <item.icon className="h-4 w-4" />
+                  {item.label}
+                </Badge>
+              </motion.div>
+            ))}
           </motion.div>
         </div>
       </section>
 
-      {/* Plans Section */}
-      <section id="planos" className="py-20 md:py-28 bg-muted/30">
-        <div className="container">
+      {/* Plans Section - Modern Pricing */}
+      <section id="planos" className="py-24 bg-muted/30 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent" />
+        <div className="container relative">
           <motion.div 
-            className="text-center mb-12"
+            className="text-center mb-16"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
             variants={fadeInUp}
-            transition={{ duration: 0.6 }}
           >
             <Badge variant="outline" className="mb-4">Planos</Badge>
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
-              Escolha o plano ideal para sua escola
+            <h2 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
+              Investimento que se paga
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Planos flexíveis que crescem com a sua instituição. Comece grátis e evolua conforme sua necessidade.
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Planos flexíveis que crescem com sua escola. Comece grátis, evolua quando quiser.
             </p>
           </motion.div>
 
@@ -454,59 +576,65 @@ const Index = () => {
               <motion.div
                 key={index}
                 variants={fadeInUp}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
+                transition={{ duration: 0.5 }}
               >
                 <motion.div
                   whileHover={{ y: -8 }}
                   transition={{ duration: 0.3 }}
+                  className="h-full"
                 >
                   <Card 
-                    className={`relative h-full ${plan.highlighted ? 'border-primary shadow-lg scale-105' : ''}`}
+                    className={`relative h-full flex flex-col ${
+                      plan.highlighted 
+                        ? 'border-primary shadow-xl shadow-primary/20 scale-105' 
+                        : 'border-border/50'
+                    }`}
                   >
                     {plan.highlighted && (
-                      <motion.div 
-                        className="absolute -top-3 left-1/2 -translate-x-1/2"
-                        initial={{ scale: 0 }}
-                        whileInView={{ scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ type: "spring", stiffness: 200, delay: 0.5 }}
-                      >
-                        <Badge className="bg-primary">Mais Popular</Badge>
-                      </motion.div>
+                      <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                        <Badge className="bg-primary shadow-lg px-4 py-1">
+                          <Star className="h-3 w-3 mr-1" />
+                          Mais Popular
+                        </Badge>
+                      </div>
                     )}
-                    <CardHeader className="text-center pb-2">
+                    <CardHeader className="text-center pt-8">
                       <CardTitle className="text-xl">{plan.name}</CardTitle>
                       <div className="mt-4">
-                        <span className="text-4xl font-bold">{plan.price}</span>
-                        {plan.period && <span className="text-muted-foreground">{plan.period}</span>}
+                        <span className="text-sm text-muted-foreground">R$</span>
+                        <span className="text-5xl font-bold">{plan.price}</span>
+                        <span className="text-muted-foreground">{plan.period}</span>
                       </div>
                       <CardDescription className="mt-2">{plan.description}</CardDescription>
                     </CardHeader>
-                    <CardContent className="pt-4">
+                    <CardContent className="flex-1">
                       <ul className="space-y-3">
                         {plan.features.map((feature, featureIndex) => (
-                          <motion.li 
-                            key={featureIndex} 
-                            className="flex items-start gap-2"
-                            initial={{ opacity: 0, x: -10 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.3 + featureIndex * 0.05 }}
-                          >
-                            <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                            <span className="text-sm">{feature}</span>
-                          </motion.li>
+                          <li key={featureIndex} className="flex items-center gap-3">
+                            {feature.included ? (
+                              <Check className="h-5 w-5 text-primary flex-shrink-0" />
+                            ) : (
+                              <X className="h-5 w-5 text-muted-foreground/50 flex-shrink-0" />
+                            )}
+                            <span className={feature.included ? "" : "text-muted-foreground/50"}>
+                              {feature.text}
+                            </span>
+                          </li>
                         ))}
                       </ul>
-                      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                        <Button 
-                          className="w-full mt-6" 
-                          variant={plan.highlighted ? "default" : "outline"}
-                        >
-                          {plan.price === "Grátis" ? "Começar Grátis" : "Contratar"}
-                        </Button>
-                      </motion.div>
                     </CardContent>
+                    <div className="p-6 pt-0">
+                      <Link to="/login">
+                        <Button 
+                          className="w-full" 
+                          variant={plan.highlighted ? "default" : "outline"}
+                          size="lg"
+                        >
+                          {plan.cta}
+                          <ChevronRight className="h-4 w-4 ml-1" />
+                        </Button>
+                      </Link>
+                    </div>
                   </Card>
                 </motion.div>
               </motion.div>
@@ -515,23 +643,85 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section id="depoimentos" className="py-20 md:py-28">
+      {/* Comparison Section */}
+      <section id="comparativo" className="py-24">
         <div className="container">
           <motion.div 
-            className="text-center mb-12"
+            className="text-center mb-16"
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ once: true }}
             variants={fadeInUp}
-            transition={{ duration: 0.6 }}
+          >
+            <Badge variant="outline" className="mb-4">Comparativo</Badge>
+            <h2 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
+              Por que escolher o i ESCOLAS?
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Veja como nos comparamos com métodos tradicionais de gestão
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeInUp}
+            className="max-w-3xl mx-auto"
+          >
+            <Card className="overflow-hidden">
+              <div className="grid grid-cols-3 bg-muted/50 p-4 font-semibold text-center">
+                <div>Funcionalidade</div>
+                <div className="text-primary">i ESCOLAS</div>
+                <div className="text-muted-foreground">Tradicional</div>
+              </div>
+              {comparisonItems.map((item, index) => (
+                <motion.div
+                  key={index}
+                  className="grid grid-cols-3 p-4 border-t items-center text-center"
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <div className="text-left font-medium">{item.feature}</div>
+                  <div>
+                    {item.iescolas ? (
+                      <Check className="h-6 w-6 text-primary mx-auto" />
+                    ) : (
+                      <X className="h-6 w-6 text-muted-foreground/50 mx-auto" />
+                    )}
+                  </div>
+                  <div>
+                    {item.traditional ? (
+                      <Check className="h-6 w-6 text-muted-foreground mx-auto" />
+                    ) : (
+                      <X className="h-6 w-6 text-muted-foreground/50 mx-auto" />
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </Card>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Testimonials Section - Modern Cards */}
+      <section id="depoimentos" className="py-24 bg-muted/30">
+        <div className="container">
+          <motion.div 
+            className="text-center mb-16"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeInUp}
           >
             <Badge variant="outline" className="mb-4">Depoimentos</Badge>
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
-              O que dizem sobre nós
+            <h2 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
+              O que nossos clientes dizem
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Veja como o i ESCOLAS está transformando a gestão de escolas em todo o Brasil.
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Histórias reais de escolas que transformaram sua gestão
             </p>
           </motion.div>
 
@@ -539,52 +729,35 @@ const Index = () => {
             className="grid md:grid-cols-3 gap-6"
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
+            viewport={{ once: true }}
             variants={staggerContainer}
           >
             {testimonials.map((testimonial, index) => (
               <motion.div
                 key={index}
                 variants={fadeInUp}
-                transition={{ duration: 0.5, delay: index * 0.15 }}
+                transition={{ duration: 0.5 }}
               >
                 <motion.div
-                  whileHover={{ y: -5, boxShadow: "0 15px 30px -15px rgba(0,0,0,0.1)" }}
+                  whileHover={{ y: -8 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <Card className="bg-card h-full">
-                    <CardContent className="pt-6">
-                      <motion.div 
-                        className="flex gap-1 mb-4"
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: true }}
-                        variants={staggerContainer}
-                      >
-                        {[...Array(5)].map((_, i) => (
-                          <motion.div
-                            key={i}
-                            variants={scaleIn}
-                            transition={{ duration: 0.2, delay: i * 0.05 }}
-                          >
-                            <Star className="h-4 w-4 fill-primary text-primary" />
-                          </motion.div>
+                  <Card className="h-full border-border/50">
+                    <CardContent className="p-6">
+                      <div className="flex gap-1 mb-4">
+                        {Array.from({ length: testimonial.rating }).map((_, i) => (
+                          <Star key={i} className="h-5 w-5 fill-primary text-primary" />
                         ))}
-                      </motion.div>
-                      <blockquote className="text-muted-foreground mb-4">
+                      </div>
+                      <blockquote className="text-lg mb-6 leading-relaxed">
                         "{testimonial.quote}"
                       </blockquote>
-                      <div className="flex items-center gap-3">
-                        <motion.div 
-                          className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center"
-                          whileHover={{ scale: 1.1 }}
-                        >
-                          <span className="text-sm font-medium text-primary">
-                            {testimonial.author.split(' ').map(n => n[0]).join('')}
-                          </span>
-                        </motion.div>
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">
+                          {testimonial.avatar}
+                        </div>
                         <div>
-                          <div className="font-medium">{testimonial.author}</div>
+                          <div className="font-semibold">{testimonial.author}</div>
                           <div className="text-sm text-muted-foreground">
                             {testimonial.role} • {testimonial.school}
                           </div>
@@ -599,168 +772,135 @@ const Index = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <motion.section 
-        id="contato" 
-        className="py-20 md:py-28 bg-primary text-primary-foreground"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-100px" }}
-        variants={fadeIn}
-        transition={{ duration: 0.8 }}
-      >
-        <div className="container">
+      {/* CTA Section - Gradient Background */}
+      <section className="py-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/10 rounded-full blur-3xl" />
+        
+        <div className="container relative">
           <motion.div 
-            className="mx-auto max-w-3xl text-center"
-            variants={staggerContainer}
+            className="max-w-3xl mx-auto text-center"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
+            variants={staggerContainer}
           >
+            <motion.div variants={fadeInUp}>
+              <Badge className="mb-6 bg-primary/10 text-primary border-primary/20">
+                <Zap className="mr-2 h-4 w-4" />
+                Comece Hoje Mesmo
+              </Badge>
+            </motion.div>
+            
             <motion.h2 
-              className="text-3xl font-bold tracking-tight sm:text-4xl mb-4"
               variants={fadeInUp}
-              transition={{ duration: 0.6 }}
+              className="text-4xl font-bold tracking-tight sm:text-5xl mb-6"
             >
               Pronto para transformar sua escola?
             </motion.h2>
+            
             <motion.p 
-              className="text-lg opacity-90 mb-8"
               variants={fadeInUp}
-              transition={{ duration: 0.6, delay: 0.1 }}
+              className="text-xl text-muted-foreground mb-10"
             >
-              Junte-se a mais de 500 escolas que já confiam no i ESCOLAS. 
-              Comece gratuitamente e veja a diferença.
+              Junte-se a mais de 500 escolas que já modernizaram sua gestão. 
+              Comece gratuitamente e veja os resultados.
             </motion.p>
+
             <motion.div 
-              className="flex flex-col sm:flex-row gap-4 justify-center"
               variants={fadeInUp}
-              transition={{ duration: 0.6, delay: 0.2 }}
+              className="flex flex-col sm:flex-row gap-4 justify-center"
             >
               <Link to="/login">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button size="lg" variant="secondary" className="w-full sm:w-auto gap-2">
-                    Criar Conta Grátis <ArrowRight className="h-4 w-4" />
+                  <Button size="lg" className="w-full sm:w-auto gap-2 text-lg px-8 py-6 shadow-xl shadow-primary/30">
+                    Criar Conta Grátis
+                    <ArrowRight className="h-5 w-5" />
                   </Button>
                 </motion.div>
               </Link>
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button size="lg" variant="outline" className="w-full sm:w-auto border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10">
-                  Falar com Consultor
+                <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 text-lg px-8 py-6">
+                  Agendar Demo
+                  <ArrowUpRight className="h-5 w-5" />
                 </Button>
               </motion.div>
             </motion.div>
+
+            <motion.p 
+              variants={fadeIn}
+              className="mt-8 text-sm text-muted-foreground"
+            >
+              ✓ Sem cartão de crédito &nbsp;&nbsp; ✓ Setup em 5 minutos &nbsp;&nbsp; ✓ Cancele quando quiser
+            </motion.p>
           </motion.div>
         </div>
-      </motion.section>
+      </section>
 
       {/* Footer */}
-      <motion.footer 
-        className="border-t py-12 bg-muted/30"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-      >
+      <footer className="border-t bg-card/50 py-16">
         <div className="container">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <motion.div 
-              className="col-span-2 md:col-span-1"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-            >
-              <div className="flex items-center gap-2 mb-4">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                  <GraduationCap className="h-4 w-4 text-primary-foreground" />
+          <div className="grid md:grid-cols-4 gap-8">
+            <div className="md:col-span-2">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+                  <GraduationCap className="h-5 w-5" />
                 </div>
-                <span className="text-lg font-bold text-primary">i ESCOLAS</span>
+                <span className="text-xl font-bold">i ESCOLAS</span>
               </div>
-              <p className="text-sm text-muted-foreground">
-                A escola ensina. O i ESCOLAS cuida do resto.
+              <p className="text-muted-foreground max-w-sm mb-6">
+                Plataforma completa de gestão escolar para educação infantil, fundamental e médio. 
+                Simplifique processos e foque na educação.
               </p>
-            </motion.div>
+              <div className="flex gap-4">
+                {['facebook', 'instagram', 'linkedin', 'twitter'].map((social) => (
+                  <a 
+                    key={social}
+                    href={`https://${social}.com/iescolas`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="h-10 w-10 rounded-full bg-muted flex items-center justify-center hover:bg-primary/10 transition-colors"
+                    aria-label={`Seguir no ${social}`}
+                  >
+                    <Globe className="h-5 w-5" />
+                  </a>
+                ))}
+              </div>
+            </div>
             
-            {[
-              {
-                title: "Produto",
-                links: [
-                  { label: "Recursos", href: "#recursos" },
-                  { label: "Planos", href: "#planos" },
-                  { label: "Atualizações", href: "#" },
-                  { label: "Roadmap", href: "#" }
-                ]
-              },
-              {
-                title: "Empresa",
-                links: [
-                  { label: "Sobre nós", href: "#" },
-                  { label: "Blog", href: "#" },
-                  { label: "Carreiras", href: "#" },
-                  { label: "Contato", href: "#contato" }
-                ]
-              },
-              {
-                title: "Suporte",
-                links: [
-                  { label: "Central de Ajuda", href: "#" },
-                  { label: "Documentação", href: "#" },
-                  { label: "Status", href: "#" },
-                  { label: "Termos de Uso", href: "#" }
-                ]
-              }
-            ].map((section, sectionIndex) => (
-              <motion.div
-                key={section.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.1 * (sectionIndex + 1) }}
-              >
-                <h4 className="font-semibold mb-4">{section.title}</h4>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  {section.links.map((link) => (
-                    <li key={link.label}>
-                      <motion.a 
-                        href={link.href} 
-                        className="hover:text-primary transition-colors"
-                        whileHover={{ x: 3 }}
-                      >
-                        {link.label}
-                      </motion.a>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            ))}
+            <div>
+              <h3 className="font-semibold mb-4">Produto</h3>
+              <ul className="space-y-3 text-muted-foreground">
+                <li><a href="#recursos" className="hover:text-foreground transition-colors">Recursos</a></li>
+                <li><a href="#planos" className="hover:text-foreground transition-colors">Planos</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">Integrações</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">Atualizações</a></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold mb-4">Suporte</h3>
+              <ul className="space-y-3 text-muted-foreground">
+                <li><a href="#" className="hover:text-foreground transition-colors">Central de Ajuda</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">Documentação</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">Status</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">Contato</a></li>
+              </ul>
+            </div>
           </div>
           
-          <motion.div 
-            className="mt-8 pt-8 border-t flex flex-col sm:flex-row justify-between items-center gap-4"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-          >
+          <div className="border-t mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-muted-foreground">
               © {new Date().getFullYear()} i ESCOLAS. Todos os direitos reservados.
             </p>
-            <div className="flex gap-4 text-sm text-muted-foreground">
-              {["Privacidade", "Termos", "Cookies"].map((item) => (
-                <motion.a 
-                  key={item}
-                  href="#" 
-                  className="hover:text-primary transition-colors"
-                  whileHover={{ y: -2 }}
-                >
-                  {item}
-                </motion.a>
-              ))}
+            <div className="flex gap-6 text-sm text-muted-foreground">
+              <a href="#" className="hover:text-foreground transition-colors">Termos de Uso</a>
+              <a href="#" className="hover:text-foreground transition-colors">Privacidade</a>
+              <a href="#" className="hover:text-foreground transition-colors">LGPD</a>
             </div>
-          </motion.div>
+          </div>
         </div>
-      </motion.footer>
+      </footer>
     </div>
   );
 };
