@@ -221,8 +221,8 @@ export default function Login() {
                 </Button>
                 <p className="text-sm text-center text-muted-foreground">
                   Não tem uma conta?{" "}
-                  <Link to="/contato" className="text-primary hover:underline">
-                    Fale conosco
+                  <Link to="/cadastro" className="text-primary hover:underline">
+                    Cadastre-se
                   </Link>
                 </p>
               </CardFooter>
