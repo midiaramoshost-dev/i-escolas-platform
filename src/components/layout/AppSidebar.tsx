@@ -15,6 +15,11 @@ import {
   ChevronDown,
   LogOut,
   DollarSign,
+  Briefcase,
+  Package,
+  Receipt,
+  FileSignature,
+  CreditCard,
 } from "lucide-react";
 import {
   Sidebar,
@@ -74,6 +79,17 @@ const menuItems = [
       { title: "Notas", url: "/escola/notas" },
       { title: "Frequência", url: "/escola/frequencia" },
       { title: "Boletins", url: "/escola/boletins" },
+    ],
+  },
+  {
+    title: "Administrativo",
+    icon: Briefcase,
+    submenu: [
+      { title: "Contas a Pagar", url: "/escola/contas-pagar" },
+      { title: "Contas a Receber", url: "/escola/contas-receber" },
+      { title: "Estoque", url: "/escola/estoque" },
+      { title: "Recibos", url: "/escola/recibos" },
+      { title: "Contratos", url: "/escola/contratos" },
     ],
   },
   {
