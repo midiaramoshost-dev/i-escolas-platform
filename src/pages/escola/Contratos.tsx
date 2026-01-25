@@ -286,6 +286,85 @@ const variaveisDisponiveis = [
   { variavel: "{{DATA_ASSINATURA}}", descricao: "Data de assinatura" },
 ];
 
+// Dados da escola (mock)
+const dadosEscola = {
+  nome: "Colégio Educar",
+  cnpj: "12.345.678/0001-90",
+  endereco: "Rua das Flores, 123 - Centro - São Paulo/SP",
+  cidade: "São Paulo",
+};
+
+// Dados de alunos com responsáveis (mock)
+interface AlunoResponsavel {
+  id: string;
+  nomeAluno: string;
+  dataNascimento: string;
+  serieTurma: string;
+  nomeResponsavel: string;
+  cpfResponsavel: string;
+  enderecoResponsavel: string;
+  telefoneResponsavel: string;
+  emailResponsavel: string;
+}
+
+const alunosResponsaveis: AlunoResponsavel[] = [
+  {
+    id: "1",
+    nomeAluno: "Ana Beatriz Silva",
+    dataNascimento: "2014-05-15",
+    serieTurma: "5º Ano A",
+    nomeResponsavel: "Maria Silva",
+    cpfResponsavel: "123.456.789-00",
+    enderecoResponsavel: "Av. Brasil, 456 - Jardim América - São Paulo/SP",
+    telefoneResponsavel: "(11) 98765-4321",
+    emailResponsavel: "maria.silva@email.com",
+  },
+  {
+    id: "2",
+    nomeAluno: "Bruno Costa Santos",
+    dataNascimento: "2013-08-22",
+    serieTurma: "6º Ano B",
+    nomeResponsavel: "Carlos Santos",
+    cpfResponsavel: "987.654.321-00",
+    enderecoResponsavel: "Rua São Paulo, 789 - Centro - São Paulo/SP",
+    telefoneResponsavel: "(11) 91234-5678",
+    emailResponsavel: "carlos.santos@email.com",
+  },
+  {
+    id: "3",
+    nomeAluno: "Carolina Mendes",
+    dataNascimento: "2012-03-10",
+    serieTurma: "7º Ano A",
+    nomeResponsavel: "Fernanda Mendes",
+    cpfResponsavel: "456.789.123-00",
+    enderecoResponsavel: "Rua das Palmeiras, 321 - Vila Nova - São Paulo/SP",
+    telefoneResponsavel: "(11) 95555-1234",
+    emailResponsavel: "fernanda.mendes@email.com",
+  },
+  {
+    id: "4",
+    nomeAluno: "Daniel Oliveira",
+    dataNascimento: "2011-11-30",
+    serieTurma: "8º Ano A",
+    nomeResponsavel: "Roberto Oliveira",
+    cpfResponsavel: "321.654.987-00",
+    enderecoResponsavel: "Av. Paulista, 1000 - Bela Vista - São Paulo/SP",
+    telefoneResponsavel: "(11) 94444-9876",
+    emailResponsavel: "roberto.oliveira@email.com",
+  },
+  {
+    id: "5",
+    nomeAluno: "Eduarda Lima",
+    dataNascimento: "2010-07-18",
+    serieTurma: "9º Ano A",
+    nomeResponsavel: "Juliana Lima",
+    cpfResponsavel: "654.987.321-00",
+    enderecoResponsavel: "Rua Augusta, 555 - Consolação - São Paulo/SP",
+    telefoneResponsavel: "(11) 93333-6543",
+    emailResponsavel: "juliana.lima@email.com",
+  },
+];
+
 export default function Contratos() {
   const [contratos, setContratos] = useState<Contrato[]>(initialContratos);
   const [searchTerm, setSearchTerm] = useState("");
@@ -663,6 +742,113 @@ ${contrato.observacoes ? `\nObservações: ${contrato.observacoes}` : ''}
     }));
   };
 
+  // Estados para gerar contrato a partir de modelo
+  const [isGerarContratoDialogOpen, setIsGerarContratoDialogOpen] = useState(false);
+  const [modeloParaGerar, setModeloParaGerar] = useState<ModeloContrato | null>(null);
+  const [selectedAlunoId, setSelectedAlunoId] = useState<string>("");
+  const [gerarContratoForm, setGerarContratoForm] = useState({
+    valorAnual: "14400.00",
+    valorParcela: "1200.00",
+    numeroParcelas: "12",
+    diaVencimento: "10",
+    dataInicio: "",
+    dataFim: "",
+  });
+  const [previewConteudo, setPreviewConteudo] = useState<string>("");
+
+  const handleOpenGerarContrato = (modelo: ModeloContrato) => {
+    setModeloParaGerar(modelo);
+    setSelectedAlunoId("");
+    const anoAtual = new Date().getFullYear();
+    setGerarContratoForm({
+      valorAnual: "14400.00",
+      valorParcela: "1200.00",
+      numeroParcelas: "12",
+      diaVencimento: "10",
+      dataInicio: `${anoAtual}-02-01`,
+      dataFim: `${anoAtual}-12-20`,
+    });
+    setPreviewConteudo("");
+    setIsGerarContratoDialogOpen(true);
+  };
+
+  const gerarPreviewContrato = () => {
+    if (!modeloParaGerar || !selectedAlunoId) {
+      toast.error("Selecione um aluno/responsável");
+      return;
+    }
+
+    const aluno = alunosResponsaveis.find(a => a.id === selectedAlunoId);
+    if (!aluno) return;
+
+    const anoAtual = new Date().getFullYear();
+    const dataAtual = new Date().toLocaleDateString('pt-BR');
+
+    // Substituir variáveis
+    let conteudo = modeloParaGerar.conteudo;
+    
+    // Dados da escola
+    conteudo = conteudo.replace(/\{\{NOME_ESCOLA\}\}/g, dadosEscola.nome);
+    conteudo = conteudo.replace(/\{\{CNPJ_ESCOLA\}\}/g, dadosEscola.cnpj);
+    conteudo = conteudo.replace(/\{\{ENDERECO_ESCOLA\}\}/g, dadosEscola.endereco);
+    conteudo = conteudo.replace(/\{\{CIDADE\}\}/g, dadosEscola.cidade);
+    
+    // Dados do responsável
+    conteudo = conteudo.replace(/\{\{NOME_RESPONSAVEL\}\}/g, aluno.nomeResponsavel);
+    conteudo = conteudo.replace(/\{\{CPF_RESPONSAVEL\}\}/g, aluno.cpfResponsavel);
+    conteudo = conteudo.replace(/\{\{ENDERECO_RESPONSAVEL\}\}/g, aluno.enderecoResponsavel);
+    
+    // Dados do aluno
+    conteudo = conteudo.replace(/\{\{NOME_ALUNO\}\}/g, aluno.nomeAluno);
+    conteudo = conteudo.replace(/\{\{DATA_NASCIMENTO_ALUNO\}\}/g, new Date(aluno.dataNascimento).toLocaleDateString('pt-BR'));
+    conteudo = conteudo.replace(/\{\{SERIE_TURMA\}\}/g, aluno.serieTurma);
+    
+    // Dados financeiros e datas
+    conteudo = conteudo.replace(/\{\{ANO_LETIVO\}\}/g, anoAtual.toString());
+    conteudo = conteudo.replace(/\{\{VALOR_ANUAL\}\}/g, parseFloat(gerarContratoForm.valorAnual).toLocaleString('pt-BR', { minimumFractionDigits: 2 }));
+    conteudo = conteudo.replace(/\{\{VALOR_ANUAL_EXTENSO\}\}/g, `quatorze mil e quatrocentos reais`);
+    conteudo = conteudo.replace(/\{\{VALOR_PARCELA\}\}/g, parseFloat(gerarContratoForm.valorParcela).toLocaleString('pt-BR', { minimumFractionDigits: 2 }));
+    conteudo = conteudo.replace(/\{\{VALOR_PARCELA_EXTENSO\}\}/g, `mil e duzentos reais`);
+    conteudo = conteudo.replace(/\{\{NUMERO_PARCELAS\}\}/g, gerarContratoForm.numeroParcelas);
+    conteudo = conteudo.replace(/\{\{DIA_VENCIMENTO\}\}/g, gerarContratoForm.diaVencimento);
+    conteudo = conteudo.replace(/\{\{DATA_INICIO\}\}/g, new Date(gerarContratoForm.dataInicio).toLocaleDateString('pt-BR'));
+    conteudo = conteudo.replace(/\{\{DATA_FIM\}\}/g, new Date(gerarContratoForm.dataFim).toLocaleDateString('pt-BR'));
+    conteudo = conteudo.replace(/\{\{DATA_ASSINATURA\}\}/g, dataAtual);
+
+    setPreviewConteudo(conteudo);
+  };
+
+  const handleGerarContrato = () => {
+    if (!modeloParaGerar || !selectedAlunoId || !previewConteudo) {
+      toast.error("Gere o preview primeiro");
+      return;
+    }
+
+    const aluno = alunosResponsaveis.find(a => a.id === selectedAlunoId);
+    if (!aluno) return;
+
+    const novoContrato: Contrato = {
+      id: Date.now().toString(),
+      numero: gerarNumeroContrato(),
+      tipo: modeloParaGerar.tipo,
+      parte: `${aluno.nomeResponsavel} (Responsável - ${aluno.nomeAluno})`,
+      descricao: `${modeloParaGerar.nome} - ${aluno.nomeAluno}`,
+      valorMensal: parseFloat(gerarContratoForm.valorParcela) || undefined,
+      dataInicio: gerarContratoForm.dataInicio,
+      dataFim: gerarContratoForm.dataFim,
+      status: "pendente",
+      modeloId: modeloParaGerar.id,
+      observacoes: previewConteudo,
+    };
+
+    setContratos([novoContrato, ...contratos]);
+    toast.success(`Contrato ${novoContrato.numero} gerado com sucesso!`);
+    setIsGerarContratoDialogOpen(false);
+    setModeloParaGerar(null);
+    setSelectedAlunoId("");
+    setPreviewConteudo("");
+  };
+
   return (
     <div className="space-y-6">
       <input
@@ -941,6 +1127,10 @@ ${contrato.observacoes ? `\nObservações: ${contrato.observacoes}` : ''}
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="bg-background">
+                        <DropdownMenuItem onClick={() => handleOpenGerarContrato(modelo)}>
+                          <FileSignature className="mr-2 h-4 w-4" />
+                          Gerar Contrato
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleOpenViewModelo(modelo)}>
                           <Eye className="mr-2 h-4 w-4" />
                           Visualizar
@@ -985,10 +1175,10 @@ ${contrato.observacoes ? `\nObservações: ${contrato.observacoes}` : ''}
                       <Button 
                         size="sm" 
                         className="flex-1"
-                        onClick={() => handleOpenEditModelo(modelo)}
+                        onClick={() => handleOpenGerarContrato(modelo)}
                       >
-                        <Edit className="h-3 w-3 mr-1" />
-                        Editar
+                        <FileSignature className="h-3 w-3 mr-1" />
+                        Gerar
                       </Button>
                     </div>
                   </div>
@@ -1340,6 +1530,210 @@ ${contrato.observacoes ? `\nObservações: ${contrato.observacoes}` : ''}
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Dialog de Gerar Contrato a partir de Modelo */}
+      <Dialog open={isGerarContratoDialogOpen} onOpenChange={setIsGerarContratoDialogOpen}>
+        <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileSignature className="h-5 w-5" />
+              Gerar Contrato a partir de Modelo
+            </DialogTitle>
+            <DialogDescription>
+              Selecione o aluno/responsável e preencha os dados para gerar um novo contrato
+            </DialogDescription>
+          </DialogHeader>
+          
+          {modeloParaGerar && (
+            <div className="grid gap-6 py-4">
+              {/* Info do Modelo */}
+              <Card className="bg-muted/30">
+                <CardContent className="pt-4">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-lg bg-primary/10 p-2">
+                      <BookTemplate className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium">{modeloParaGerar.nome}</p>
+                      <p className="text-sm text-muted-foreground">{modeloParaGerar.tipo}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Seleção de Aluno */}
+              <div className="space-y-2">
+                <Label htmlFor="aluno-select">Selecione o Aluno/Responsável *</Label>
+                <Select value={selectedAlunoId} onValueChange={setSelectedAlunoId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Escolha um aluno..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {alunosResponsaveis.map((aluno) => (
+                      <SelectItem key={aluno.id} value={aluno.id}>
+                        <div className="flex flex-col">
+                          <span>{aluno.nomeAluno}</span>
+                          <span className="text-xs text-muted-foreground">
+                            Responsável: {aluno.nomeResponsavel} • {aluno.serieTurma}
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Dados selecionados */}
+              {selectedAlunoId && (
+                <Card className="border-primary/20">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Dados do Aluno/Responsável</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {(() => {
+                      const aluno = alunosResponsaveis.find(a => a.id === selectedAlunoId);
+                      if (!aluno) return null;
+                      return (
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <Label className="text-muted-foreground text-xs">Aluno</Label>
+                            <p className="font-medium">{aluno.nomeAluno}</p>
+                          </div>
+                          <div>
+                            <Label className="text-muted-foreground text-xs">Série/Turma</Label>
+                            <p className="font-medium">{aluno.serieTurma}</p>
+                          </div>
+                          <div>
+                            <Label className="text-muted-foreground text-xs">Responsável</Label>
+                            <p className="font-medium">{aluno.nomeResponsavel}</p>
+                          </div>
+                          <div>
+                            <Label className="text-muted-foreground text-xs">CPF</Label>
+                            <p className="font-medium">{aluno.cpfResponsavel}</p>
+                          </div>
+                          <div className="col-span-2">
+                            <Label className="text-muted-foreground text-xs">Endereço</Label>
+                            <p className="font-medium">{aluno.enderecoResponsavel}</p>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Dados Financeiros */}
+              <div className="space-y-4">
+                <Label className="text-base font-medium">Dados Financeiros e Vigência</Label>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="valor-anual">Valor Anual (R$)</Label>
+                    <Input
+                      id="valor-anual"
+                      type="number"
+                      step="0.01"
+                      value={gerarContratoForm.valorAnual}
+                      onChange={(e) => setGerarContratoForm({...gerarContratoForm, valorAnual: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="valor-parcela">Valor da Parcela (R$)</Label>
+                    <Input
+                      id="valor-parcela"
+                      type="number"
+                      step="0.01"
+                      value={gerarContratoForm.valorParcela}
+                      onChange={(e) => setGerarContratoForm({...gerarContratoForm, valorParcela: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="num-parcelas">Nº de Parcelas</Label>
+                    <Input
+                      id="num-parcelas"
+                      type="number"
+                      value={gerarContratoForm.numeroParcelas}
+                      onChange={(e) => setGerarContratoForm({...gerarContratoForm, numeroParcelas: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="dia-vencimento">Dia do Vencimento</Label>
+                    <Input
+                      id="dia-vencimento"
+                      type="number"
+                      min="1"
+                      max="28"
+                      value={gerarContratoForm.diaVencimento}
+                      onChange={(e) => setGerarContratoForm({...gerarContratoForm, diaVencimento: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="data-inicio-contrato">Data Início</Label>
+                    <Input
+                      id="data-inicio-contrato"
+                      type="date"
+                      value={gerarContratoForm.dataInicio}
+                      onChange={(e) => setGerarContratoForm({...gerarContratoForm, dataInicio: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="data-fim-contrato">Data Fim</Label>
+                    <Input
+                      id="data-fim-contrato"
+                      type="date"
+                      value={gerarContratoForm.dataFim}
+                      onChange={(e) => setGerarContratoForm({...gerarContratoForm, dataFim: e.target.value})}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Botão de Preview */}
+              <div className="flex justify-center">
+                <Button 
+                  variant="outline" 
+                  onClick={gerarPreviewContrato}
+                  disabled={!selectedAlunoId}
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  Gerar Preview do Contrato
+                </Button>
+              </div>
+
+              {/* Preview do Contrato */}
+              {previewConteudo && (
+                <Card className="border-success/50 bg-success/5">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-success" />
+                      Preview do Contrato Gerado
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="bg-background rounded-lg p-4 max-h-[300px] overflow-y-auto">
+                      <pre className="whitespace-pre-wrap font-mono text-sm leading-relaxed">
+                        {previewConteudo}
+                      </pre>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsGerarContratoDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleGerarContrato}
+              disabled={!previewConteudo}
+            >
+              <FileSignature className="h-4 w-4 mr-2" />
+              Gerar Contrato
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
