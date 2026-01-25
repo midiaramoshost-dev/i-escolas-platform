@@ -21,6 +21,8 @@ import {
   BookTemplate,
   FileDown,
   FileCheck,
+  ImagePlus,
+  X,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -314,6 +316,13 @@ export default function Contratos() {
   const [selectedContrato, setSelectedContrato] = useState<Contrato | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  
+  // Estado para logo da escola
+  const [logoEscola, setLogoEscola] = useState<string | null>(() => {
+    // Recuperar logo do localStorage se existir
+    return localStorage.getItem('escola_logo') || null;
+  });
 
   const [formData, setFormData] = useState({
     tipo: "",
@@ -511,6 +520,42 @@ export default function Contratos() {
     }
   };
 
+  const handleLogoUpload = () => {
+    logoInputRef.current?.click();
+  };
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validar tipo de arquivo
+      if (!file.type.startsWith('image/')) {
+        toast.error("Por favor, selecione uma imagem válida");
+        return;
+      }
+      
+      // Validar tamanho (máx 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error("A imagem deve ter no máximo 2MB");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = event.target?.result as string;
+        setLogoEscola(base64);
+        localStorage.setItem('escola_logo', base64);
+        toast.success("Logo da escola atualizada!");
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveLogo = () => {
+    setLogoEscola(null);
+    localStorage.removeItem('escola_logo');
+    toast.success("Logo removida");
+  };
+
   const handleDownloadContrato = (contrato: Contrato) => {
     const content = `
 CONTRATO ${contrato.numero}
@@ -558,19 +603,39 @@ ${contrato.observacoes ? `\nObservações: ${contrato.observacoes}` : ''}
 
     // Cabeçalho
     doc.setFillColor(37, 99, 235); // Azul institucional
-    doc.rect(0, 0, pageWidth, 35, 'F');
+    const headerHeight = logoEscola ? 45 : 35;
+    doc.rect(0, 0, pageWidth, headerHeight, 'F');
     
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(18);
-    doc.setFont('helvetica', 'bold');
-    doc.text(dadosEscola.nome.toUpperCase(), pageWidth / 2, 15, { align: 'center' });
-    
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`CNPJ: ${dadosEscola.cnpj}`, pageWidth / 2, 23, { align: 'center' });
-    doc.text(dadosEscola.endereco, pageWidth / 2, 30, { align: 'center' });
+    // Se tiver logo, adicionar no cabeçalho
+    if (logoEscola) {
+      try {
+        doc.addImage(logoEscola, 'JPEG', 10, 5, 25, 25);
+      } catch (e) {
+        console.log('Erro ao adicionar logo:', e);
+      }
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text(dadosEscola.nome.toUpperCase(), 45, 15);
+      
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`CNPJ: ${dadosEscola.cnpj}`, 45, 23);
+      doc.text(dadosEscola.endereco, 45, 30);
+    } else {
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text(dadosEscola.nome.toUpperCase(), pageWidth / 2, 15, { align: 'center' });
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`CNPJ: ${dadosEscola.cnpj}`, pageWidth / 2, 23, { align: 'center' });
+      doc.text(dadosEscola.endereco, pageWidth / 2, 30, { align: 'center' });
+    }
 
-    yPosition = 50;
+    yPosition = headerHeight + 15;
 
     // Título do contrato
     doc.setTextColor(37, 99, 235);
@@ -971,19 +1036,39 @@ ${contrato.observacoes ? `\nObservações: ${contrato.observacoes}` : ''}
 
     // Cabeçalho
     doc.setFillColor(37, 99, 235);
-    doc.rect(0, 0, pageWidth, 35, 'F');
+    const headerHeight = logoEscola ? 45 : 35;
+    doc.rect(0, 0, pageWidth, headerHeight, 'F');
     
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(18);
-    doc.setFont('helvetica', 'bold');
-    doc.text(dadosEscola.nome.toUpperCase(), pageWidth / 2, 15, { align: 'center' });
-    
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`CNPJ: ${dadosEscola.cnpj}`, pageWidth / 2, 23, { align: 'center' });
-    doc.text(dadosEscola.endereco, pageWidth / 2, 30, { align: 'center' });
+    // Se tiver logo, adicionar no cabeçalho
+    if (logoEscola) {
+      try {
+        doc.addImage(logoEscola, 'JPEG', 10, 5, 25, 25);
+      } catch (e) {
+        console.log('Erro ao adicionar logo:', e);
+      }
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text(dadosEscola.nome.toUpperCase(), 45, 15);
+      
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`CNPJ: ${dadosEscola.cnpj}`, 45, 23);
+      doc.text(dadosEscola.endereco, 45, 30);
+    } else {
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text(dadosEscola.nome.toUpperCase(), pageWidth / 2, 15, { align: 'center' });
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`CNPJ: ${dadosEscola.cnpj}`, pageWidth / 2, 23, { align: 'center' });
+      doc.text(dadosEscola.endereco, pageWidth / 2, 30, { align: 'center' });
+    }
 
-    yPosition = 50;
+    yPosition = headerHeight + 15;
 
     // Título do contrato
     doc.setTextColor(37, 99, 235);
@@ -1083,6 +1168,13 @@ ${contrato.observacoes ? `\nObservações: ${contrato.observacoes}` : ''}
         className="hidden"
         accept=".pdf,.doc,.docx"
       />
+      <input
+        type="file"
+        ref={logoInputRef}
+        onChange={handleLogoChange}
+        className="hidden"
+        accept="image/*"
+      />
 
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -1091,6 +1183,36 @@ ${contrato.observacoes ? `\nObservações: ${contrato.observacoes}` : ''}
           <p className="text-muted-foreground">
             Gestão de contratos, documentos e modelos
           </p>
+        </div>
+        
+        {/* Upload de Logo */}
+        <div className="flex items-center gap-3">
+          {logoEscola ? (
+            <div className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+              <img 
+                src={logoEscola} 
+                alt="Logo da escola" 
+                className="h-10 w-10 object-contain rounded"
+              />
+              <div className="text-sm">
+                <p className="font-medium">Logo configurada</p>
+                <p className="text-xs text-muted-foreground">Aparecerá no PDF</p>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleRemoveLogo}
+                className="h-8 w-8 text-muted-foreground hover:text-destructive"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <Button variant="outline" onClick={handleLogoUpload}>
+              <ImagePlus className="h-4 w-4 mr-2" />
+              Adicionar Logo
+            </Button>
+          )}
         </div>
       </div>
 
