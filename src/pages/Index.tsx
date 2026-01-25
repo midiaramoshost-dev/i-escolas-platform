@@ -333,6 +333,7 @@ const Index = () => {
             {[
               { href: "#recursos", label: "Recursos" },
               { href: "#planos", label: "Planos" },
+              { href: "#indicacao", label: "Indique e Ganhe" },
               { href: "#depoimentos", label: "Depoimentos" },
               { href: "#faq", label: "FAQ" },
               { href: "#contato", label: "Contato" }
