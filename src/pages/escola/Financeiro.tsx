@@ -23,6 +23,7 @@ import {
   QrCode,
   MessageCircle,
   Mail,
+  Bell,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -68,6 +69,7 @@ import {
   Legend,
 } from "recharts";
 import { EnviarCobrancaDialog, Inadimplente } from "@/components/financeiro/EnviarCobrancaDialog";
+import { AgendarLembreteDialog } from "@/components/financeiro/AgendarLembreteDialog";
 import { useToast } from "@/hooks/use-toast";
 
 // Mock data
@@ -237,6 +239,7 @@ export default function EscolaFinanceiro() {
   const [searchTerm, setSearchTerm] = useState("");
   const [periodoFiltro, setPeriodoFiltro] = useState("mes");
   const [cobrancaDialogOpen, setCobrancaDialogOpen] = useState(false);
+  const [lembreteDialogOpen, setLembreteDialogOpen] = useState(false);
   const [selectedInadimplente, setSelectedInadimplente] = useState<string | null>(null);
   const [inadimplentes, setInadimplentes] = useState<Inadimplente[]>(inadimplentesData);
   const { toast } = useToast();
@@ -684,6 +687,13 @@ export default function EscolaFinanceiro() {
                   <div className="flex gap-2">
                     <Button 
                       variant="outline"
+                      onClick={() => setLembreteDialogOpen(true)}
+                    >
+                      <Bell className="mr-2 h-4 w-4" />
+                      Agendar Lembretes
+                    </Button>
+                    <Button 
+                      variant="outline"
                       onClick={() => setCobrancaDialogOpen(true)}
                     >
                       <Send className="mr-2 h-4 w-4" />
@@ -781,6 +791,20 @@ export default function EscolaFinanceiro() {
         onOpenChange={setCobrancaDialogOpen}
         inadimplentes={inadimplentes}
         onContatoRegistrado={handleContatoRegistrado}
+      />
+
+      {/* Dialog de Agendamento de Lembretes */}
+      <AgendarLembreteDialog
+        open={lembreteDialogOpen}
+        onOpenChange={setLembreteDialogOpen}
+        inadimplentes={inadimplentes}
+        onEnviarCobranca={(inadimplente, canal) => {
+          if (canal === "whatsapp") {
+            enviarWhatsAppIndividual(inadimplente);
+          } else {
+            enviarEmailIndividual(inadimplente);
+          }
+        }}
       />
     </motion.div>
   );
