@@ -9,11 +9,17 @@ import {
   Calendar,
   ArrowUpRight,
   ArrowDownRight,
+  Wallet,
+  Package,
+  FileText,
+  DollarSign,
+  TrendingDown,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReferralCard } from "@/components/referral/ReferralCard";
 import {
   AreaChart,
@@ -28,6 +34,9 @@ import {
   PieChart,
   Pie,
   Cell,
+  LineChart,
+  Line,
+  Legend,
 } from "recharts";
 
 const statsCards = [
@@ -128,6 +137,46 @@ const upcomingEvents = [
   { title: "Reunião de Pais", date: "18 Mar", type: "event" },
   { title: "Prova Bimestral", date: "22 Mar", type: "exam" },
   { title: "Feriado - Páscoa", date: "29 Mar", type: "holiday" },
+];
+
+// Dados Administrativos
+const fluxoCaixaData = [
+  { month: "Jan", receber: 125000, pagar: 78000 },
+  { month: "Fev", receber: 132000, pagar: 82000 },
+  { month: "Mar", receber: 128000, pagar: 75000 },
+  { month: "Abr", receber: 145000, pagar: 88000 },
+  { month: "Mai", receber: 138000, pagar: 79000 },
+  { month: "Jun", receber: 152000, pagar: 85000 },
+];
+
+const contasPagarCategoria = [
+  { name: "Salários", value: 45000, color: "hsl(217, 91%, 40%)" },
+  { name: "Fornecedores", value: 18000, color: "hsl(199, 89%, 48%)" },
+  { name: "Utilidades", value: 8500, color: "hsl(142, 76%, 36%)" },
+  { name: "Manutenção", value: 6200, color: "hsl(45, 93%, 47%)" },
+  { name: "Outros", value: 4300, color: "hsl(280, 65%, 60%)" },
+];
+
+const estoqueStatus = [
+  { name: "Normal", value: 42, color: "hsl(142, 76%, 36%)" },
+  { name: "Baixo", value: 12, color: "hsl(45, 93%, 47%)" },
+  { name: "Crítico", value: 5, color: "hsl(0, 84%, 60%)" },
+];
+
+const contratosVencimento = [
+  { nome: "Contrato Limpeza", empresa: "CleanMax Ltda", vencimento: "2024-02-15", diasRestantes: 12 },
+  { nome: "Manutenção Ar", empresa: "RefriAr ME", vencimento: "2024-02-20", diasRestantes: 17 },
+  { nome: "Segurança", empresa: "VigilantePro", vencimento: "2024-02-28", diasRestantes: 25 },
+  { nome: "Internet", empresa: "NetSpeed", vencimento: "2024-03-05", diasRestantes: 31 },
+  { nome: "Software Gestão", empresa: "EduTech", vencimento: "2024-03-15", diasRestantes: 41 },
+];
+
+const estoqueItems = [
+  { nome: "Papel A4", quantidade: 120, minimo: 50, status: "normal" },
+  { nome: "Canetas", quantidade: 45, minimo: 100, status: "baixo" },
+  { nome: "Giz de Cera", quantidade: 8, minimo: 30, status: "critico" },
+  { nome: "Cadernos", quantidade: 200, minimo: 80, status: "normal" },
+  { nome: "Lápis", quantidade: 25, minimo: 50, status: "baixo" },
 ];
 
 export default function EscolaDashboard() {
@@ -413,8 +462,329 @@ export default function EscolaDashboard() {
             </div>
           </CardContent>
         </Card>
+      </div>
 
-        {/* Referral Card */}
+      {/* Seção Administrativa */}
+      <div className="mt-8">
+        <div className="flex flex-col gap-2 mb-6">
+          <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+            <Wallet className="h-6 w-6" />
+            Resumo Administrativo
+          </h2>
+          <p className="text-muted-foreground">
+            Visão geral financeira, estoque e contratos
+          </p>
+        </div>
+
+        {/* Admin Stats Cards */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
+          <Card className="shadow-card hover:shadow-soft transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                A Receber (Mês)
+              </CardTitle>
+              <div className="rounded-lg p-2 bg-success/10">
+                <TrendingUp className="h-5 w-5 text-success" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-success">R$ 152.000</div>
+              <div className="flex items-center gap-1 mt-1">
+                <ArrowUpRight className="h-4 w-4 text-success" />
+                <span className="text-sm text-success">+10%</span>
+                <span className="text-sm text-muted-foreground">vs. mês anterior</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-card hover:shadow-soft transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                A Pagar (Mês)
+              </CardTitle>
+              <div className="rounded-lg p-2 bg-destructive/10">
+                <TrendingDown className="h-5 w-5 text-destructive" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-destructive">R$ 85.000</div>
+              <div className="flex items-center gap-1 mt-1">
+                <ArrowUpRight className="h-4 w-4 text-destructive" />
+                <span className="text-sm text-destructive">+7%</span>
+                <span className="text-sm text-muted-foreground">vs. mês anterior</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-card hover:shadow-soft transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Itens em Estoque
+              </CardTitle>
+              <div className="rounded-lg p-2 bg-warning/10">
+                <Package className="h-5 w-5 text-warning" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">59</div>
+              <div className="flex items-center gap-1 mt-1">
+                <span className="text-sm text-destructive font-medium">5 críticos</span>
+                <span className="text-sm text-muted-foreground">• 12 baixos</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-card hover:shadow-soft transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Contratos Ativos
+              </CardTitle>
+              <div className="rounded-lg p-2 bg-info/10">
+                <FileText className="h-5 w-5 text-info" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">18</div>
+              <div className="flex items-center gap-1 mt-1">
+                <span className="text-sm text-warning font-medium">3 vencem em 30 dias</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Charts Row */}
+        <div className="grid gap-6 lg:grid-cols-2 mb-6">
+          {/* Fluxo de Caixa */}
+          <Card className="shadow-card">
+            <CardHeader>
+              <CardTitle>Fluxo de Caixa</CardTitle>
+              <CardDescription>
+                Comparativo de contas a receber vs a pagar
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={fluxoCaixaData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickFormatter={(value) => `${value/1000}k`} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--popover))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "8px",
+                      }}
+                      formatter={(value: number) => [`R$ ${value.toLocaleString('pt-BR')}`, '']}
+                    />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="receber"
+                      name="A Receber"
+                      stroke="hsl(142, 76%, 36%)"
+                      strokeWidth={2}
+                      dot={{ fill: "hsl(142, 76%, 36%)" }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="pagar"
+                      name="A Pagar"
+                      stroke="hsl(0, 84%, 60%)"
+                      strokeWidth={2}
+                      dot={{ fill: "hsl(0, 84%, 60%)" }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Contas a Pagar por Categoria */}
+          <Card className="shadow-card">
+            <CardHeader>
+              <CardTitle>Despesas por Categoria</CardTitle>
+              <CardDescription>
+                Distribuição das contas a pagar
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[200px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={contasPagarCategoria}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={50}
+                      outerRadius={80}
+                      paddingAngle={2}
+                      dataKey="value"
+                    >
+                      {contasPagarCategoria.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--popover))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "8px",
+                      }}
+                      formatter={(value: number) => [`R$ ${value.toLocaleString('pt-BR')}`, '']}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="mt-4 space-y-2">
+                {contasPagarCategoria.map((item) => (
+                  <div key={item.name} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="h-3 w-3 rounded-full"
+                        style={{ backgroundColor: item.color }}
+                      />
+                      <span className="text-sm">{item.name}</span>
+                    </div>
+                    <span className="text-sm font-medium">R$ {item.value.toLocaleString('pt-BR')}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Bottom Admin Row */}
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* Status do Estoque */}
+          <Card className="shadow-card">
+            <CardHeader>
+              <CardTitle>Status do Estoque</CardTitle>
+              <CardDescription>Itens por nível de estoque</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[180px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={estoqueStatus}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={40}
+                      outerRadius={70}
+                      paddingAngle={2}
+                      dataKey="value"
+                    >
+                      {estoqueStatus.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--popover))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "8px",
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="space-y-2">
+                {estoqueStatus.map((item) => (
+                  <div key={item.name} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="h-3 w-3 rounded-full"
+                        style={{ backgroundColor: item.color }}
+                      />
+                      <span className="text-sm">{item.name}</span>
+                    </div>
+                    <span className="text-sm font-medium">{item.value} itens</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Itens com Estoque Baixo */}
+          <Card className="shadow-card">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Estoque Crítico</CardTitle>
+                <CardDescription>Itens que precisam de reposição</CardDescription>
+              </div>
+              <Button variant="ghost" size="sm">
+                Ver todos
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {estoqueItems.filter(item => item.status !== 'normal').map((item, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{item.nome}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Progress 
+                          value={(item.quantidade / item.minimo) * 100} 
+                          className="h-2 w-20"
+                        />
+                        <span className="text-xs text-muted-foreground">
+                          {item.quantidade}/{item.minimo}
+                        </span>
+                      </div>
+                    </div>
+                    <Badge variant={item.status === 'critico' ? 'destructive' : 'outline'}>
+                      {item.status === 'critico' ? 'Crítico' : 'Baixo'}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Contratos Próximos do Vencimento */}
+          <Card className="shadow-card">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Contratos a Vencer</CardTitle>
+                <CardDescription>Próximos 45 dias</CardDescription>
+              </div>
+              <Button variant="ghost" size="sm">
+                Ver todos
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {contratosVencimento.map((contrato, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                  >
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{contrato.nome}</p>
+                      <p className="text-xs text-muted-foreground">{contrato.empresa}</p>
+                    </div>
+                    <Badge
+                      variant={
+                        contrato.diasRestantes <= 15
+                          ? "destructive"
+                          : contrato.diasRestantes <= 30
+                          ? "outline"
+                          : "secondary"
+                      }
+                    >
+                      {contrato.diasRestantes} dias
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Referral Card */}
+      <div className="mt-6">
         <ReferralCard />
       </div>
     </div>
