@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ReferralCard } from "@/components/referral/ReferralCard";
 
 const statsCards = [
   {
@@ -385,6 +386,9 @@ export default function AlunoDashboard() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Referral Card */}
+        <ReferralCard />
       </motion.div>
     </motion.div>
   );

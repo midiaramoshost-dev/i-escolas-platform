@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { ReferralCard } from "@/components/referral/ReferralCard";
 import {
   AreaChart,
   Area,
@@ -412,6 +413,9 @@ export default function EscolaDashboard() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Referral Card */}
+        <ReferralCard />
       </div>
     </div>
   );
