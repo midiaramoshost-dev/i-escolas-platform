@@ -306,6 +306,58 @@ export default function DiarioClasse() {
   const [isDeleteAulaDialogOpen, setIsDeleteAulaDialogOpen] = useState(false);
   const [selectedAula, setSelectedAula] = useState<Aula | null>(null);
   const [presencas, setPresencas] = useState<Record<string, boolean>>({});
+  
+  // Estado do formulário de edição de aula
+  const [editAulaForm, setEditAulaForm] = useState({
+    data: "",
+    horario: "",
+    turma: "",
+    disciplina: "",
+    conteudo: "",
+    status: "",
+  });
+
+  // Inicializar formulário de edição quando selecionar uma aula
+  const handleOpenEditAula = (aula: Aula) => {
+    setSelectedAula(aula);
+    setEditAulaForm({
+      data: aula.data,
+      horario: aula.horario,
+      turma: aula.turma,
+      disciplina: aula.disciplina,
+      conteudo: aula.conteudo,
+      status: aula.status,
+    });
+    setIsEditAulaDialogOpen(true);
+  };
+
+  // Salvar alterações da aula
+  const handleSaveEditAula = () => {
+    if (!selectedAula) return;
+    
+    if (!editAulaForm.data || !editAulaForm.turma || !editAulaForm.disciplina || !editAulaForm.conteudo) {
+      toast.error("Preencha todos os campos obrigatórios");
+      return;
+    }
+
+    setAulas(aulas.map(aula => 
+      aula.id === selectedAula.id 
+        ? {
+            ...aula,
+            data: editAulaForm.data,
+            horario: editAulaForm.horario,
+            turma: editAulaForm.turma,
+            disciplina: editAulaForm.disciplina,
+            conteudo: editAulaForm.conteudo,
+            status: editAulaForm.status,
+          }
+        : aula
+    ));
+    
+    toast.success("Aula atualizada com sucesso!");
+    setIsEditAulaDialogOpen(false);
+    setSelectedAula(null);
+  };
 
   // Inicializar presenças
   const initializePresencas = () => {
@@ -638,10 +690,7 @@ export default function DiarioClasse() {
                                 <Eye className="mr-2 h-4 w-4" />
                                 Visualizar
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => {
-                                setSelectedAula(aula);
-                                setIsEditAulaDialogOpen(true);
-                              }}>
+                              <DropdownMenuItem onClick={() => handleOpenEditAula(aula)}>
                                 <Edit className="mr-2 h-4 w-4" />
                                 Editar
                               </DropdownMenuItem>
@@ -1309,95 +1358,108 @@ export default function DiarioClasse() {
               Modifique as informações da aula registrada
             </DialogDescription>
           </DialogHeader>
-          {selectedAula && (
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="edit-data">Data</Label>
-                  <Input id="edit-data" type="date" defaultValue={selectedAula.data} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="edit-horario">Horário</Label>
-                  <Select defaultValue={selectedAula.horario}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o horário" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="07:30 - 08:20">07:30 - 08:20</SelectItem>
-                      <SelectItem value="08:20 - 09:10">08:20 - 09:10</SelectItem>
-                      <SelectItem value="09:30 - 10:20">09:30 - 10:20</SelectItem>
-                      <SelectItem value="10:20 - 11:10">10:20 - 11:10</SelectItem>
-                      <SelectItem value="11:10 - 12:00">11:10 - 12:00</SelectItem>
-                      <SelectItem value="13:30 - 14:20">13:30 - 14:20</SelectItem>
-                      <SelectItem value="14:20 - 15:10">14:20 - 15:10</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="edit-turma">Turma</Label>
-                  <Select defaultValue={selectedAula.turma}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione a turma" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {turmasData.map((turma) => (
-                        <SelectItem key={turma.id} value={turma.nome}>
-                          {turma.nome}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="edit-disciplina">Disciplina</Label>
-                  <Select defaultValue={selectedAula.disciplina}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione a disciplina" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {disciplinasData.map((disc) => (
-                        <SelectItem key={disc.id} value={disc.nome}>
-                          {disc.nome}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="edit-conteudo">Conteúdo Ministrado</Label>
-                <Textarea
-                  id="edit-conteudo"
-                  defaultValue={selectedAula.conteudo}
-                  rows={3}
+                <Label htmlFor="edit-data">Data *</Label>
+                <Input 
+                  id="edit-data" 
+                  type="date" 
+                  value={editAulaForm.data}
+                  onChange={(e) => setEditAulaForm({...editAulaForm, data: e.target.value})}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit-status">Status</Label>
-                <Select defaultValue={selectedAula.status}>
+                <Label htmlFor="edit-horario">Horário</Label>
+                <Select 
+                  value={editAulaForm.horario}
+                  onValueChange={(value) => setEditAulaForm({...editAulaForm, horario: value})}
+                >
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione o status" />
+                    <SelectValue placeholder="Selecione o horário" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="pendente">Pendente</SelectItem>
-                    <SelectItem value="concluida">Concluída</SelectItem>
+                    <SelectItem value="07:30 - 08:20">07:30 - 08:20</SelectItem>
+                    <SelectItem value="08:20 - 09:10">08:20 - 09:10</SelectItem>
+                    <SelectItem value="09:30 - 10:20">09:30 - 10:20</SelectItem>
+                    <SelectItem value="10:20 - 11:10">10:20 - 11:10</SelectItem>
+                    <SelectItem value="11:10 - 12:00">11:10 - 12:00</SelectItem>
+                    <SelectItem value="13:30 - 14:20">13:30 - 14:20</SelectItem>
+                    <SelectItem value="14:20 - 15:10">14:20 - 15:10</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
-          )}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-turma">Turma *</Label>
+                <Select 
+                  value={editAulaForm.turma}
+                  onValueChange={(value) => setEditAulaForm({...editAulaForm, turma: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a turma" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {turmasData.map((turma) => (
+                      <SelectItem key={turma.id} value={turma.nome}>
+                        {turma.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-disciplina">Disciplina *</Label>
+                <Select 
+                  value={editAulaForm.disciplina}
+                  onValueChange={(value) => setEditAulaForm({...editAulaForm, disciplina: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a disciplina" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {disciplinasData.map((disc) => (
+                      <SelectItem key={disc.id} value={disc.nome}>
+                        {disc.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-conteudo">Conteúdo Ministrado *</Label>
+              <Textarea
+                id="edit-conteudo"
+                value={editAulaForm.conteudo}
+                onChange={(e) => setEditAulaForm({...editAulaForm, conteudo: e.target.value})}
+                rows={3}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-status">Status</Label>
+              <Select 
+                value={editAulaForm.status}
+                onValueChange={(value) => setEditAulaForm({...editAulaForm, status: value})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pendente">Pendente</SelectItem>
+                  <SelectItem value="concluida">Concluída</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditAulaDialogOpen(false)}>
               Cancelar
             </Button>
             <Button 
               className="gradient-brand text-white" 
-              onClick={() => {
-                toast.success("Aula atualizada com sucesso!");
-                setIsEditAulaDialogOpen(false);
-              }}
+              onClick={handleSaveEditAula}
             >
               <Save className="mr-2 h-4 w-4" />
               Salvar Alterações
