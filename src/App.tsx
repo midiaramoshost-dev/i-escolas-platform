@@ -20,14 +20,21 @@ import ResetPassword from "./pages/ResetPassword";
 import Indicacao from "./pages/Indicacao";
 import EscolaDashboard from "./pages/escola/Dashboard";
 import Turmas from "./pages/escola/Turmas";
+import Series from "./pages/escola/Series";
+import Disciplinas from "./pages/escola/Disciplinas";
+import Calendario from "./pages/escola/Calendario";
 import Professores from "./pages/escola/Professores";
 import Alunos from "./pages/escola/Alunos";
+import Responsaveis from "./pages/escola/Responsaveis";
+import Funcionarios from "./pages/escola/Funcionarios";
 import Configuracoes from "./pages/escola/Configuracoes";
 import DiarioClasse from "./pages/escola/DiarioClasse";
 import Notas from "./pages/escola/Notas";
 import Frequencia from "./pages/escola/Frequencia";
 import Boletins from "./pages/escola/Boletins";
 import EscolaFinanceiro from "./pages/escola/Financeiro";
+import Comunicados from "./pages/escola/Comunicados";
+import Relatorios from "./pages/escola/Relatorios";
 import AlunoDashboard from "./pages/aluno/Dashboard";
 import AlunoNotas from "./pages/aluno/Notas";
 import AlunoFrequencia from "./pages/aluno/Frequencia";
@@ -84,13 +91,20 @@ const App = () => (
                 <Route index element={<Navigate to="/escola/dashboard" replace />} />
                 <Route path="dashboard" element={<EscolaDashboard />} />
                 <Route path="turmas" element={<Turmas />} />
+                <Route path="series" element={<Series />} />
+                <Route path="disciplinas" element={<Disciplinas />} />
+                <Route path="calendario" element={<Calendario />} />
                 <Route path="professores" element={<Professores />} />
                 <Route path="alunos" element={<Alunos />} />
+                <Route path="responsaveis" element={<Responsaveis />} />
+                <Route path="funcionarios" element={<Funcionarios />} />
                 <Route path="diario" element={<DiarioClasse />} />
                 <Route path="notas" element={<Notas />} />
                 <Route path="frequencia" element={<Frequencia />} />
                 <Route path="boletins" element={<Boletins />} />
                 <Route path="financeiro" element={<EscolaFinanceiro />} />
+                <Route path="comunicados" element={<Comunicados />} />
+                <Route path="relatorios" element={<Relatorios />} />
                 <Route path="configuracoes" element={<Configuracoes />} />
               </Route>
 
