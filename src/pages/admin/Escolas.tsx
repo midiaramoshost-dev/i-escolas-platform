@@ -3,7 +3,6 @@ import {
   Building2,
   Plus,
   Search,
-  Filter,
   MoreVertical,
   MapPin,
   Users,
@@ -15,7 +14,7 @@ import {
   XCircle,
   Clock,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,8 +50,10 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
+import { EditarEscolaDialog, Escola } from "@/components/admin/EditarEscolaDialog";
+import { toast } from "sonner";
 
-const escolas = [
+const escolasIniciais: Escola[] = [
   { id: "1", nome: "Colégio São Paulo", cnpj: "12.345.678/0001-90", cidade: "São Paulo", uf: "SP", porte: "Grande", plano: "Premium", alunos: 1250, professores: 85, status: "ativo", datacadastro: "2023-01-15" },
   { id: "2", nome: "Escola Municipal Centro", cnpj: "23.456.789/0001-01", cidade: "Rio de Janeiro", uf: "RJ", porte: "Grande", plano: "Pro", alunos: 850, professores: 52, status: "ativo", datacadastro: "2023-03-20" },
   { id: "3", nome: "Instituto Educacional ABC", cnpj: "34.567.890/0001-12", cidade: "Belo Horizonte", uf: "MG", porte: "Médio", plano: "Start", alunos: 420, professores: 28, status: "trial", datacadastro: "2024-01-10" },
@@ -91,10 +92,28 @@ const getStatusIcon = (status: string) => {
 };
 
 export default function AdminEscolas() {
+  const [escolas, setEscolas] = useState<Escola[]>(escolasIniciais);
   const [busca, setBusca] = useState("");
   const [filtroPlano, setFiltroPlano] = useState("todos");
   const [filtroStatus, setFiltroStatus] = useState("todos");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [escolaSelecionada, setEscolaSelecionada] = useState<Escola | null>(null);
+
+  const handleEditEscola = (escola: Escola) => {
+    setEscolaSelecionada(escola);
+    setEditDialogOpen(true);
+  };
+
+  const handleSaveEscola = (escolaAtualizada: Escola) => {
+    setEscolas(escolas.map(e => e.id === escolaAtualizada.id ? escolaAtualizada : e));
+  };
+
+  const handleDesativarEscola = (escola: Escola) => {
+    const novoStatus = escola.status === "inativo" ? "ativo" : "inativo";
+    setEscolas(escolas.map(e => e.id === escola.id ? { ...e, status: novoStatus } : e));
+    toast.success(`Escola ${novoStatus === "inativo" ? "desativada" : "ativada"} com sucesso!`);
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -377,18 +396,24 @@ export default function AdminEscolas() {
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
+                        <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
+                          <DropdownMenuItem className="cursor-pointer">
                             <Eye className="mr-2 h-4 w-4" />
                             Ver Detalhes
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem 
+                            className="cursor-pointer"
+                            onClick={() => handleEditEscola(escola)}
+                          >
                             <Edit className="mr-2 h-4 w-4" />
                             Editar
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="text-red-500">
+                          <DropdownMenuItem 
+                            className="text-red-500 cursor-pointer"
+                            onClick={() => handleDesativarEscola(escola)}
+                          >
                             <Trash2 className="mr-2 h-4 w-4" />
-                            Desativar
+                            {escola.status === "inativo" ? "Ativar" : "Desativar"}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -400,6 +425,14 @@ export default function AdminEscolas() {
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Dialog de Edição */}
+      <EditarEscolaDialog
+        escola={escolaSelecionada}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onSave={handleSaveEscola}
+      />
     </motion.div>
   );
 }
