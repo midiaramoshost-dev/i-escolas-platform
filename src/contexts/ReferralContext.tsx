@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
+import { toast } from '@/hooks/use-toast';
 
 export interface Referral {
   id: string;
@@ -143,6 +144,12 @@ export function ReferralProvider({ children }: { children: ReactNode }) {
             };
             allRewardsUpdated.push(newReward);
             saveRewards(allRewardsUpdated);
+            
+            // Notify the referrer about the earned reward
+            toast({
+              title: "🎉 Parabéns! Você ganhou uma recompensa!",
+              description: "Uma indicação foi convertida e você ganhou 1 mês grátis!",
+            });
           }
         }
       }
