@@ -17,6 +17,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import RecoverPassword from "./pages/RecoverPassword";
 import ResetPassword from "./pages/ResetPassword";
+import Indicacao from "./pages/Indicacao";
 import EscolaDashboard from "./pages/escola/Dashboard";
 import Turmas from "./pages/escola/Turmas";
 import Professores from "./pages/escola/Professores";
@@ -66,6 +67,7 @@ const App = () => (
               <Route path="/cadastro" element={<Register />} />
               <Route path="/recuperar-senha" element={<RecoverPassword />} />
               <Route path="/redefinir-senha" element={<ResetPassword />} />
+              <Route path="/indicacao" element={<Indicacao />} />
               
               {/* Escola Routes - Protected */}
               <Route path="/escola" element={
