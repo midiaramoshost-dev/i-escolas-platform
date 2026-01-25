@@ -19,7 +19,15 @@ import Notas from "./pages/escola/Notas";
 import Frequencia from "./pages/escola/Frequencia";
 import Boletins from "./pages/escola/Boletins";
 import AlunoDashboard from "./pages/aluno/Dashboard";
+import AlunoNotas from "./pages/aluno/Notas";
+import AlunoFrequencia from "./pages/aluno/Frequencia";
+import AlunoTarefas from "./pages/aluno/Tarefas";
+import AlunoComunicados from "./pages/aluno/Comunicados";
 import ResponsavelDashboard from "./pages/responsavel/Dashboard";
+import ResponsavelNotas from "./pages/responsavel/Notas";
+import ResponsavelFrequencia from "./pages/responsavel/Frequencia";
+import ResponsavelTarefas from "./pages/responsavel/Tarefas";
+import ResponsavelComunicados from "./pages/responsavel/Comunicados";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -53,12 +61,20 @@ const App = () => (
             <Route path="/aluno" element={<AlunoLayout />}>
               <Route index element={<Navigate to="/aluno/dashboard" replace />} />
               <Route path="dashboard" element={<AlunoDashboard />} />
+              <Route path="notas" element={<AlunoNotas />} />
+              <Route path="frequencia" element={<AlunoFrequencia />} />
+              <Route path="tarefas" element={<AlunoTarefas />} />
+              <Route path="comunicados" element={<AlunoComunicados />} />
             </Route>
 
             {/* Portal do Responsável Routes */}
             <Route path="/responsavel" element={<ResponsavelLayout />}>
               <Route index element={<Navigate to="/responsavel/dashboard" replace />} />
               <Route path="dashboard" element={<ResponsavelDashboard />} />
+              <Route path="notas" element={<ResponsavelNotas />} />
+              <Route path="frequencia" element={<ResponsavelFrequencia />} />
+              <Route path="tarefas" element={<ResponsavelTarefas />} />
+              <Route path="comunicados" element={<ResponsavelComunicados />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
