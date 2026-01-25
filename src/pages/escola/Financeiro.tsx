@@ -24,6 +24,7 @@ import {
   MessageCircle,
   Mail,
   Bell,
+  BarChart3,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -71,6 +72,7 @@ import {
 import { EnviarCobrancaDialog, Inadimplente } from "@/components/financeiro/EnviarCobrancaDialog";
 import { AgendarLembreteDialog } from "@/components/financeiro/AgendarLembreteDialog";
 import { HistoricoNegociacaoDialog, getAllHistoricos, type StatusNegociacao } from "@/components/financeiro/HistoricoNegociacaoDialog";
+import { RelatorioInadimplenciaDialog } from "@/components/financeiro/RelatorioInadimplenciaDialog";
 import { useToast } from "@/hooks/use-toast";
 
 // Mock data
@@ -242,6 +244,7 @@ export default function EscolaFinanceiro() {
   const [cobrancaDialogOpen, setCobrancaDialogOpen] = useState(false);
   const [lembreteDialogOpen, setLembreteDialogOpen] = useState(false);
   const [historicoDialogOpen, setHistoricoDialogOpen] = useState(false);
+  const [relatorioDialogOpen, setRelatorioDialogOpen] = useState(false);
   const [selectedInadimplente, setSelectedInadimplente] = useState<Inadimplente | null>(null);
   const [inadimplentes, setInadimplentes] = useState<Inadimplente[]>(inadimplentesData);
   const { toast } = useToast();
@@ -351,6 +354,10 @@ export default function EscolaFinanceiro() {
               <SelectItem value="ano">Este ano</SelectItem>
             </SelectContent>
           </Select>
+          <Button variant="outline" onClick={() => setRelatorioDialogOpen(true)}>
+            <BarChart3 className="mr-2 h-4 w-4" />
+            Relatórios
+          </Button>
           <Button variant="outline">
             <Download className="mr-2 h-4 w-4" />
             Exportar
@@ -825,6 +832,13 @@ export default function EscolaFinanceiro() {
             i.id === id ? { ...i, status: status } : i
           ));
         }}
+      />
+
+      {/* Dialog de Relatório de Inadimplência */}
+      <RelatorioInadimplenciaDialog
+        open={relatorioDialogOpen}
+        onOpenChange={setRelatorioDialogOpen}
+        inadimplentes={inadimplentes}
       />
     </motion.div>
   );
