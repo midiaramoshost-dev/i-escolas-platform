@@ -2,25 +2,45 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ThemeProvider } from "@/hooks/useTheme";
+import { MainLayout } from "@/components/layout/MainLayout";
+import Login from "./pages/Login";
+import EscolaDashboard from "./pages/escola/Dashboard";
+import Turmas from "./pages/escola/Turmas";
+import Professores from "./pages/escola/Professores";
+import Alunos from "./pages/escola/Alunos";
+import Configuracoes from "./pages/escola/Configuracoes";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <ThemeProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/login" element={<Login />} />
+            
+            {/* Escola Routes */}
+            <Route path="/escola" element={<MainLayout />}>
+              <Route index element={<Navigate to="/escola/dashboard" replace />} />
+              <Route path="dashboard" element={<EscolaDashboard />} />
+              <Route path="turmas" element={<Turmas />} />
+              <Route path="professores" element={<Professores />} />
+              <Route path="alunos" element={<Alunos />} />
+              <Route path="configuracoes" element={<Configuracoes />} />
+            </Route>
+
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
