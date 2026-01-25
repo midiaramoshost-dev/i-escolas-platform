@@ -22,15 +22,15 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !user) {
     // Redirect to login, saving the attempted URL
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (!allowedRoles.includes(user!.role)) {
+  if (!allowedRoles.includes(user.role)) {
     // User is authenticated but doesn't have permission
     // Redirect to their appropriate dashboard
-    return <Navigate to={getRoleRedirectPath(user!.role)} replace />;
+    return <Navigate to={getRoleRedirectPath(user.role)} replace />;
   }
 
   return <>{children}</>;

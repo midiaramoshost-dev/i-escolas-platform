@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { User as SupabaseUser, Session } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 
 export type UserRole = 'admin' | 'escola' | 'aluno' | 'responsavel';
 
@@ -20,76 +22,20 @@ interface RegisterData {
   phone?: string;
 }
 
-interface PasswordResetToken {
-  email: string;
-  token: string;
-  expiresAt: number;
-}
-
 interface AuthContextType {
   user: User | null;
+  session: Session | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
-  logout: () => void;
-  register: (data: RegisterData) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
+  register: (data: RegisterData) => Promise<{ success: boolean; error?: string }>;
   requestPasswordReset: (email: string) => Promise<boolean>;
-  resetPassword: (email: string, token: string, newPassword: string) => Promise<boolean>;
+  resetPassword: (newPassword: string) => Promise<boolean>;
   getRoleRedirectPath: (role: UserRole) => string;
-  getAllUsers: () => (User & { password: string })[];
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-const STORAGE_KEYS = {
-  USER: 'iescolas_user',
-  USERS_DB: 'iescolas_users_db',
-  RESET_TOKENS: 'iescolas_reset_tokens',
-};
-
-// Default demo users
-const defaultUsers: Record<string, User & { password: string }> = {
-  'admin@iescolas.com': {
-    id: '1',
-    name: 'Super Admin',
-    email: 'admin@iescolas.com',
-    role: 'admin',
-    password: 'admin123',
-    createdAt: new Date().toISOString(),
-  },
-  'ramos660@hotmail.com': {
-    id: '5',
-    name: 'Ramos Admin',
-    email: 'ramos660@hotmail.com',
-    role: 'admin',
-    password: 'R@mos1qazxsw2',
-    createdAt: new Date().toISOString(),
-  },
-  'diretor@escola.com': {
-    id: '2',
-    name: 'Diretor Roberto',
-    email: 'diretor@escola.com',
-    role: 'escola',
-    password: 'escola123',
-    createdAt: new Date().toISOString(),
-  },
-  'aluno@escola.com': {
-    id: '3',
-    name: 'Ana Beatriz',
-    email: 'aluno@escola.com',
-    role: 'aluno',
-    password: 'aluno123',
-    createdAt: new Date().toISOString(),
-  },
-  'responsavel@email.com': {
-    id: '4',
-    name: 'Maria Silva',
-    email: 'responsavel@email.com',
-    role: 'responsavel',
-    password: 'resp123',
-    createdAt: new Date().toISOString(),
-  },
-};
 
 const roleRedirectPaths: Record<UserRole, string> = {
   admin: '/admin/dashboard',
@@ -98,204 +44,199 @@ const roleRedirectPaths: Record<UserRole, string> = {
   responsavel: '/responsavel/dashboard',
 };
 
-// Helper to get users from localStorage or use defaults
-function getUsersDB(): Record<string, User & { password: string }> {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEYS.USERS_DB);
-    if (stored) {
-      const storedUsers = JSON.parse(stored);
-      // Always merge with default users to ensure new default users are included
-      const mergedUsers = { ...defaultUsers, ...storedUsers };
-      // Ensure default users always have their original passwords (for demo purposes)
-      for (const email of Object.keys(defaultUsers)) {
-        mergedUsers[email] = defaultUsers[email];
-      }
-      localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(mergedUsers));
-      return mergedUsers;
-    }
-  } catch {
-    console.error('Error reading users DB');
-  }
-  // Initialize with default users
-  localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(defaultUsers));
-  return { ...defaultUsers };
-}
-
-function saveUsersDB(users: Record<string, User & { password: string }>) {
-  localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(users));
-}
-
-function getResetTokens(): PasswordResetToken[] {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEYS.RESET_TOKENS);
-    if (stored) {
-      return JSON.parse(stored);
-    }
-  } catch {
-    console.error('Error reading reset tokens');
-  }
-  return [];
-}
-
-function saveResetTokens(tokens: PasswordResetToken[]) {
-  localStorage.setItem(STORAGE_KEYS.RESET_TOKENS, JSON.stringify(tokens));
-}
-
-function generateToken(): string {
-  return Math.random().toString(36).substring(2) + Date.now().toString(36);
-}
-
-function generateId(): string {
-  return 'user_' + Math.random().toString(36).substring(2, 11);
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Check for existing session in localStorage
-    const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch {
-        localStorage.removeItem(STORAGE_KEYS.USER);
+  // Fetch user profile and role from database
+  const fetchUserData = async (supabaseUser: SupabaseUser): Promise<User | null> => {
+    try {
+      // Use RPC to get user role securely
+      const { data: roleData, error: roleError } = await supabase
+        .rpc('get_user_role', { _user_id: supabaseUser.id });
+
+      if (roleError) {
+        console.error('Error fetching user role:', roleError);
+        return null;
       }
+
+      // Fetch profile data
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', supabaseUser.id)
+        .maybeSingle();
+
+      if (profileError) {
+        console.error('Error fetching profile:', profileError);
+        return null;
+      }
+
+      if (!profile) {
+        console.error('Profile not found');
+        return null;
+      }
+
+      return {
+        id: supabaseUser.id,
+        name: profile.name,
+        email: profile.email,
+        role: roleData as UserRole,
+        avatar: profile.avatar_url || undefined,
+        phone: profile.phone || undefined,
+        createdAt: profile.created_at,
+      };
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      return null;
     }
-    // Initialize users DB if needed
-    getUsersDB();
-    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, newSession) => {
+        setSession(newSession);
+        
+        if (newSession?.user) {
+          // Defer fetching user data to avoid deadlock
+          setTimeout(async () => {
+            const userData = await fetchUserData(newSession.user);
+            setUser(userData);
+            setIsLoading(false);
+          }, 0);
+        } else {
+          setUser(null);
+          setIsLoading(false);
+        }
+      }
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session: existingSession } }) => {
+      setSession(existingSession);
+      
+      if (existingSession?.user) {
+        fetchUserData(existingSession.user).then((userData) => {
+          setUser(userData);
+          setIsLoading(false);
+        });
+      } else {
+        setIsLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    setIsLoading(true);
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    const users = getUsersDB();
-    const foundUser = users[email.toLowerCase()];
-    
-    if (foundUser && foundUser.password === password) {
-      const { password: _, ...userWithoutPassword } = foundUser;
-      setUser(userWithoutPassword);
-      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userWithoutPassword));
-      setIsLoading(false);
-      return true;
+  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        if (error.message.includes('Invalid login credentials')) {
+          return { success: false, error: 'E-mail ou senha incorretos.' };
+        }
+        if (error.message.includes('Email not confirmed')) {
+          return { success: false, error: 'E-mail não confirmado. Verifique sua caixa de entrada.' };
+        }
+        return { success: false, error: error.message };
+      }
+
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: 'Erro ao fazer login. Tente novamente.' };
     }
-    
-    setIsLoading(false);
-    return false;
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem(STORAGE_KEYS.USER);
+    setSession(null);
   };
 
-  const register = async (data: RegisterData): Promise<boolean> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    const users = getUsersDB();
-    const emailLower = data.email.toLowerCase();
-    
-    // Check if user already exists
-    if (users[emailLower]) {
-      return false;
+  const register = async (data: RegisterData): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { data: authData, error } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            name: data.name,
+            role: data.role,
+            phone: data.phone || null,
+          },
+        },
+      });
+
+      if (error) {
+        if (error.message.includes('User already registered')) {
+          return { success: false, error: 'Este e-mail já está cadastrado.' };
+        }
+        return { success: false, error: error.message };
+      }
+
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: 'Erro ao criar conta. Tente novamente.' };
     }
-    
-    // Create new user
-    const newUser: User & { password: string } = {
-      id: generateId(),
-      name: data.name,
-      email: emailLower,
-      role: data.role,
-      password: data.password,
-      phone: data.phone,
-      createdAt: new Date().toISOString(),
-    };
-    
-    users[emailLower] = newUser;
-    saveUsersDB(users);
-    
-    return true;
   };
 
   const requestPasswordReset = async (email: string): Promise<boolean> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    const users = getUsersDB();
-    const emailLower = email.toLowerCase();
-    
-    if (!users[emailLower]) {
+    try {
+      const redirectUrl = `${window.location.origin}/redefinir-senha`;
+      
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectUrl,
+      });
+
+      if (error) {
+        console.error('Error requesting password reset:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error requesting password reset:', error);
       return false;
     }
-    
-    // Generate reset token
-    const token = generateToken();
-    const expiresAt = Date.now() + 60 * 60 * 1000; // 1 hour
-    
-    const tokens = getResetTokens();
-    // Remove old tokens for this email
-    const filteredTokens = tokens.filter(t => t.email !== emailLower);
-    filteredTokens.push({ email: emailLower, token, expiresAt });
-    saveResetTokens(filteredTokens);
-    
-    // In a real app, this would send an email
-    // For demo, we'll log the reset link to console
-    console.log(`[DEMO] Reset link: /redefinir-senha?token=${token}&email=${encodeURIComponent(emailLower)}`);
-    
-    return true;
   };
 
-  const resetPassword = async (email: string, token: string, newPassword: string): Promise<boolean> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    const tokens = getResetTokens();
-    const emailLower = email.toLowerCase();
-    
-    const validToken = tokens.find(
-      t => t.email === emailLower && t.token === token && t.expiresAt > Date.now()
-    );
-    
-    if (!validToken) {
+  const resetPassword = async (newPassword: string): Promise<boolean> => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (error) {
+        console.error('Error resetting password:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error resetting password:', error);
       return false;
     }
-    
-    // Update password
-    const users = getUsersDB();
-    if (users[emailLower]) {
-      users[emailLower].password = newPassword;
-      saveUsersDB(users);
-      
-      // Remove used token
-      const filteredTokens = tokens.filter(t => t.token !== token);
-      saveResetTokens(filteredTokens);
-      
-      return true;
-    }
-    
-    return false;
   };
 
   const getRoleRedirectPath = (role: UserRole): string => {
     return roleRedirectPaths[role];
   };
 
-  const getAllUsers = (): (User & { password: string })[] => {
-    const users = getUsersDB();
-    return Object.values(users);
-  };
-
   return (
     <AuthContext.Provider
       value={{
         user,
-        isAuthenticated: !!user,
+        session,
+        isAuthenticated: !!session && !!user,
         isLoading,
         login,
         logout,
@@ -303,7 +244,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         requestPasswordReset,
         resetPassword,
         getRoleRedirectPath,
-        getAllUsers,
       }}
     >
       {children}

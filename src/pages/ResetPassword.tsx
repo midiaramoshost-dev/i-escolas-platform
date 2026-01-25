@@ -1,45 +1,70 @@
-import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { School, Lock, Eye, EyeOff, CheckCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { School, Lock, Eye, EyeOff, CheckCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { z } from "zod";
+
+const passwordSchema = z.object({
+  password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "As senhas não conferem",
+  path: ["confirmPassword"],
+});
 
 export default function ResetPassword() {
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get("token");
-  const email = searchParams.get("email");
-  
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(true);
+  const [hasValidSession, setHasValidSession] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
   const navigate = useNavigate();
   const { resetPassword } = useAuth();
   const { toast } = useToast();
 
+  useEffect(() => {
+    // Check if user arrived via password reset link
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      // Check URL for recovery token
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      const type = hashParams.get('type');
+      
+      if (type === 'recovery' && accessToken) {
+        // User clicked on password reset link
+        setHasValidSession(true);
+      } else if (session) {
+        // User has an active session (might be from recovery)
+        setHasValidSession(true);
+      }
+      
+      setIsVerifying(false);
+    };
+
+    checkSession();
+  }, []);
+
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (password !== confirmPassword) {
+    // Validate passwords
+    const validation = passwordSchema.safeParse({ password, confirmPassword });
+    if (!validation.success) {
       toast({
         variant: "destructive",
-        title: "Senhas não conferem",
-        description: "A senha e a confirmação precisam ser iguais.",
-      });
-      return;
-    }
-
-    if (password.length < 6) {
-      toast({
-        variant: "destructive",
-        title: "Senha muito curta",
-        description: "A senha precisa ter pelo menos 6 caracteres.",
+        title: "Dados inválidos",
+        description: validation.error.errors[0].message,
       });
       return;
     }
@@ -47,7 +72,7 @@ export default function ResetPassword() {
     setIsLoading(true);
 
     try {
-      const success = await resetPassword(email || "", token || "", password);
+      const success = await resetPassword(password);
 
       if (success) {
         setResetSuccess(true);
@@ -58,8 +83,8 @@ export default function ResetPassword() {
       } else {
         toast({
           variant: "destructive",
-          title: "Link inválido ou expirado",
-          description: "Solicite um novo link de recuperação.",
+          title: "Erro ao alterar senha",
+          description: "Não foi possível alterar a senha. Tente novamente.",
         });
       }
     } catch (error) {
@@ -73,7 +98,18 @@ export default function ResetPassword() {
     }
   };
 
-  if (!token || !email) {
+  if (isVerifying) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background to-muted/30">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Verificando link...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!hasValidSession) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background to-muted/30">
         <div className="w-full max-w-md space-y-6">
@@ -164,9 +200,7 @@ export default function ResetPassword() {
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-2xl font-bold">Nova senha</CardTitle>
             <CardDescription>
-              Digite sua nova senha para a conta:
-              <br />
-              <span className="font-medium text-foreground">{email}</span>
+              Digite sua nova senha abaixo
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleReset}>

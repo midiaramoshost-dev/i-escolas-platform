@@ -7,6 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+
+const emailSchema = z.string().email('E-mail inválido');
 
 export default function RecoverPassword() {
   const [email, setEmail] = useState("");
@@ -18,6 +21,18 @@ export default function RecoverPassword() {
 
   const handleRecover = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate email
+    const validation = emailSchema.safeParse(email);
+    if (!validation.success) {
+      toast({
+        variant: "destructive",
+        title: "E-mail inválido",
+        description: "Digite um endereço de e-mail válido.",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -32,8 +47,8 @@ export default function RecoverPassword() {
       } else {
         toast({
           variant: "destructive",
-          title: "E-mail não encontrado",
-          description: "Este e-mail não está cadastrado no sistema.",
+          title: "Erro ao enviar",
+          description: "Não foi possível enviar o e-mail. Tente novamente.",
         });
       }
     } catch (error) {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { School, Mail, Lock, Eye, EyeOff, User, Phone, ArrowLeft, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,20 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
-import { useReferral } from "@/contexts/ReferralContext";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+
+const registerSchema = z.object({
+  name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres').max(100, 'Nome muito longo'),
+  email: z.string().email('E-mail inválido').max(255, 'E-mail muito longo'),
+  phone: z.string().optional(),
+  password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
+  confirmPassword: z.string(),
+  role: z.enum(['escola', 'aluno', 'responsavel'], { required_error: 'Selecione um perfil' }),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "As senhas não conferem",
+  path: ["confirmPassword"],
+});
 
 export default function Register() {
   const [searchParams] = useSearchParams();
@@ -30,7 +42,6 @@ export default function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { register } = useAuth();
-  const { applyReferralCode } = useReferral();
   const { toast } = useToast();
 
   const handleChange = (field: string, value: string | boolean) => {
@@ -49,29 +60,13 @@ export default function Register() {
       return;
     }
 
-    if (formData.password !== formData.confirmPassword) {
+    // Validate form data
+    const validation = registerSchema.safeParse(formData);
+    if (!validation.success) {
       toast({
         variant: "destructive",
-        title: "Senhas não conferem",
-        description: "A senha e a confirmação precisam ser iguais.",
-      });
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      toast({
-        variant: "destructive",
-        title: "Senha muito curta",
-        description: "A senha precisa ter pelo menos 6 caracteres.",
-      });
-      return;
-    }
-
-    if (!formData.role) {
-      toast({
-        variant: "destructive",
-        title: "Perfil obrigatório",
-        description: "Selecione um tipo de perfil para continuar.",
+        title: "Dados inválidos",
+        description: validation.error.errors[0].message,
       });
       return;
     }
@@ -79,33 +74,30 @@ export default function Register() {
     setIsLoading(true);
 
     try {
-      const success = await register({
+      const result = await register({
         name: formData.name,
         email: formData.email,
         password: formData.password,
         role: formData.role as UserRole,
-        phone: formData.phone,
+        phone: formData.phone || undefined,
       });
 
-      if (success) {
-        // Apply referral code if provided
+      if (result.success) {
+        // Store referral code for later application
         if (formData.referralCode) {
-          // We need to apply after login, so store the code
           localStorage.setItem('pending_referral_code', formData.referralCode);
         }
         
         toast({
           title: "Conta criada com sucesso!",
-          description: formData.referralCode 
-            ? "Faça login para ativar sua indicação e benefícios." 
-            : "Você já pode fazer login com suas credenciais.",
+          description: "Verifique seu e-mail para confirmar a conta.",
         });
         navigate("/login");
       } else {
         toast({
           variant: "destructive",
           title: "Erro no cadastro",
-          description: "Este e-mail já está cadastrado. Tente outro.",
+          description: result.error || "Ocorreu um erro. Tente novamente.",
         });
       }
     } catch (error) {

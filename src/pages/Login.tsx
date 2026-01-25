@@ -1,28 +1,28 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { School, Mail, Lock, Eye, EyeOff, Users, GraduationCap, Shield, Building2 } from "lucide-react";
+import { School, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useAuth, UserRole } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
 
-const demoAccounts = [
-  { role: 'admin' as UserRole, email: 'admin@iescolas.com', password: 'admin123', label: 'Admin Master', icon: Shield, color: 'from-rose-500 to-red-600' },
-  { role: 'escola' as UserRole, email: 'diretor@escola.com', password: 'escola123', label: 'Escola', icon: Building2, color: 'from-blue-500 to-indigo-600' },
-  { role: 'aluno' as UserRole, email: 'aluno@escola.com', password: 'aluno123', label: 'Aluno', icon: GraduationCap, color: 'from-emerald-500 to-teal-600' },
-  { role: 'responsavel' as UserRole, email: 'responsavel@email.com', password: 'resp123', label: 'Responsável', icon: Users, color: 'from-violet-500 to-purple-600' },
-];
+const loginSchema = z.object({
+  email: z.string().email('E-mail inválido'),
+  password: z.string().min(1, 'Senha é obrigatória'),
+});
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, isLoading, getRoleRedirectPath } = useAuth();
+  const { login, user, getRoleRedirectPath } = useAuth();
   const { toast } = useToast();
 
   const from = location.state?.from?.pathname || null;
@@ -30,57 +30,44 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const success = await login(email, password);
+    // Validate input
+    const validation = loginSchema.safeParse({ email, password });
+    if (!validation.success) {
+      toast({
+        variant: "destructive",
+        title: "Dados inválidos",
+        description: validation.error.errors[0].message,
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
     
-    if (success) {
+    const result = await login(email, password);
+    
+    if (result.success) {
       toast({
         title: "Login realizado com sucesso!",
         description: "Redirecionando para o painel...",
       });
-      
-      // Get the user role from the mock users to redirect
-      const mockUsers: Record<string, UserRole> = {
-        'admin@iescolas.com': 'admin',
-        'diretor@escola.com': 'escola',
-        'aluno@escola.com': 'aluno',
-        'responsavel@email.com': 'responsavel',
-      };
-      
-      const userRole = mockUsers[email.toLowerCase()];
-      const redirectPath = from || getRoleRedirectPath(userRole);
-      navigate(redirectPath, { replace: true });
+      // Navigation will happen automatically via auth state change
     } else {
       toast({
         variant: "destructive",
         title: "Erro no login",
-        description: "E-mail ou senha incorretos. Tente novamente.",
+        description: result.error || "E-mail ou senha incorretos. Tente novamente.",
       });
     }
+    
+    setIsSubmitting(false);
   };
 
-  const handleDemoLogin = async (demoEmail: string, demoPassword: string) => {
-    setEmail(demoEmail);
-    setPassword(demoPassword);
-    
-    const success = await login(demoEmail, demoPassword);
-    
-    if (success) {
-      toast({
-        title: "Login demo realizado!",
-        description: "Redirecionando...",
-      });
-      
-      const mockUsers: Record<string, UserRole> = {
-        'admin@iescolas.com': 'admin',
-        'diretor@escola.com': 'escola',
-        'aluno@escola.com': 'aluno',
-        'responsavel@email.com': 'responsavel',
-      };
-      
-      const userRole = mockUsers[demoEmail.toLowerCase()];
-      navigate(getRoleRedirectPath(userRole), { replace: true });
-    }
-  };
+  // Redirect if already logged in
+  if (user) {
+    const redirectPath = from || getRoleRedirectPath(user.role);
+    navigate(redirectPath, { replace: true });
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex">
@@ -215,9 +202,9 @@ export default function Login() {
                   type="submit"
                   className="w-full"
                   size="lg"
-                  disabled={isLoading}
+                  disabled={isSubmitting}
                 >
-                  {isLoading ? "Entrando..." : "Entrar"}
+                  {isSubmitting ? "Entrando..." : "Entrar"}
                 </Button>
                 <p className="text-sm text-center text-muted-foreground">
                   Não tem uma conta?{" "}
@@ -227,35 +214,6 @@ export default function Login() {
                 </p>
               </CardFooter>
             </form>
-          </Card>
-
-          {/* Demo Accounts */}
-          <Card className="border-dashed">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Acesso Demo
-              </CardTitle>
-              <CardDescription className="text-xs">
-                Clique para entrar com um perfil de demonstração
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-2">
-              {demoAccounts.map((account) => (
-                <Button
-                  key={account.role}
-                  variant="outline"
-                  size="sm"
-                  className="h-auto py-2 px-3 justify-start gap-2"
-                  onClick={() => handleDemoLogin(account.email, account.password)}
-                  disabled={isLoading}
-                >
-                  <div className={`flex h-6 w-6 items-center justify-center rounded bg-gradient-to-br ${account.color}`}>
-                    <account.icon className="h-3.5 w-3.5 text-white" />
-                  </div>
-                  <span className="text-xs font-medium">{account.label}</span>
-                </Button>
-              ))}
-            </CardContent>
           </Card>
 
           <p className="text-center text-xs text-muted-foreground">
