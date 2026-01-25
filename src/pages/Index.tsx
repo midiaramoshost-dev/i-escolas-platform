@@ -38,6 +38,25 @@ import {
   MousePointer2
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
+import {
+  ScrollReveal,
+  FadeUp,
+  FadeLeft,
+  FadeRight,
+  ScaleUp,
+  Blur,
+  SlideUp,
+  Bounce,
+  Elastic,
+  Reveal,
+  WordReveal,
+  LineReveal,
+  StaggerContainer,
+  StaggerItem,
+  Counter,
+  TextReveal,
+} from "@/components/animations/ScrollReveal";
+import { useParallax, useScrollProgress } from "@/hooks/useScrollReveal";
 
 // Animation variants
 const fadeInUp = {
@@ -414,89 +433,82 @@ const Index = () => {
         </motion.div>
       </section>
 
-      {/* Stats Section - Floating Cards */}
+      {/* Stats Section - Floating Cards with Enhanced Animations */}
       <section className="relative py-20 -mt-20">
         <div className="container">
-          <motion.div 
-            className="grid grid-cols-2 md:grid-cols-4 gap-4"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={staggerContainer}
-          >
+          <StaggerContainer className="grid grid-cols-2 md:grid-cols-4 gap-4" staggerDelay={0.15}>
             {stats.map((stat, index) => (
-              <motion.div 
-                key={index}
-                variants={scaleIn}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                whileHover={{ y: -8, scale: 1.02 }}
-              >
-                <Card className="relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm">
-                  <CardContent className="p-6 text-center">
-                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 text-primary mb-4">
-                      <stat.icon className="h-6 w-6" />
-                    </div>
-                    <motion.div 
-                      className="text-4xl font-bold text-foreground"
-                      initial={{ scale: 0 }}
-                      whileInView={{ scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ type: "spring", stiffness: 100, delay: index * 0.15 }}
-                    >
-                      {stat.value}
-                    </motion.div>
-                    <div className="text-sm text-muted-foreground mt-1">{stat.label}</div>
-                  </CardContent>
-                  <div className="absolute top-0 right-0 w-20 h-20 bg-primary/5 rounded-full blur-2xl" />
-                </Card>
-              </motion.div>
+              <StaggerItem key={index} animation="bounce">
+                <motion.div whileHover={{ y: -12, scale: 1.05 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}>
+                  <Card className="relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm group">
+                    <CardContent className="p-6 text-center">
+                      <motion.div 
+                        className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 text-primary mb-4"
+                        whileHover={{ rotate: 360, scale: 1.2 }}
+                        transition={{ duration: 0.6 }}
+                      >
+                        <stat.icon className="h-6 w-6" />
+                      </motion.div>
+                      <div className="text-4xl font-bold text-foreground">
+                        <Counter 
+                          to={parseInt(stat.value.replace(/[^0-9]/g, "")) || 0} 
+                          suffix={stat.value.includes("+") ? "+" : stat.value.includes("%") ? "%" : stat.value.includes("k") ? "k+" : ""}
+                          duration={2}
+                          className="inline"
+                        />
+                      </div>
+                      <div className="text-sm text-muted-foreground mt-1">{stat.label}</div>
+                    </CardContent>
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors" />
+                  </Card>
+                </motion.div>
+              </StaggerItem>
             ))}
-          </motion.div>
+          </StaggerContainer>
         </div>
       </section>
 
-      {/* Features Section - Bento Grid */}
+      {/* Features Section - Bento Grid with Enhanced Scroll Animations */}
       <section id="recursos" className="py-24 relative">
         <div className="container">
-          <motion.div 
-            className="text-center mb-16"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={fadeInUp}
-          >
-            <Badge variant="outline" className="mb-4">Recursos</Badge>
-            <h2 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
-              Tudo que sua escola precisa
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Uma plataforma completa para gerenciar todos os aspectos da sua instituição
-            </p>
-          </motion.div>
+          <div className="text-center mb-16">
+            <Blur delay={0.1}>
+              <Badge variant="outline" className="mb-4">Recursos</Badge>
+            </Blur>
+            <SlideUp delay={0.2}>
+              <h2 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
+                Tudo que sua escola precisa
+              </h2>
+            </SlideUp>
+            <FadeUp delay={0.3}>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Uma plataforma completa para gerenciar todos os aspectos da sua instituição
+              </p>
+            </FadeUp>
+          </div>
           
-          <motion.div 
-            className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            variants={staggerContainer}
-          >
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature, index) => (
-              <motion.div
-                key={index}
-                variants={fadeInUp}
-                transition={{ duration: 0.5 }}
+              <ScrollReveal 
+                key={index} 
+                animation={index % 3 === 0 ? "fadeLeft" : index % 3 === 1 ? "fadeUp" : "fadeRight"}
+                staggerIndex={index}
+                staggerDelay={0.12}
               >
                 <motion.div
-                  whileHover={{ y: -8 }}
-                  transition={{ duration: 0.3 }}
-                  className="h-full"
+                  whileHover={{ y: -12, rotateY: 5 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className="h-full perspective-1000"
                 >
-                  <Card className="group h-full border-border/50 hover:border-primary/50 transition-all duration-300 overflow-hidden">
+                  <Card className="group h-full border-border/50 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 transition-all duration-500 overflow-hidden">
                     <CardHeader className="pb-4">
-                      <div className={`mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${feature.gradient} text-white shadow-lg`}>
+                      <motion.div 
+                        className={`mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${feature.gradient} text-white shadow-lg`}
+                        whileHover={{ scale: 1.15, rotate: 10 }}
+                        transition={{ type: "spring", stiffness: 400 }}
+                      >
                         <feature.icon className="h-7 w-7" />
-                      </div>
+                      </motion.div>
                       <CardTitle className="text-xl group-hover:text-primary transition-colors">
                         {feature.title}
                       </CardTitle>
@@ -506,21 +518,21 @@ const Index = () => {
                         {feature.description}
                       </CardDescription>
                     </CardContent>
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ backgroundImage: `linear-gradient(to right, var(--tw-gradient-stops))` }} />
+                    <motion.div 
+                      className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-primary/50"
+                      initial={{ scaleX: 0 }}
+                      whileHover={{ scaleX: 1 }}
+                      transition={{ duration: 0.4 }}
+                      style={{ transformOrigin: "left" }}
+                    />
                   </Card>
                 </motion.div>
-              </motion.div>
+              </ScrollReveal>
             ))}
-          </motion.div>
+          </div>
 
           {/* Extra Features */}
-          <motion.div 
-            className="mt-12 flex flex-wrap justify-center gap-3"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={staggerContainer}
-          >
+          <StaggerContainer className="mt-12 flex flex-wrap justify-center gap-3" staggerDelay={0.08}>
             {[
               { icon: Bell, label: "Alertas Inteligentes" },
               { icon: Shield, label: "Segurança Avançada" },
@@ -529,74 +541,71 @@ const Index = () => {
               { icon: Globe, label: "Acesso em Qualquer Lugar" },
               { icon: Lock, label: "LGPD Compliance" }
             ].map((item, index) => (
-              <motion.div
-                key={index}
-                variants={scaleIn}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
-                whileHover={{ scale: 1.1, y: -2 }}
-              >
-                <Badge variant="secondary" className="gap-2 py-2 px-4 text-sm">
-                  <item.icon className="h-4 w-4" />
-                  {item.label}
-                </Badge>
-              </motion.div>
+              <StaggerItem key={index} animation="elastic">
+                <motion.div whileHover={{ scale: 1.15, y: -4, rotate: 3 }} transition={{ type: "spring", stiffness: 500 }}>
+                  <Badge variant="secondary" className="gap-2 py-2 px-4 text-sm cursor-pointer">
+                    <item.icon className="h-4 w-4" />
+                    {item.label}
+                  </Badge>
+                </motion.div>
+              </StaggerItem>
             ))}
-          </motion.div>
+          </StaggerContainer>
         </div>
       </section>
 
-      {/* Plans Section - Modern Pricing */}
+      {/* Plans Section - Modern Pricing with Reveal Animations */}
       <section id="planos" className="py-24 bg-muted/30 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent" />
         <div className="container relative">
-          <motion.div 
-            className="text-center mb-16"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={fadeInUp}
-          >
-            <Badge variant="outline" className="mb-4">Planos</Badge>
-            <h2 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
-              Investimento que se paga
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Planos flexíveis que crescem com sua escola. Comece grátis, evolua quando quiser.
-            </p>
-          </motion.div>
+          <div className="text-center mb-16">
+            <Elastic delay={0.1}>
+              <Badge variant="outline" className="mb-4">Planos</Badge>
+            </Elastic>
+            <Reveal delay={0.2}>
+              <h2 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
+                Investimento que se paga
+              </h2>
+            </Reveal>
+            <FadeUp delay={0.3}>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Planos flexíveis que crescem com sua escola. Comece grátis, evolua quando quiser.
+              </p>
+            </FadeUp>
+          </div>
 
-          <motion.div 
-            className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            variants={staggerContainer}
-          >
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {plans.map((plan, index) => (
-              <motion.div
-                key={index}
-                variants={fadeInUp}
-                transition={{ duration: 0.5 }}
+              <ScrollReveal 
+                key={index} 
+                animation="flipY"
+                staggerIndex={index}
+                staggerDelay={0.15}
               >
                 <motion.div
-                  whileHover={{ y: -8 }}
-                  transition={{ duration: 0.3 }}
+                  whileHover={{ y: -12, scale: 1.03, rotateX: 5 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
                   className="h-full"
                 >
                   <Card 
-                    className={`relative h-full flex flex-col ${
+                    className={`relative h-full flex flex-col transition-all duration-500 ${
                       plan.highlighted 
                         ? 'border-primary shadow-xl shadow-primary/20 scale-105' 
-                        : 'border-border/50'
+                        : 'border-border/50 hover:shadow-xl hover:shadow-primary/10'
                     }`}
                   >
                     {plan.highlighted && (
-                      <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                      <motion.div 
+                        className="absolute -top-4 left-1/2 -translate-x-1/2"
+                        initial={{ y: -20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.5, type: "spring" }}
+                      >
                         <Badge className="bg-primary shadow-lg px-4 py-1">
                           <Star className="h-3 w-3 mr-1" />
                           Mais Popular
                         </Badge>
-                      </div>
+                      </motion.div>
                     )}
                     <CardHeader className="text-center pt-8">
                       <CardTitle className="text-xl">{plan.name}</CardTitle>
@@ -610,7 +619,14 @@ const Index = () => {
                     <CardContent className="flex-1">
                       <ul className="space-y-3">
                         {plan.features.map((feature, featureIndex) => (
-                          <li key={featureIndex} className="flex items-center gap-3">
+                          <motion.li 
+                            key={featureIndex} 
+                            className="flex items-center gap-3"
+                            initial={{ opacity: 0, x: -10 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.5 + featureIndex * 0.08 }}
+                          >
                             {feature.included ? (
                               <Check className="h-5 w-5 text-primary flex-shrink-0" />
                             ) : (
@@ -619,143 +635,158 @@ const Index = () => {
                             <span className={feature.included ? "" : "text-muted-foreground/50"}>
                               {feature.text}
                             </span>
-                          </li>
+                          </motion.li>
                         ))}
                       </ul>
                     </CardContent>
                     <div className="p-6 pt-0">
                       <Link to="/login">
-                        <Button 
-                          className="w-full" 
-                          variant={plan.highlighted ? "default" : "outline"}
-                          size="lg"
-                        >
-                          {plan.cta}
-                          <ChevronRight className="h-4 w-4 ml-1" />
-                        </Button>
+                        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                          <Button 
+                            className="w-full" 
+                            variant={plan.highlighted ? "default" : "outline"}
+                            size="lg"
+                          >
+                            {plan.cta}
+                            <ChevronRight className="h-4 w-4 ml-1" />
+                          </Button>
+                        </motion.div>
                       </Link>
                     </div>
                   </Card>
                 </motion.div>
-              </motion.div>
+              </ScrollReveal>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* Comparison Section */}
+      {/* Comparison Section with Enhanced Animations */}
       <section id="comparativo" className="py-24">
         <div className="container">
-          <motion.div 
-            className="text-center mb-16"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeInUp}
-          >
-            <Badge variant="outline" className="mb-4">Comparativo</Badge>
-            <h2 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
-              Por que escolher o i ESCOLAS?
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Veja como nos comparamos com métodos tradicionais de gestão
-            </p>
-          </motion.div>
+          <div className="text-center mb-16">
+            <ScaleUp delay={0.1}>
+              <Badge variant="outline" className="mb-4">Comparativo</Badge>
+            </ScaleUp>
+            <SlideUp delay={0.2}>
+              <h2 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
+                Por que escolher o i ESCOLAS?
+              </h2>
+            </SlideUp>
+            <Blur delay={0.3}>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Veja como nos comparamos com métodos tradicionais de gestão
+              </p>
+            </Blur>
+          </div>
 
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeInUp}
-            className="max-w-3xl mx-auto"
-          >
-            <Card className="overflow-hidden">
+          <FadeUp delay={0.2}>
+            <Card className="overflow-hidden max-w-3xl mx-auto">
               <div className="grid grid-cols-3 bg-muted/50 p-4 font-semibold text-center">
                 <div>Funcionalidade</div>
                 <div className="text-primary">i ESCOLAS</div>
                 <div className="text-muted-foreground">Tradicional</div>
               </div>
               {comparisonItems.map((item, index) => (
-                <motion.div
-                  key={index}
-                  className="grid grid-cols-3 p-4 border-t items-center text-center"
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.05 }}
+                <ScrollReveal 
+                  key={index} 
+                  animation="wave"
+                  staggerIndex={index}
+                  staggerDelay={0.08}
                 >
-                  <div className="text-left font-medium">{item.feature}</div>
-                  <div>
-                    {item.iescolas ? (
-                      <Check className="h-6 w-6 text-primary mx-auto" />
-                    ) : (
-                      <X className="h-6 w-6 text-muted-foreground/50 mx-auto" />
-                    )}
-                  </div>
-                  <div>
-                    {item.traditional ? (
-                      <Check className="h-6 w-6 text-muted-foreground mx-auto" />
-                    ) : (
-                      <X className="h-6 w-6 text-muted-foreground/50 mx-auto" />
-                    )}
-                  </div>
-                </motion.div>
+                  <motion.div
+                    className="grid grid-cols-3 p-4 border-t items-center text-center hover:bg-muted/30 transition-colors"
+                    whileHover={{ x: 5 }}
+                    transition={{ type: "spring", stiffness: 400 }}
+                  >
+                    <div className="text-left font-medium">{item.feature}</div>
+                    <div>
+                      {item.iescolas ? (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          whileInView={{ scale: 1 }}
+                          viewport={{ once: true }}
+                          transition={{ type: "spring", stiffness: 500, delay: 0.2 + index * 0.05 }}
+                        >
+                          <Check className="h-6 w-6 text-primary mx-auto" />
+                        </motion.div>
+                      ) : (
+                        <X className="h-6 w-6 text-muted-foreground/50 mx-auto" />
+                      )}
+                    </div>
+                    <div>
+                      {item.traditional ? (
+                        <Check className="h-6 w-6 text-muted-foreground mx-auto" />
+                      ) : (
+                        <X className="h-6 w-6 text-muted-foreground/50 mx-auto" />
+                      )}
+                    </div>
+                  </motion.div>
+                </ScrollReveal>
               ))}
             </Card>
-          </motion.div>
+          </FadeUp>
         </div>
       </section>
 
-      {/* Testimonials Section - Modern Cards */}
+      {/* Testimonials Section - Modern Cards with Stagger */}
       <section id="depoimentos" className="py-24 bg-muted/30">
         <div className="container">
-          <motion.div 
-            className="text-center mb-16"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeInUp}
-          >
-            <Badge variant="outline" className="mb-4">Depoimentos</Badge>
-            <h2 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
-              O que nossos clientes dizem
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Histórias reais de escolas que transformaram sua gestão
-            </p>
-          </motion.div>
+          <div className="text-center mb-16">
+            <Bounce delay={0.1}>
+              <Badge variant="outline" className="mb-4">Depoimentos</Badge>
+            </Bounce>
+            <LineReveal delay={0.2}>
+              <h2 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
+                O que nossos clientes dizem
+              </h2>
+            </LineReveal>
+            <FadeUp delay={0.3}>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Histórias reais de escolas que transformaram sua gestão
+              </p>
+            </FadeUp>
+          </div>
 
-          <motion.div 
-            className="grid md:grid-cols-3 gap-6"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={staggerContainer}
-          >
+          <div className="grid md:grid-cols-3 gap-6">
             {testimonials.map((testimonial, index) => (
-              <motion.div
-                key={index}
-                variants={fadeInUp}
-                transition={{ duration: 0.5 }}
+              <ScrollReveal 
+                key={index} 
+                animation={index === 0 ? "fadeLeft" : index === 2 ? "fadeRight" : "fadeUp"}
+                staggerIndex={index}
+                staggerDelay={0.2}
               >
                 <motion.div
-                  whileHover={{ y: -8 }}
-                  transition={{ duration: 0.3 }}
+                  whileHover={{ y: -12, scale: 1.02, rotateY: 5 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className="h-full perspective-1000"
                 >
-                  <Card className="h-full border-border/50">
+                  <Card className="h-full border-border/50 hover:shadow-xl hover:shadow-primary/10 transition-all duration-500">
                     <CardContent className="p-6">
                       <div className="flex gap-1 mb-4">
                         {Array.from({ length: testimonial.rating }).map((_, i) => (
-                          <Star key={i} className="h-5 w-5 fill-primary text-primary" />
+                          <motion.div
+                            key={i}
+                            initial={{ scale: 0, rotate: -180 }}
+                            whileInView={{ scale: 1, rotate: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.5 + i * 0.1, type: "spring", stiffness: 500 }}
+                          >
+                            <Star className="h-5 w-5 fill-primary text-primary" />
+                          </motion.div>
                         ))}
                       </div>
                       <blockquote className="text-lg mb-6 leading-relaxed">
                         "{testimonial.quote}"
                       </blockquote>
                       <div className="flex items-center gap-4">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">
+                        <motion.div 
+                          className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold"
+                          whileHover={{ scale: 1.2, rotate: 360 }}
+                          transition={{ duration: 0.5 }}
+                        >
                           {testimonial.avatar}
-                        </div>
+                        </motion.div>
                         <div>
                           <div className="font-semibold">{testimonial.author}</div>
                           <div className="text-sm text-muted-foreground">
@@ -766,74 +797,79 @@ const Index = () => {
                     </CardContent>
                   </Card>
                 </motion.div>
-              </motion.div>
+              </ScrollReveal>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* CTA Section - Gradient Background */}
+      {/* CTA Section - Gradient Background with Enhanced Reveal */}
       <section className="py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/10 rounded-full blur-3xl" />
+        <motion.div 
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/10 rounded-full blur-3xl"
+          animate={{ 
+            scale: [1, 1.1, 1],
+            opacity: [0.5, 0.8, 0.5]
+          }}
+          transition={{ duration: 5, repeat: Infinity }}
+        />
         
         <div className="container relative">
-          <motion.div 
-            className="max-w-3xl mx-auto text-center"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={staggerContainer}
-          >
-            <motion.div variants={fadeInUp}>
+          <div className="max-w-3xl mx-auto text-center">
+            <Elastic delay={0.1}>
               <Badge className="mb-6 bg-primary/10 text-primary border-primary/20">
                 <Zap className="mr-2 h-4 w-4" />
                 Comece Hoje Mesmo
               </Badge>
-            </motion.div>
+            </Elastic>
             
-            <motion.h2 
-              variants={fadeInUp}
-              className="text-4xl font-bold tracking-tight sm:text-5xl mb-6"
-            >
-              Pronto para transformar sua escola?
-            </motion.h2>
+            <Reveal delay={0.2}>
+              <h2 className="text-4xl font-bold tracking-tight sm:text-5xl mb-6">
+                Pronto para transformar sua escola?
+              </h2>
+            </Reveal>
             
-            <motion.p 
-              variants={fadeInUp}
-              className="text-xl text-muted-foreground mb-10"
-            >
-              Junte-se a mais de 500 escolas que já modernizaram sua gestão. 
-              Comece gratuitamente e veja os resultados.
-            </motion.p>
+            <FadeUp delay={0.4}>
+              <p className="text-xl text-muted-foreground mb-10">
+                Junte-se a mais de 500 escolas que já modernizaram sua gestão. 
+                Comece gratuitamente e veja os resultados.
+              </p>
+            </FadeUp>
 
-            <motion.div 
-              variants={fadeInUp}
-              className="flex flex-col sm:flex-row gap-4 justify-center"
-            >
-              <Link to="/login">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button size="lg" className="w-full sm:w-auto gap-2 text-lg px-8 py-6 shadow-xl shadow-primary/30">
-                    Criar Conta Grátis
-                    <ArrowRight className="h-5 w-5" />
+            <FadeUp delay={0.5}>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link to="/login">
+                  <motion.div 
+                    whileHover={{ scale: 1.08, y: -4 }} 
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: "spring", stiffness: 400 }}
+                  >
+                    <Button size="lg" className="w-full sm:w-auto gap-2 text-lg px-8 py-6 shadow-xl shadow-primary/30">
+                      Criar Conta Grátis
+                      <ArrowRight className="h-5 w-5" />
+                    </Button>
+                  </motion.div>
+                </Link>
+                <motion.div 
+                  whileHover={{ scale: 1.08, y: -4 }} 
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                >
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 text-lg px-8 py-6">
+                    Agendar Demo
+                    <ArrowUpRight className="h-5 w-5" />
                   </Button>
                 </motion.div>
-              </Link>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 text-lg px-8 py-6">
-                  Agendar Demo
-                  <ArrowUpRight className="h-5 w-5" />
-                </Button>
-              </motion.div>
-            </motion.div>
+              </div>
+            </FadeUp>
 
-            <motion.p 
-              variants={fadeIn}
-              className="mt-8 text-sm text-muted-foreground"
-            >
-              ✓ Sem cartão de crédito &nbsp;&nbsp; ✓ Setup em 5 minutos &nbsp;&nbsp; ✓ Cancele quando quiser
-            </motion.p>
-          </motion.div>
+            <Blur delay={0.7}>
+              <p className="mt-8 text-sm text-muted-foreground">
+                ✓ Sem cartão de crédito &nbsp;&nbsp; ✓ Setup em 5 minutos &nbsp;&nbsp; ✓ Cancele quando quiser
+              </p>
+            </Blur>
+          </div>
         </div>
       </section>
 
