@@ -103,7 +103,15 @@ function getUsersDB(): Record<string, User & { password: string }> {
   try {
     const stored = localStorage.getItem(STORAGE_KEYS.USERS_DB);
     if (stored) {
-      return JSON.parse(stored);
+      const storedUsers = JSON.parse(stored);
+      // Always merge with default users to ensure new default users are included
+      const mergedUsers = { ...defaultUsers, ...storedUsers };
+      // Ensure default users always have their original passwords (for demo purposes)
+      for (const email of Object.keys(defaultUsers)) {
+        mergedUsers[email] = defaultUsers[email];
+      }
+      localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(mergedUsers));
+      return mergedUsers;
     }
   } catch {
     console.error('Error reading users DB');
