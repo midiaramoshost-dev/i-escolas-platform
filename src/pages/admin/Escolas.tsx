@@ -51,6 +51,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { EditarEscolaDialog, Escola } from "@/components/admin/EditarEscolaDialog";
+import { DetalhesEscolaDialog } from "@/components/admin/DetalhesEscolaDialog";
 import { toast } from "sonner";
 
 const escolasIniciais: Escola[] = [
@@ -98,7 +99,13 @@ export default function AdminEscolas() {
   const [filtroStatus, setFiltroStatus] = useState("todos");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [detalhesDialogOpen, setDetalhesDialogOpen] = useState(false);
   const [escolaSelecionada, setEscolaSelecionada] = useState<Escola | null>(null);
+
+  const handleVerDetalhes = (escola: Escola) => {
+    setEscolaSelecionada(escola);
+    setDetalhesDialogOpen(true);
+  };
 
   const handleEditEscola = (escola: Escola) => {
     setEscolaSelecionada(escola);
@@ -397,7 +404,10 @@ export default function AdminEscolas() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
-                          <DropdownMenuItem className="cursor-pointer">
+                          <DropdownMenuItem 
+                            className="cursor-pointer"
+                            onClick={() => handleVerDetalhes(escola)}
+                          >
                             <Eye className="mr-2 h-4 w-4" />
                             Ver Detalhes
                           </DropdownMenuItem>
@@ -425,6 +435,13 @@ export default function AdminEscolas() {
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Dialog de Detalhes */}
+      <DetalhesEscolaDialog
+        escola={escolaSelecionada}
+        open={detalhesDialogOpen}
+        onOpenChange={setDetalhesDialogOpen}
+      />
 
       {/* Dialog de Edição */}
       <EditarEscolaDialog
