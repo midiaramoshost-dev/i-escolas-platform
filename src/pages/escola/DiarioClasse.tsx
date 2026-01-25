@@ -20,6 +20,7 @@ import {
   GraduationCap,
   AlertCircle,
   TrendingUp,
+  Trash2,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,16 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Table,
   TableBody,
   TableCell,
@@ -60,6 +71,30 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
+import { toast } from "sonner";
+
+// Interfaces
+interface Aula {
+  id: string;
+  data: string;
+  turma: string;
+  disciplina: string;
+  horario: string;
+  conteudo: string;
+  presentes: number;
+  ausentes: number;
+  status: string;
+}
+
+interface NotaAluno {
+  id: string;
+  aluno: string;
+  matricula: string;
+  av1: number;
+  av2: number;
+  trabalhos: number;
+  media: number;
+}
 
 // Dados mockados
 const turmasData = [
@@ -91,7 +126,7 @@ const alunosTurma = [
   { id: "10", nome: "João Pedro Costa", matricula: "2024010" },
 ];
 
-const aulasRegistradas = [
+const initialAulasRegistradas: Aula[] = [
   {
     id: "1",
     data: "2024-01-22",
@@ -258,6 +293,7 @@ const statsCards = [
 ];
 
 export default function DiarioClasse() {
+  const [aulas, setAulas] = useState<Aula[]>(initialAulasRegistradas);
   const [selectedTurma, setSelectedTurma] = useState<string>("");
   const [selectedDisciplina, setSelectedDisciplina] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split("T")[0]);
@@ -265,6 +301,10 @@ export default function DiarioClasse() {
   const [isChamadaDialogOpen, setIsChamadaDialogOpen] = useState(false);
   const [isNotaDialogOpen, setIsNotaDialogOpen] = useState(false);
   const [isConteudoDialogOpen, setIsConteudoDialogOpen] = useState(false);
+  const [isEditAulaDialogOpen, setIsEditAulaDialogOpen] = useState(false);
+  const [isViewAulaDialogOpen, setIsViewAulaDialogOpen] = useState(false);
+  const [isDeleteAulaDialogOpen, setIsDeleteAulaDialogOpen] = useState(false);
+  const [selectedAula, setSelectedAula] = useState<Aula | null>(null);
   const [presencas, setPresencas] = useState<Record<string, boolean>>({});
 
   // Inicializar presenças
@@ -560,7 +600,7 @@ export default function DiarioClasse() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {aulasRegistradas.map((aula) => (
+                    {aulas.map((aula) => (
                       <TableRow key={aula.id}>
                         <TableCell className="font-medium">
                           {new Date(aula.data).toLocaleDateString("pt-BR")}
@@ -590,18 +630,37 @@ export default function DiarioClasse() {
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem>
+                            <DropdownMenuContent align="end" className="bg-background">
+                              <DropdownMenuItem onClick={() => {
+                                setSelectedAula(aula);
+                                setIsViewAulaDialogOpen(true);
+                              }}>
                                 <Eye className="mr-2 h-4 w-4" />
                                 Visualizar
                               </DropdownMenuItem>
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => {
+                                setSelectedAula(aula);
+                                setIsEditAulaDialogOpen(true);
+                              }}>
                                 <Edit className="mr-2 h-4 w-4" />
                                 Editar
                               </DropdownMenuItem>
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => {
+                                setSelectedAula(aula);
+                                setIsChamadaDialogOpen(true);
+                              }}>
                                 <Users className="mr-2 h-4 w-4" />
                                 Ver Chamada
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                className="text-destructive"
+                                onClick={() => {
+                                  setSelectedAula(aula);
+                                  setIsDeleteAulaDialogOpen(true);
+                                }}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Excluir
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>

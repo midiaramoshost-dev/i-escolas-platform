@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   Plus,
   Search,
-  Filter,
   MoreHorizontal,
   Users,
   BookOpen,
@@ -43,11 +42,33 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
-const turmasData = [
+interface Turma {
+  id: string;
+  nome: string;
+  serie: string;
+  turno: string;
+  sala: string;
+  alunos: number;
+  capacidade: number;
+  professor: string;
+  status: string;
+}
+
+const initialTurmasData: Turma[] = [
   {
     id: "1",
     nome: "1º Ano A",
@@ -145,13 +166,41 @@ const statsCards = [
   { title: "Turno Tarde", value: "16", icon: Clock, color: "warning" },
 ];
 
+const seriesOptions = [
+  "1º Ano", "2º Ano", "3º Ano", "4º Ano", "5º Ano", 
+  "6º Ano", "7º Ano", "8º Ano", "9º Ano", 
+  "1º Médio", "2º Médio", "3º Médio"
+];
+
+const turnoOptions = ["Manhã", "Tarde", "Noite", "Integral"];
+
+const professoresOptions = [
+  "Maria Silva", "João Santos", "Ana Costa", "Carlos Oliveira",
+  "Patricia Lima", "Roberto Ferreira", "Fernanda Souza", "Marcos Almeida"
+];
+
 export default function Turmas() {
+  const [turmas, setTurmas] = useState<Turma[]>(initialTurmasData);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterSerie, setFilterSerie] = useState("all");
   const [filterTurno, setFilterTurno] = useState("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedTurma, setSelectedTurma] = useState<Turma | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  
+  // Form state
+  const [formData, setFormData] = useState({
+    nome: "",
+    serie: "",
+    turno: "",
+    sala: "",
+    capacidade: "",
+    professor: "",
+  });
 
-  const filteredTurmas = turmasData.filter((turma) => {
+  const filteredTurmas = turmas.filter((turma) => {
     const matchesSearch =
       turma.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
       turma.professor.toLowerCase().includes(searchTerm.toLowerCase());
@@ -159,6 +208,101 @@ export default function Turmas() {
     const matchesTurno = filterTurno === "all" || turma.turno === filterTurno;
     return matchesSearch && matchesSerie && matchesTurno;
   });
+
+  const resetForm = () => {
+    setFormData({
+      nome: "",
+      serie: "",
+      turno: "",
+      sala: "",
+      capacidade: "",
+      professor: "",
+    });
+    setIsEditing(false);
+    setSelectedTurma(null);
+  };
+
+  const handleOpenCreate = () => {
+    resetForm();
+    setIsDialogOpen(true);
+  };
+
+  const handleOpenEdit = (turma: Turma) => {
+    setFormData({
+      nome: turma.nome,
+      serie: turma.serie,
+      turno: turma.turno,
+      sala: turma.sala,
+      capacidade: turma.capacidade.toString(),
+      professor: turma.professor,
+    });
+    setSelectedTurma(turma);
+    setIsEditing(true);
+    setIsDialogOpen(true);
+  };
+
+  const handleOpenView = (turma: Turma) => {
+    setSelectedTurma(turma);
+    setIsViewDialogOpen(true);
+  };
+
+  const handleOpenDelete = (turma: Turma) => {
+    setSelectedTurma(turma);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleSave = () => {
+    if (!formData.nome || !formData.serie || !formData.turno) {
+      toast.error("Preencha todos os campos obrigatórios");
+      return;
+    }
+
+    if (isEditing && selectedTurma) {
+      // Atualizar turma existente
+      setTurmas(turmas.map(t => 
+        t.id === selectedTurma.id 
+          ? {
+              ...t,
+              nome: formData.nome,
+              serie: formData.serie,
+              turno: formData.turno,
+              sala: formData.sala,
+              capacidade: parseInt(formData.capacidade) || t.capacidade,
+              professor: formData.professor,
+              status: t.alunos >= (parseInt(formData.capacidade) || t.capacidade) ? "lotada" : "ativa",
+            }
+          : t
+      ));
+      toast.success("Turma atualizada com sucesso!");
+    } else {
+      // Criar nova turma
+      const novaTurma: Turma = {
+        id: Date.now().toString(),
+        nome: formData.nome,
+        serie: formData.serie,
+        turno: formData.turno,
+        sala: formData.sala,
+        alunos: 0,
+        capacidade: parseInt(formData.capacidade) || 30,
+        professor: formData.professor,
+        status: "ativa",
+      };
+      setTurmas([...turmas, novaTurma]);
+      toast.success("Turma criada com sucesso!");
+    }
+    
+    setIsDialogOpen(false);
+    resetForm();
+  };
+
+  const handleDelete = () => {
+    if (selectedTurma) {
+      setTurmas(turmas.filter(t => t.id !== selectedTurma.id));
+      toast.success("Turma excluída com sucesso!");
+      setIsDeleteDialogOpen(false);
+      setSelectedTurma(null);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -170,99 +314,10 @@ export default function Turmas() {
             Gerencie as turmas da sua escola
           </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              Nova Turma
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>Criar Nova Turma</DialogTitle>
-              <DialogDescription>
-                Preencha os dados para criar uma nova turma
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="nome">Nome da Turma</Label>
-                  <Input id="nome" placeholder="Ex: 1º Ano A" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="serie">Série</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1ano">1º Ano</SelectItem>
-                      <SelectItem value="2ano">2º Ano</SelectItem>
-                      <SelectItem value="3ano">3º Ano</SelectItem>
-                      <SelectItem value="4ano">4º Ano</SelectItem>
-                      <SelectItem value="5ano">5º Ano</SelectItem>
-                      <SelectItem value="6ano">6º Ano</SelectItem>
-                      <SelectItem value="7ano">7º Ano</SelectItem>
-                      <SelectItem value="8ano">8º Ano</SelectItem>
-                      <SelectItem value="9ano">9º Ano</SelectItem>
-                      <SelectItem value="1medio">1º Médio</SelectItem>
-                      <SelectItem value="2medio">2º Médio</SelectItem>
-                      <SelectItem value="3medio">3º Médio</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="turno">Turno</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="manha">Manhã</SelectItem>
-                      <SelectItem value="tarde">Tarde</SelectItem>
-                      <SelectItem value="noite">Noite</SelectItem>
-                      <SelectItem value="integral">Integral</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="sala">Sala</Label>
-                  <Input id="sala" placeholder="Ex: Sala 101" />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="capacidade">Capacidade</Label>
-                  <Input id="capacidade" type="number" placeholder="30" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="professor">Professor Responsável</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="maria">Maria Silva</SelectItem>
-                      <SelectItem value="joao">João Santos</SelectItem>
-                      <SelectItem value="ana">Ana Costa</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                Cancelar
-              </Button>
-              <Button onClick={() => setIsDialogOpen(false)}>
-                Criar Turma
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <Button className="gap-2" onClick={handleOpenCreate}>
+          <Plus className="h-4 w-4" />
+          Nova Turma
+        </Button>
       </div>
 
       {/* Stats */}
@@ -302,13 +357,9 @@ export default function Turmas() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas as Séries</SelectItem>
-                  <SelectItem value="1º Ano">1º Ano</SelectItem>
-                  <SelectItem value="2º Ano">2º Ano</SelectItem>
-                  <SelectItem value="3º Ano">3º Ano</SelectItem>
-                  <SelectItem value="5º Ano">5º Ano</SelectItem>
-                  <SelectItem value="7º Ano">7º Ano</SelectItem>
-                  <SelectItem value="9º Ano">9º Ano</SelectItem>
-                  <SelectItem value="3º Médio">3º Médio</SelectItem>
+                  {seriesOptions.map(serie => (
+                    <SelectItem key={serie} value={serie}>{serie}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <Select value={filterTurno} onValueChange={setFilterTurno}>
@@ -317,8 +368,9 @@ export default function Turmas() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="Manhã">Manhã</SelectItem>
-                  <SelectItem value="Tarde">Tarde</SelectItem>
+                  {turnoOptions.map(turno => (
+                    <SelectItem key={turno} value={turno}>{turno}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -387,16 +439,19 @@ export default function Turmas() {
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
+                      <DropdownMenuContent align="end" className="bg-background">
+                        <DropdownMenuItem onClick={() => handleOpenView(turma)}>
                           <Eye className="mr-2 h-4 w-4" />
                           Visualizar
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleOpenEdit(turma)}>
                           <Edit className="mr-2 h-4 w-4" />
                           Editar
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">
+                        <DropdownMenuItem 
+                          className="text-destructive"
+                          onClick={() => handleOpenDelete(turma)}
+                        >
                           <Trash2 className="mr-2 h-4 w-4" />
                           Excluir
                         </DropdownMenuItem>
@@ -409,6 +464,190 @@ export default function Turmas() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Dialog de Criar/Editar */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>{isEditing ? "Editar Turma" : "Criar Nova Turma"}</DialogTitle>
+            <DialogDescription>
+              {isEditing ? "Atualize os dados da turma" : "Preencha os dados para criar uma nova turma"}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="nome">Nome da Turma *</Label>
+                <Input 
+                  id="nome" 
+                  placeholder="Ex: 1º Ano A" 
+                  value={formData.nome}
+                  onChange={(e) => setFormData({...formData, nome: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="serie">Série *</Label>
+                <Select 
+                  value={formData.serie} 
+                  onValueChange={(value) => setFormData({...formData, serie: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {seriesOptions.map(serie => (
+                      <SelectItem key={serie} value={serie}>{serie}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="turno">Turno *</Label>
+                <Select 
+                  value={formData.turno} 
+                  onValueChange={(value) => setFormData({...formData, turno: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {turnoOptions.map(turno => (
+                      <SelectItem key={turno} value={turno}>{turno}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="sala">Sala</Label>
+                <Input 
+                  id="sala" 
+                  placeholder="Ex: Sala 101" 
+                  value={formData.sala}
+                  onChange={(e) => setFormData({...formData, sala: e.target.value})}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="capacidade">Capacidade</Label>
+                <Input 
+                  id="capacidade" 
+                  type="number" 
+                  placeholder="30" 
+                  value={formData.capacidade}
+                  onChange={(e) => setFormData({...formData, capacidade: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="professor">Professor Responsável</Label>
+                <Select 
+                  value={formData.professor} 
+                  onValueChange={(value) => setFormData({...formData, professor: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {professoresOptions.map(prof => (
+                      <SelectItem key={prof} value={prof}>{prof}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {setIsDialogOpen(false); resetForm();}}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSave}>
+              {isEditing ? "Salvar Alterações" : "Criar Turma"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de Visualizar */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Detalhes da Turma</DialogTitle>
+          </DialogHeader>
+          {selectedTurma && (
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Nome</Label>
+                  <p className="font-medium">{selectedTurma.nome}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Série</Label>
+                  <p className="font-medium">{selectedTurma.serie}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Turno</Label>
+                  <p className="font-medium">{selectedTurma.turno}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Sala</Label>
+                  <p className="font-medium">{selectedTurma.sala}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Professor</Label>
+                  <p className="font-medium">{selectedTurma.professor}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Capacidade</Label>
+                  <p className="font-medium">{selectedTurma.alunos}/{selectedTurma.capacidade} alunos</p>
+                </div>
+              </div>
+              <div>
+                <Label className="text-muted-foreground">Status</Label>
+                <div className="mt-1">
+                  <Badge variant={selectedTurma.status === "lotada" ? "destructive" : "default"}>
+                    {selectedTurma.status === "lotada" ? "Lotada" : "Ativa"}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+              Fechar
+            </Button>
+            <Button onClick={() => {
+              setIsViewDialogOpen(false);
+              if (selectedTurma) handleOpenEdit(selectedTurma);
+            }}>
+              Editar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* AlertDialog de Excluir */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir a turma "{selectedTurma?.nome}"? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -17,7 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Table,
   TableBody,
@@ -46,12 +46,40 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
 
-const alunosData = [
+interface Aluno {
+  id: string;
+  matricula: string;
+  nome: string;
+  turma: string;
+  serie: string;
+  turno: string;
+  responsavel: string;
+  telefone: string;
+  email: string;
+  cpf: string;
+  dataNascimento: string;
+  endereco: string;
+  frequencia: number;
+  media: number;
+  status: string;
+}
+
+const initialAlunosData: Aluno[] = [
   {
     id: "1",
     matricula: "2024001",
@@ -62,6 +90,9 @@ const alunosData = [
     responsavel: "Maria Silva",
     telefone: "(11) 98888-1111",
     email: "maria.silva@email.com",
+    cpf: "123.456.789-00",
+    dataNascimento: "2014-03-15",
+    endereco: "Rua das Flores, 123 - Centro",
     frequencia: 96,
     media: 8.5,
     status: "regular",
@@ -76,6 +107,9 @@ const alunosData = [
     responsavel: "Carlos Santos",
     telefone: "(11) 98888-2222",
     email: "carlos.santos@email.com",
+    cpf: "234.567.890-11",
+    dataNascimento: "2014-05-20",
+    endereco: "Av. Principal, 456 - Jardim",
     frequencia: 88,
     media: 7.2,
     status: "alerta",
@@ -90,6 +124,9 @@ const alunosData = [
     responsavel: "Paula Mendes",
     telefone: "(11) 98888-3333",
     email: "paula.mendes@email.com",
+    cpf: "345.678.901-22",
+    dataNascimento: "2012-08-10",
+    endereco: "Rua Nova, 789 - Vila Nova",
     frequencia: 94,
     media: 9.1,
     status: "regular",
@@ -104,6 +141,9 @@ const alunosData = [
     responsavel: "Roberto Oliveira",
     telefone: "(11) 98888-4444",
     email: "roberto.oliveira@email.com",
+    cpf: "456.789.012-33",
+    dataNascimento: "2010-11-25",
+    endereco: "Rua do Sol, 321 - Centro",
     frequencia: 72,
     media: 5.8,
     status: "critico",
@@ -118,6 +158,9 @@ const alunosData = [
     responsavel: "Fernanda Lima",
     telefone: "(11) 98888-5555",
     email: "fernanda.lima@email.com",
+    cpf: "567.890.123-44",
+    dataNascimento: "2016-02-14",
+    endereco: "Rua Verde, 654 - Parque",
     frequencia: 98,
     media: 8.9,
     status: "regular",
@@ -132,6 +175,9 @@ const alunosData = [
     responsavel: "Juliana Almeida",
     telefone: "(11) 98888-6666",
     email: "juliana.almeida@email.com",
+    cpf: "678.901.234-55",
+    dataNascimento: "2018-06-30",
+    endereco: "Av. Brasil, 987 - Centro",
     frequencia: 95,
     media: 8.0,
     status: "regular",
@@ -146,6 +192,9 @@ const alunosData = [
     responsavel: "Marcos Ferreira",
     telefone: "(11) 98888-7777",
     email: "marcos.ferreira@email.com",
+    cpf: "789.012.345-66",
+    dataNascimento: "2007-09-18",
+    endereco: "Rua da Paz, 147 - Jardim",
     frequencia: 91,
     media: 7.8,
     status: "regular",
@@ -160,6 +209,9 @@ const alunosData = [
     responsavel: "Luciana Souza",
     telefone: "(11) 98888-8888",
     email: "luciana.souza@email.com",
+    cpf: "890.123.456-77",
+    dataNascimento: "2012-12-05",
+    endereco: "Rua Central, 258 - Vila",
     frequencia: 85,
     media: 6.5,
     status: "alerta",
@@ -173,13 +225,47 @@ const statsCards = [
   { title: "Situação Crítica", value: "15", icon: AlertTriangle, color: "destructive" },
 ];
 
+const turmasOptions = [
+  "1º Ano A", "1º Ano B", "2º Ano A", "3º Ano A", "4º Ano A",
+  "5º Ano A", "6º Ano A", "7º Ano B", "8º Ano A", "9º Ano A",
+  "1º EM A", "2º EM A", "3º EM A"
+];
+
+const seriesOptions = [
+  "1º Ano", "2º Ano", "3º Ano", "4º Ano", "5º Ano",
+  "6º Ano", "7º Ano", "8º Ano", "9º Ano",
+  "1º Médio", "2º Médio", "3º Médio"
+];
+
+const turnoOptions = ["Manhã", "Tarde", "Integral"];
+
 export default function Alunos() {
+  const [alunos, setAlunos] = useState<Aluno[]>(initialAlunosData);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterTurma, setFilterTurma] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedAluno, setSelectedAluno] = useState<Aluno | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
 
-  const filteredAlunos = alunosData.filter((aluno) => {
+  // Form state
+  const [formData, setFormData] = useState({
+    nome: "",
+    cpf: "",
+    dataNascimento: "",
+    endereco: "",
+    serie: "",
+    turma: "",
+    turno: "",
+    responsavel: "",
+    telefone: "",
+    email: "",
+    parentesco: "",
+  });
+
+  const filteredAlunos = alunos.filter((aluno) => {
     const matchesSearch =
       aluno.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
       aluno.matricula.includes(searchTerm) ||
@@ -211,6 +297,134 @@ export default function Alunos() {
     }
   };
 
+  const resetForm = () => {
+    setFormData({
+      nome: "",
+      cpf: "",
+      dataNascimento: "",
+      endereco: "",
+      serie: "",
+      turma: "",
+      turno: "",
+      responsavel: "",
+      telefone: "",
+      email: "",
+      parentesco: "",
+    });
+    setIsEditing(false);
+    setSelectedAluno(null);
+  };
+
+  const handleOpenCreate = () => {
+    resetForm();
+    setIsDialogOpen(true);
+  };
+
+  const handleOpenEdit = (aluno: Aluno) => {
+    setFormData({
+      nome: aluno.nome,
+      cpf: aluno.cpf,
+      dataNascimento: aluno.dataNascimento,
+      endereco: aluno.endereco,
+      serie: aluno.serie,
+      turma: aluno.turma,
+      turno: aluno.turno,
+      responsavel: aluno.responsavel,
+      telefone: aluno.telefone,
+      email: aluno.email,
+      parentesco: "",
+    });
+    setSelectedAluno(aluno);
+    setIsEditing(true);
+    setIsDialogOpen(true);
+  };
+
+  const handleOpenView = (aluno: Aluno) => {
+    setSelectedAluno(aluno);
+    setIsViewDialogOpen(true);
+  };
+
+  const handleOpenDelete = (aluno: Aluno) => {
+    setSelectedAluno(aluno);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleSave = () => {
+    if (!formData.nome || !formData.turma) {
+      toast.error("Preencha todos os campos obrigatórios");
+      return;
+    }
+
+    if (isEditing && selectedAluno) {
+      setAlunos(alunos.map(a => 
+        a.id === selectedAluno.id 
+          ? {
+              ...a,
+              nome: formData.nome,
+              cpf: formData.cpf,
+              dataNascimento: formData.dataNascimento,
+              endereco: formData.endereco,
+              serie: formData.serie,
+              turma: formData.turma,
+              turno: formData.turno,
+              responsavel: formData.responsavel,
+              telefone: formData.telefone,
+              email: formData.email,
+            }
+          : a
+      ));
+      toast.success("Aluno atualizado com sucesso!");
+    } else {
+      const novoAluno: Aluno = {
+        id: Date.now().toString(),
+        matricula: `2024${String(alunos.length + 1).padStart(3, '0')}`,
+        nome: formData.nome,
+        cpf: formData.cpf,
+        dataNascimento: formData.dataNascimento,
+        endereco: formData.endereco,
+        serie: formData.serie,
+        turma: formData.turma,
+        turno: formData.turno,
+        responsavel: formData.responsavel,
+        telefone: formData.telefone,
+        email: formData.email,
+        frequencia: 100,
+        media: 0,
+        status: "regular",
+      };
+      setAlunos([...alunos, novoAluno]);
+      toast.success("Aluno matriculado com sucesso!");
+    }
+    
+    setIsDialogOpen(false);
+    resetForm();
+  };
+
+  const handleDelete = () => {
+    if (selectedAluno) {
+      setAlunos(alunos.filter(a => a.id !== selectedAluno.id));
+      toast.success("Matrícula cancelada com sucesso!");
+      setIsDeleteDialogOpen(false);
+      setSelectedAluno(null);
+    }
+  };
+
+  const formatPhone = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 11) {
+      return numbers.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    }
+    return value;
+  };
+
+  const formatCPF = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 11) {
+      return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    }
+    return value;
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -226,145 +440,10 @@ export default function Alunos() {
             <Download className="h-4 w-4" />
             Exportar
           </Button>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="gap-2">
-                <Plus className="h-4 w-4" />
-                Novo Aluno
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[700px]">
-              <DialogHeader>
-                <DialogTitle>Matricular Aluno</DialogTitle>
-                <DialogDescription>
-                  Preencha os dados para realizar a matrícula
-                </DialogDescription>
-              </DialogHeader>
-              <Tabs defaultValue="aluno" className="mt-4">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="aluno">Dados do Aluno</TabsTrigger>
-                  <TabsTrigger value="responsavel">Responsável</TabsTrigger>
-                  <TabsTrigger value="academico">Acadêmico</TabsTrigger>
-                </TabsList>
-                <TabsContent value="aluno" className="space-y-4 pt-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="nome">Nome Completo</Label>
-                      <Input id="nome" placeholder="Nome do aluno" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="nascimento">Data de Nascimento</Label>
-                      <Input id="nascimento" type="date" />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="cpf">CPF</Label>
-                      <Input id="cpf" placeholder="000.000.000-00" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="rg">RG</Label>
-                      <Input id="rg" placeholder="00.000.000-0" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="endereco">Endereço Completo</Label>
-                    <Input id="endereco" placeholder="Rua, número, bairro, cidade" />
-                  </div>
-                </TabsContent>
-                <TabsContent value="responsavel" className="space-y-4 pt-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="resp-nome">Nome do Responsável</Label>
-                      <Input id="resp-nome" placeholder="Nome completo" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="parentesco">Parentesco</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="mae">Mãe</SelectItem>
-                          <SelectItem value="pai">Pai</SelectItem>
-                          <SelectItem value="avo">Avó/Avô</SelectItem>
-                          <SelectItem value="tio">Tio/Tia</SelectItem>
-                          <SelectItem value="outro">Outro</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="resp-email">E-mail</Label>
-                      <Input id="resp-email" type="email" placeholder="email@exemplo.com" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="resp-telefone">Telefone</Label>
-                      <Input id="resp-telefone" placeholder="(11) 99999-9999" />
-                    </div>
-                  </div>
-                </TabsContent>
-                <TabsContent value="academico" className="space-y-4 pt-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Série</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="1ano">1º Ano</SelectItem>
-                          <SelectItem value="2ano">2º Ano</SelectItem>
-                          <SelectItem value="3ano">3º Ano</SelectItem>
-                          <SelectItem value="4ano">4º Ano</SelectItem>
-                          <SelectItem value="5ano">5º Ano</SelectItem>
-                          <SelectItem value="6ano">6º Ano</SelectItem>
-                          <SelectItem value="7ano">7º Ano</SelectItem>
-                          <SelectItem value="8ano">8º Ano</SelectItem>
-                          <SelectItem value="9ano">9º Ano</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Turma</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="a">Turma A</SelectItem>
-                          <SelectItem value="b">Turma B</SelectItem>
-                          <SelectItem value="c">Turma C</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Turno</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="manha">Manhã</SelectItem>
-                        <SelectItem value="tarde">Tarde</SelectItem>
-                        <SelectItem value="integral">Integral</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </TabsContent>
-              </Tabs>
-              <DialogFooter className="mt-6">
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancelar
-                </Button>
-                <Button onClick={() => setIsDialogOpen(false)}>
-                  Matricular Aluno
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button className="gap-2" onClick={handleOpenCreate}>
+            <Plus className="h-4 w-4" />
+            Novo Aluno
+          </Button>
         </div>
       </div>
 
@@ -405,12 +484,9 @@ export default function Alunos() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas</SelectItem>
-                  <SelectItem value="1º Ano A">1º Ano A</SelectItem>
-                  <SelectItem value="3º Ano A">3º Ano A</SelectItem>
-                  <SelectItem value="5º Ano A">5º Ano A</SelectItem>
-                  <SelectItem value="7º Ano B">7º Ano B</SelectItem>
-                  <SelectItem value="9º Ano A">9º Ano A</SelectItem>
-                  <SelectItem value="3º EM A">3º EM A</SelectItem>
+                  {turmasOptions.map(turma => (
+                    <SelectItem key={turma} value={turma}>{turma}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <Select value={filterStatus} onValueChange={setFilterStatus}>
@@ -513,12 +589,12 @@ export default function Alunos() {
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
+                      <DropdownMenuContent align="end" className="bg-background">
+                        <DropdownMenuItem onClick={() => handleOpenView(aluno)}>
                           <Eye className="mr-2 h-4 w-4" />
                           Ver Perfil
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleOpenEdit(aluno)}>
                           <Edit className="mr-2 h-4 w-4" />
                           Editar
                         </DropdownMenuItem>
@@ -526,7 +602,10 @@ export default function Alunos() {
                           <Mail className="mr-2 h-4 w-4" />
                           Contatar Responsável
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">
+                        <DropdownMenuItem 
+                          className="text-destructive"
+                          onClick={() => handleOpenDelete(aluno)}
+                        >
                           <Trash2 className="mr-2 h-4 w-4" />
                           Cancelar Matrícula
                         </DropdownMenuItem>
@@ -539,6 +618,280 @@ export default function Alunos() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Dialog de Criar/Editar */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[700px]">
+          <DialogHeader>
+            <DialogTitle>{isEditing ? "Editar Aluno" : "Matricular Aluno"}</DialogTitle>
+            <DialogDescription>
+              {isEditing ? "Atualize os dados do aluno" : "Preencha os dados para realizar a matrícula"}
+            </DialogDescription>
+          </DialogHeader>
+          <Tabs defaultValue="aluno" className="mt-4">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="aluno">Dados do Aluno</TabsTrigger>
+              <TabsTrigger value="responsavel">Responsável</TabsTrigger>
+              <TabsTrigger value="academico">Acadêmico</TabsTrigger>
+            </TabsList>
+            <TabsContent value="aluno" className="space-y-4 pt-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="nome">Nome Completo *</Label>
+                  <Input 
+                    id="nome" 
+                    placeholder="Nome do aluno" 
+                    value={formData.nome}
+                    onChange={(e) => setFormData({...formData, nome: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="nascimento">Data de Nascimento</Label>
+                  <Input 
+                    id="nascimento" 
+                    type="date" 
+                    value={formData.dataNascimento}
+                    onChange={(e) => setFormData({...formData, dataNascimento: e.target.value})}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="cpf">CPF</Label>
+                  <Input 
+                    id="cpf" 
+                    placeholder="000.000.000-00" 
+                    value={formData.cpf}
+                    onChange={(e) => setFormData({...formData, cpf: formatCPF(e.target.value)})}
+                    maxLength={14}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="rg">RG</Label>
+                  <Input id="rg" placeholder="00.000.000-0" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="endereco">Endereço Completo</Label>
+                <Input 
+                  id="endereco" 
+                  placeholder="Rua, número, bairro, cidade" 
+                  value={formData.endereco}
+                  onChange={(e) => setFormData({...formData, endereco: e.target.value})}
+                />
+              </div>
+            </TabsContent>
+            <TabsContent value="responsavel" className="space-y-4 pt-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="resp-nome">Nome do Responsável</Label>
+                  <Input 
+                    id="resp-nome" 
+                    placeholder="Nome completo" 
+                    value={formData.responsavel}
+                    onChange={(e) => setFormData({...formData, responsavel: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="parentesco">Parentesco</Label>
+                  <Select 
+                    value={formData.parentesco}
+                    onValueChange={(value) => setFormData({...formData, parentesco: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="mae">Mãe</SelectItem>
+                      <SelectItem value="pai">Pai</SelectItem>
+                      <SelectItem value="avo">Avó/Avô</SelectItem>
+                      <SelectItem value="tio">Tio/Tia</SelectItem>
+                      <SelectItem value="outro">Outro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="resp-email">E-mail</Label>
+                  <Input 
+                    id="resp-email" 
+                    type="email" 
+                    placeholder="email@exemplo.com" 
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="resp-telefone">Telefone</Label>
+                  <Input 
+                    id="resp-telefone" 
+                    placeholder="(11) 99999-9999" 
+                    value={formData.telefone}
+                    onChange={(e) => setFormData({...formData, telefone: formatPhone(e.target.value)})}
+                    maxLength={15}
+                  />
+                </div>
+              </div>
+            </TabsContent>
+            <TabsContent value="academico" className="space-y-4 pt-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Série *</Label>
+                  <Select 
+                    value={formData.serie}
+                    onValueChange={(value) => setFormData({...formData, serie: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {seriesOptions.map(serie => (
+                        <SelectItem key={serie} value={serie}>{serie}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Turma *</Label>
+                  <Select 
+                    value={formData.turma}
+                    onValueChange={(value) => setFormData({...formData, turma: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {turmasOptions.map(turma => (
+                        <SelectItem key={turma} value={turma}>{turma}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Turno</Label>
+                <Select 
+                  value={formData.turno}
+                  onValueChange={(value) => setFormData({...formData, turno: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {turnoOptions.map(turno => (
+                      <SelectItem key={turno} value={turno}>{turno}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </TabsContent>
+          </Tabs>
+          <DialogFooter className="mt-6">
+            <Button variant="outline" onClick={() => {setIsDialogOpen(false); resetForm();}}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSave}>
+              {isEditing ? "Salvar Alterações" : "Matricular Aluno"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de Visualizar */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Perfil do Aluno</DialogTitle>
+          </DialogHeader>
+          {selectedAluno && (
+            <div className="space-y-4 py-4">
+              <div className="flex items-center gap-4">
+                <Avatar className="h-16 w-16">
+                  <AvatarFallback className="bg-primary text-primary-foreground text-xl">
+                    {getInitials(selectedAluno.nome)}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="font-semibold text-lg">{selectedAluno.nome}</h3>
+                  <p className="text-muted-foreground">Matrícula: {selectedAluno.matricula}</p>
+                  {getStatusBadge(selectedAluno.status)}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Turma</Label>
+                  <p className="font-medium">{selectedAluno.turma}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Turno</Label>
+                  <p className="font-medium">{selectedAluno.turno}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Frequência</Label>
+                  <p className={`font-medium ${selectedAluno.frequencia >= 90 ? "text-success" : selectedAluno.frequencia >= 75 ? "text-warning" : "text-destructive"}`}>
+                    {selectedAluno.frequencia}%
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Média Geral</Label>
+                  <p className={`font-medium ${selectedAluno.media >= 7 ? "text-success" : selectedAluno.media >= 5 ? "text-warning" : "text-destructive"}`}>
+                    {selectedAluno.media.toFixed(1)}
+                  </p>
+                </div>
+              </div>
+              <div className="border-t pt-4">
+                <h4 className="font-medium mb-2">Responsável</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-muted-foreground">Nome</Label>
+                    <p className="font-medium">{selectedAluno.responsavel}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Telefone</Label>
+                    <p className="font-medium">{selectedAluno.telefone}</p>
+                  </div>
+                </div>
+                <div className="mt-2">
+                  <Label className="text-muted-foreground">E-mail</Label>
+                  <p className="font-medium">{selectedAluno.email}</p>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+              Fechar
+            </Button>
+            <Button onClick={() => {
+              setIsViewDialogOpen(false);
+              if (selectedAluno) handleOpenEdit(selectedAluno);
+            }}>
+              Editar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* AlertDialog de Excluir */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancelar Matrícula</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja cancelar a matrícula de "{selectedAluno?.nome}"? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Voltar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Cancelar Matrícula
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
