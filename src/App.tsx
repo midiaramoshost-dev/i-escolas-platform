@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/hooks/useTheme";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { AlunoLayout } from "@/components/layout/AlunoLayout";
 import { ResponsavelLayout } from "@/components/layout/ResponsavelLayout";
+import { AdminLayout } from "@/components/layout/AdminLayout";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import EscolaDashboard from "./pages/escola/Dashboard";
@@ -32,6 +33,11 @@ import ResponsavelTarefas from "./pages/responsavel/Tarefas";
 import ResponsavelComunicados from "./pages/responsavel/Comunicados";
 import ResponsavelFinanceiro from "./pages/responsavel/Financeiro";
 import ResponsavelPerfil from "./pages/responsavel/Perfil";
+import AdminDashboard from "./pages/admin/Dashboard";
+import AdminEscolas from "./pages/admin/Escolas";
+import AdminPlanos from "./pages/admin/Planos";
+import AdminFinanceiro from "./pages/admin/Financeiro";
+import AdminMonitoramento from "./pages/admin/Monitoramento";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -83,6 +89,16 @@ const App = () => (
               <Route path="comunicados" element={<ResponsavelComunicados />} />
               <Route path="financeiro" element={<ResponsavelFinanceiro />} />
               <Route path="perfil" element={<ResponsavelPerfil />} />
+            </Route>
+
+            {/* Admin Master Routes */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<Navigate to="/admin/dashboard" replace />} />
+              <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="escolas" element={<AdminEscolas />} />
+              <Route path="planos" element={<AdminPlanos />} />
+              <Route path="financeiro" element={<AdminFinanceiro />} />
+              <Route path="monitoramento" element={<AdminMonitoramento />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
