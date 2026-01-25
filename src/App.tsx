@@ -47,6 +47,9 @@ import AdminEscolas from "./pages/admin/Escolas";
 import AdminPlanos from "./pages/admin/Planos";
 import AdminFinanceiro from "./pages/admin/Financeiro";
 import AdminMonitoramento from "./pages/admin/Monitoramento";
+import AdminUsuarios from "./pages/admin/Usuarios";
+import AdminConfiguracoes from "./pages/admin/Configuracoes";
+import AdminModulos from "./pages/admin/Modulos";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -132,6 +135,9 @@ const App = () => (
                 <Route path="planos" element={<AdminPlanos />} />
                 <Route path="financeiro" element={<AdminFinanceiro />} />
                 <Route path="monitoramento" element={<AdminMonitoramento />} />
+                <Route path="usuarios" element={<AdminUsuarios />} />
+                <Route path="configuracoes" element={<AdminConfiguracoes />} />
+                <Route path="modulos" element={<AdminModulos />} />
               </Route>
 
               <Route path="*" element={<NotFound />} />

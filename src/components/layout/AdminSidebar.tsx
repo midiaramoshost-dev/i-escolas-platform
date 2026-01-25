@@ -11,6 +11,7 @@ import {
   Layers,
   DollarSign,
   Activity,
+  Puzzle,
 } from "lucide-react";
 import {
   Sidebar,
@@ -54,6 +55,11 @@ const menuItems = [
     title: "Monitoramento",
     icon: Activity,
     url: "/admin/monitoramento",
+  },
+  {
+    title: "Módulos",
+    icon: Puzzle,
+    url: "/admin/modulos",
   },
   {
     title: "Usuários",
