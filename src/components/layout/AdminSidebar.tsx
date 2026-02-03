@@ -106,7 +106,7 @@ export function AdminSidebar() {
               <span className="text-lg font-bold tracking-tight text-sidebar-foreground">
                 ADM Master
               </span>
-              <span className="text-xs text-sidebar-foreground/60">
+              <span className="text-xs bg-gradient-to-r from-rose-400 via-orange-300 to-amber-200 bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(251,113,133,0.45)]">
                 iESCOLAS
               </span>
             </div>

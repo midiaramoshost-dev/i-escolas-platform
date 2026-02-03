@@ -149,7 +149,7 @@ export function AppSidebar() {
           </div>
           {!isCollapsed && (
             <div className="flex flex-col">
-              <span className="text-lg font-bold tracking-tight text-sidebar-foreground">
+              <span className="text-lg font-bold tracking-tight bg-gradient-to-r from-primary via-violet-500 to-sky-500 bg-clip-text text-transparent drop-shadow-[0_2px_10px_rgba(80,70,255,0.45)]">
                 iESCOLAS
               </span>
               <span className="text-xs text-sidebar-foreground/60">
