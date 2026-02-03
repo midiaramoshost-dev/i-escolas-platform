@@ -343,6 +343,12 @@ const Index = () => {
       description: "Comunicação e acompanhamento em tempo real com as famílias.",
       icon: MessageSquare,
       gradient: "from-violet-500/20 via-violet-500/10 to-transparent"
+    },
+    {
+      title: "Gestão Completa",
+      description: "Tudo integrado em um só lugar para sua equipe pedagógica.",
+      icon: GraduationCap,
+      gradient: "from-blue-500/20 via-blue-500/10 to-transparent"
     }
   ];
 
