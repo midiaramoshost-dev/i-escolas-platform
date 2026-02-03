@@ -66,6 +66,14 @@ import {
   TextReveal,
 } from "@/components/animations/ScrollReveal";
 import { useParallax, useScrollProgress } from "@/hooks/useScrollReveal";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi,
+} from "@/components/ui/carousel";
 
 // Animation variants
 const fadeInUp = {
@@ -143,6 +151,7 @@ const Index = () => {
   const { theme, toggleTheme } = useTheme();
   const { planos } = usePlanos();
   const [isAnnual, setIsAnnual] = useState(false);
+  const [heroCarouselApi, setHeroCarouselApi] = useState<CarouselApi | null>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -182,6 +191,16 @@ const Index = () => {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (!heroCarouselApi) return;
+
+    const interval = setInterval(() => {
+      heroCarouselApi.scrollNext();
+    }, 4500);
+
+    return () => clearInterval(interval);
+  }, [heroCarouselApi]);
   const heroY = useTransform(scrollYProgress, [0, 1], [0, 200]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
@@ -304,6 +323,27 @@ const Index = () => {
     { feature: "Acesso mobile", iescolas: true, traditional: false },
     { feature: "Atualizações em tempo real", iescolas: true, traditional: false },
     { feature: "Suporte especializado", iescolas: true, traditional: false },
+  ];
+
+  const heroSlides = [
+    {
+      title: "Dashboard Inteligente",
+      description: "Indicadores em tempo real para decisões rápidas e seguras.",
+      icon: BarChart3,
+      gradient: "from-primary/25 via-primary/10 to-transparent"
+    },
+    {
+      title: "Diário Digital",
+      description: "Registro de aulas e frequência em poucos cliques.",
+      icon: BookOpen,
+      gradient: "from-emerald-500/20 via-emerald-500/10 to-transparent"
+    },
+    {
+      title: "Portal do Responsável",
+      description: "Comunicação e acompanhamento em tempo real com as famílias.",
+      icon: MessageSquare,
+      gradient: "from-violet-500/20 via-violet-500/10 to-transparent"
+    }
   ];
 
   return (
@@ -470,6 +510,45 @@ const Index = () => {
                 <Award className="h-5 w-5 text-primary" />
                 <span className="text-sm">+500 escolas confiam</span>
               </div>
+            </motion.div>
+
+            {/* Hero Slideshow */}
+            <motion.div
+              className="mt-12"
+              variants={fadeIn}
+              transition={{ duration: 0.8, delay: 0.6 }}
+            >
+              <Carousel
+                opts={{ loop: true }}
+                setApi={setHeroCarouselApi}
+                className="relative mx-auto max-w-4xl"
+                aria-label="Slideshow de recursos"
+              >
+                <CarouselContent>
+                  {heroSlides.map((slide, index) => (
+                    <CarouselItem key={index}>
+                      <Card className="border-border/50 bg-card/70 backdrop-blur-sm overflow-hidden">
+                        <CardContent className="p-0">
+                          <div className={`relative h-64 md:h-72 bg-gradient-to-br ${slide.gradient}`}>
+                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.3),transparent_55%)]" />
+                            <div className="relative h-full flex flex-col items-center justify-center gap-4 p-8 text-center">
+                              <div className="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
+                                <slide.icon className="h-7 w-7" />
+                              </div>
+                              <div>
+                                <h3 className="text-2xl font-semibold mb-2">{slide.title}</h3>
+                                <p className="text-muted-foreground max-w-md mx-auto">{slide.description}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious className="hidden md:inline-flex" />
+                <CarouselNext className="hidden md:inline-flex" />
+              </Carousel>
             </motion.div>
           </motion.div>
         </motion.div>
