@@ -22,8 +22,13 @@ export function AppHeader() {
       <div className="flex items-center gap-4">
         <SidebarTrigger className="-ml-1" />
 
-        <div className="hidden sm:flex items-center">
-          <span className="text-lg font-semibold tracking-tight bg-gradient-to-r from-primary via-violet-500 to-sky-500 bg-clip-text text-transparent drop-shadow-[0_2px_10px_rgba(80,70,255,0.45)]">
+        <div className="hidden sm:flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-primary via-violet-500 to-sky-500 shadow-sm ring-1 ring-primary/25">
+            <span className="text-xs font-semibold tracking-tight text-white">
+              IE
+            </span>
+          </div>
+          <span className="text-sm font-semibold tracking-[0.3em] text-foreground/90">
             iESCOLAS
           </span>
         </div>

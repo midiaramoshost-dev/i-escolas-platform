@@ -97,16 +97,15 @@ export function AdminSidebar() {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarHeader className="border-b border-sidebar-border p-4">
         <Link to="/admin/dashboard" className="flex items-center gap-3">
-          <div className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-red-600 shadow-md ring-1 ring-rose-500/30">
-            <Shield className="h-6 w-6 text-white drop-shadow" />
-            <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-amber-400 ring-2 ring-card" />
+          <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary via-violet-500 to-sky-500 shadow-sm ring-1 ring-primary/20">
+            <Shield className="h-5 w-5 text-white" />
           </div>
           {!isCollapsed && (
             <div className="flex flex-col">
-              <span className="text-lg font-bold tracking-tight text-sidebar-foreground">
+              <span className="text-base font-semibold tracking-tight text-sidebar-foreground">
                 ADM Master
               </span>
-              <span className="text-xs bg-gradient-to-r from-rose-400 via-orange-300 to-amber-200 bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(251,113,133,0.45)]">
+              <span className="text-[11px] uppercase tracking-[0.25em] text-sidebar-foreground/70">
                 iESCOLAS
               </span>
             </div>
