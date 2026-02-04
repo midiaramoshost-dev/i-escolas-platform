@@ -95,7 +95,7 @@ export function DetalhesEscolaDialog({ escola, open, onOpenChange }: DetalhesEsc
                 <Building2 className="h-6 w-6 text-rose-500" />
               </div>
               <div>
-                <DialogTitle className="text-xl">{escola.nome}</DialogTitle>
+                <DialogTitle className="text-xl text-blue-500">{escola.nome}</DialogTitle>
                 <p className="text-sm text-muted-foreground">{escola.cnpj}</p>
               </div>
             </div>
