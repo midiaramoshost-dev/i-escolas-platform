@@ -74,6 +74,10 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
+import heroSlide1 from "@/assets/hero-slide-1.jpg";
+import heroSlide2 from "@/assets/hero-slide-2.jpg";
+import heroSlide3 from "@/assets/hero-slide-3.jpg";
+import heroSlide4 from "@/assets/hero-slide-4.jpg";
 
 // Animation variants
 const fadeInUp = {
@@ -152,6 +156,7 @@ const Index = () => {
   const { planos } = usePlanos();
   const [isAnnual, setIsAnnual] = useState(false);
   const [heroCarouselApi, setHeroCarouselApi] = useState<CarouselApi | null>(null);
+  const [activeSlide, setActiveSlide] = useState(0);
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -195,11 +200,20 @@ const Index = () => {
   useEffect(() => {
     if (!heroCarouselApi) return;
 
+    const onSelect = () => {
+      setActiveSlide(heroCarouselApi.selectedScrollSnap());
+    };
+    heroCarouselApi.on("select", onSelect);
+    onSelect();
+
     const interval = setInterval(() => {
       heroCarouselApi.scrollNext();
-    }, 4500);
+    }, 5000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      heroCarouselApi.off("select", onSelect);
+    };
   }, [heroCarouselApi]);
   const heroY = useTransform(scrollYProgress, [0, 1], [0, 200]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
@@ -329,26 +343,22 @@ const Index = () => {
     {
       title: "Dashboard Inteligente",
       description: "Indicadores em tempo real para decisões rápidas e seguras.",
-      icon: BarChart3,
-      gradient: "from-primary/25 via-primary/10 to-transparent"
+      image: heroSlide1,
     },
     {
       title: "Diário Digital",
       description: "Registro de aulas e frequência em poucos cliques.",
-      icon: BookOpen,
-      gradient: "from-emerald-500/20 via-emerald-500/10 to-transparent"
+      image: heroSlide2,
     },
     {
       title: "Portal do Responsável",
       description: "Comunicação e acompanhamento em tempo real com as famílias.",
-      icon: MessageSquare,
-      gradient: "from-violet-500/20 via-violet-500/10 to-transparent"
+      image: heroSlide3,
     },
     {
       title: "Gestão Completa",
       description: "Tudo integrado em um só lugar para sua equipe pedagógica.",
-      icon: GraduationCap,
-      gradient: "from-blue-500/20 via-blue-500/10 to-transparent"
+      image: heroSlide4,
     }
   ];
 
@@ -533,28 +543,40 @@ const Index = () => {
                 <CarouselContent>
                   {heroSlides.map((slide, index) => (
                     <CarouselItem key={index}>
-                      <Card className="border-border/50 bg-card/70 backdrop-blur-sm overflow-hidden">
-                        <CardContent className="p-0">
-                          <div className={`relative h-64 md:h-72 bg-gradient-to-br ${slide.gradient}`}>
-                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.3),transparent_55%)]" />
-                            <div className="relative h-full flex flex-col items-center justify-center gap-4 p-8 text-center">
-                              <div className="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
-                                <slide.icon className="h-7 w-7" />
-                              </div>
-                              <div>
-                                <h3 className="text-2xl font-semibold mb-2">{slide.title}</h3>
-                                <p className="text-muted-foreground max-w-md mx-auto">{slide.description}</p>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
+                      <div className="relative h-80 md:h-96 rounded-2xl overflow-hidden group">
+                        <img
+                          src={slide.image}
+                          alt={slide.title}
+                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          loading={index === 0 ? "eager" : "lazy"}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />
+                        <div className="relative h-full flex flex-col items-center justify-end gap-2 p-8 pb-12 text-center">
+                          <h3 className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">{slide.title}</h3>
+                          <p className="text-white/85 max-w-md mx-auto text-sm md:text-base drop-shadow">{slide.description}</p>
+                        </div>
+                      </div>
                     </CarouselItem>
                   ))}
                 </CarouselContent>
                 <CarouselPrevious className="hidden md:inline-flex" />
                 <CarouselNext className="hidden md:inline-flex" />
               </Carousel>
+              {/* Dot indicators */}
+              <div className="flex justify-center gap-2 mt-4">
+                {heroSlides.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => heroCarouselApi?.scrollTo(index)}
+                    className={`h-2.5 rounded-full transition-all duration-300 ${
+                      activeSlide === index
+                        ? "w-8 bg-primary"
+                        : "w-2.5 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                    }`}
+                    aria-label={`Ir para slide ${index + 1}`}
+                  />
+                ))}
+              </div>
             </motion.div>
           </motion.div>
         </motion.div>
