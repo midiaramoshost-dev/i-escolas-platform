@@ -436,7 +436,7 @@ const Index = () => {
       </motion.header>
 
       {/* Hero Section - Modern with Parallax */}
-      <section ref={heroRef} className="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden">
+      <section ref={heroRef} className="relative flex items-center justify-center pt-24 pb-12 overflow-hidden">
         {/* Animated Background */}
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10" />
@@ -467,7 +467,7 @@ const Index = () => {
 
             {/* Main Heading */}
             <motion.h1 
-              className="mb-6 text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl lg:text-8xl"
+              className="mb-6 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl"
               variants={fadeInUp}
               transition={{ duration: 0.7, delay: 0.1 }}
             >
@@ -479,7 +479,7 @@ const Index = () => {
 
             {/* Subheadline */}
             <motion.p 
-              className="mb-10 text-xl text-muted-foreground md:text-2xl max-w-3xl mx-auto leading-relaxed"
+              className="mb-8 text-lg text-muted-foreground md:text-xl max-w-3xl mx-auto leading-relaxed"
               variants={fadeInUp}
               transition={{ duration: 0.7, delay: 0.2 }}
             >
@@ -530,40 +530,42 @@ const Index = () => {
 
             {/* Hero Slideshow */}
             <motion.div
-              className="mt-12"
+              className="mt-10"
               variants={fadeIn}
               transition={{ duration: 0.8, delay: 0.6 }}
             >
               <Carousel
                 opts={{ loop: true }}
                 setApi={setHeroCarouselApi}
-                className="relative mx-auto max-w-4xl"
+                className="relative mx-auto max-w-5xl"
                 aria-label="Slideshow de recursos"
               >
                 <CarouselContent>
                   {heroSlides.map((slide, index) => (
                     <CarouselItem key={index}>
-                      <div className="relative h-80 md:h-96 rounded-2xl overflow-hidden group">
+                      <div className="relative h-72 sm:h-80 md:h-[28rem] rounded-2xl overflow-hidden group shadow-2xl shadow-primary/10 border border-border/40">
                         <img
                           src={slide.image}
                           alt={slide.title}
                           className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                           loading={index === 0 ? "eager" : "lazy"}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />
-                        <div className="relative h-full flex flex-col items-center justify-end gap-2 p-8 pb-12 text-center">
-                          <h3 className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">{slide.title}</h3>
-                          <p className="text-white/85 max-w-md mx-auto text-sm md:text-base drop-shadow">{slide.description}</p>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                        <div className="relative h-full flex flex-col items-center justify-end gap-2 p-6 pb-10 md:p-8 md:pb-14 text-center">
+                          <span className="inline-flex items-center rounded-full bg-primary/90 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-primary-foreground mb-2">
+                            {slide.title}
+                          </span>
+                          <p className="text-white/90 max-w-lg mx-auto text-sm md:text-lg drop-shadow-lg">{slide.description}</p>
                         </div>
                       </div>
                     </CarouselItem>
                   ))}
                 </CarouselContent>
-                <CarouselPrevious className="hidden md:inline-flex" />
-                <CarouselNext className="hidden md:inline-flex" />
+                <CarouselPrevious className="hidden md:inline-flex left-4 bg-white/20 border-white/30 text-white hover:bg-white/30" />
+                <CarouselNext className="hidden md:inline-flex right-4 bg-white/20 border-white/30 text-white hover:bg-white/30" />
               </Carousel>
               {/* Dot indicators */}
-              <div className="flex justify-center gap-2 mt-4">
+              <div className="flex justify-center gap-2 mt-5">
                 {heroSlides.map((_, index) => (
                   <button
                     key={index}
