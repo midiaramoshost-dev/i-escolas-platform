@@ -47,6 +47,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { usePlanos } from "@/contexts/PlanosContext";
 import { ContactForm } from "@/components/landing/ContactForm";
 import { ReferralSection } from "@/components/landing/ReferralSection";
+import { WhatsAppButton } from "@/components/landing/WhatsAppButton";
 import {
   ScrollReveal,
   FadeUp,
@@ -1376,6 +1377,8 @@ const Index = () => {
           </div>
         </div>
       </footer>
+
+      <WhatsAppButton />
     </div>
   );
 };
