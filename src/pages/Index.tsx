@@ -67,14 +67,6 @@ import {
   TextReveal,
 } from "@/components/animations/ScrollReveal";
 import { useParallax, useScrollProgress } from "@/hooks/useScrollReveal";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-  type CarouselApi,
-} from "@/components/ui/carousel";
 import heroSlide1 from "@/assets/hero-slide-1.jpg";
 import heroSlide2 from "@/assets/hero-slide-2.jpg";
 import heroSlide3 from "@/assets/hero-slide-3.jpg";
@@ -156,7 +148,6 @@ const Index = () => {
   const { theme, toggleTheme } = useTheme();
   const { planos } = usePlanos();
   const [isAnnual, setIsAnnual] = useState(false);
-  const [heroCarouselApi, setHeroCarouselApi] = useState<CarouselApi | null>(null);
   const [activeSlide, setActiveSlide] = useState(0);
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
@@ -199,23 +190,12 @@ const Index = () => {
   }, []);
 
   useEffect(() => {
-    if (!heroCarouselApi) return;
-
-    const onSelect = () => {
-      setActiveSlide(heroCarouselApi.selectedScrollSnap());
-    };
-    heroCarouselApi.on("select", onSelect);
-    onSelect();
-
     const interval = setInterval(() => {
-      heroCarouselApi.scrollNext();
+      setActiveSlide((prev) => (prev + 1) % 4);
     }, 5000);
 
-    return () => {
-      clearInterval(interval);
-      heroCarouselApi.off("select", onSelect);
-    };
-  }, [heroCarouselApi]);
+    return () => clearInterval(interval);
+  }, []);
   const heroY = useTransform(scrollYProgress, [0, 1], [0, 200]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
@@ -436,16 +416,25 @@ const Index = () => {
         </nav>
       </motion.header>
 
-      {/* Hero Section - Modern with Parallax */}
-      <section ref={heroRef} className="relative flex items-center justify-center pt-24 pb-12 overflow-hidden">
-        {/* Animated Background */}
+      {/* Hero Section - Slideshow Background */}
+      <section ref={heroRef} className="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden">
+        {/* Slideshow Background */}
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10" />
-          <div className="absolute top-1/4 -left-1/4 w-1/2 h-1/2 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-primary/5 rounded-full blur-3xl animate-pulse delay-1000" />
-          
-          {/* Grid Pattern */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border)/0.3)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border)/0.3)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
+          {heroSlides.map((slide, index) => (
+            <img
+              key={index}
+              src={slide.image}
+              alt=""
+              aria-hidden="true"
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+                activeSlide === index ? "opacity-100" : "opacity-0"
+              }`}
+              loading={index === 0 ? "eager" : "lazy"}
+            />
+          ))}
+          {/* Dark overlay for text readability */}
+          <div className="absolute inset-0 bg-black/60" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50" />
         </div>
 
         <motion.div 
@@ -460,7 +449,7 @@ const Index = () => {
           >
             {/* Badge */}
             <motion.div variants={fadeInUp} transition={{ duration: 0.6 }}>
-              <Badge className="mb-6 py-2 px-4 text-sm bg-primary/10 text-primary border-primary/20 hover:bg-primary/15">
+              <Badge className="mb-6 py-2 px-4 text-sm bg-white/15 text-white border-white/25 hover:bg-white/20 backdrop-blur-sm">
                 <Sparkles className="mr-2 h-4 w-4" />
                 Plataforma #1 em Gestão Escolar no Brasil
               </Badge>
@@ -468,19 +457,19 @@ const Index = () => {
 
             {/* Main Heading */}
             <motion.h1 
-              className="mb-6 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl"
+              className="mb-6 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl"
               variants={fadeInUp}
               transition={{ duration: 0.7, delay: 0.1 }}
             >
-              <span className="block text-foreground">A escola ensina.</span>
-              <span className="block mt-2 bg-gradient-to-r from-primary via-primary to-primary/70 bg-clip-text text-transparent">
+              <span className="block text-white drop-shadow-lg">A escola ensina.</span>
+              <span className="block mt-2 text-white drop-shadow-lg">
                 Nós cuidamos do resto.
               </span>
             </motion.h1>
 
             {/* Subheadline */}
             <motion.p 
-              className="mb-8 text-lg text-muted-foreground md:text-xl max-w-3xl mx-auto leading-relaxed"
+              className="mb-8 text-lg text-white/85 md:text-xl max-w-3xl mx-auto leading-relaxed drop-shadow"
               variants={fadeInUp}
               transition={{ duration: 0.7, delay: 0.2 }}
             >
@@ -502,8 +491,8 @@ const Index = () => {
                 </motion.div>
               </Link>
               <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
-                <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 text-lg px-8 py-6 group">
-                  <Play className="h-5 w-5 group-hover:text-primary transition-colors" />
+                <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 text-lg px-8 py-6 border-white/40 text-white hover:bg-white/10 group">
+                  <Play className="h-5 w-5 group-hover:text-white transition-colors" />
                   Ver Demonstração
                 </Button>
               </motion.div>
@@ -511,70 +500,42 @@ const Index = () => {
 
             {/* Trust Indicators */}
             <motion.div 
-              className="mt-16 flex flex-wrap items-center justify-center gap-8 text-muted-foreground"
+              className="mt-16 flex flex-wrap items-center justify-center gap-8 text-white/70"
               variants={fadeIn}
               transition={{ duration: 0.8, delay: 0.5 }}
             >
               <div className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-primary" />
+                <Shield className="h-5 w-5 text-white/90" />
                 <span className="text-sm">Dados 100% seguros</span>
               </div>
               <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-primary" />
+                <Clock className="h-5 w-5 text-white/90" />
                 <span className="text-sm">Setup em 5 minutos</span>
               </div>
               <div className="flex items-center gap-2">
-                <Award className="h-5 w-5 text-primary" />
+                <Award className="h-5 w-5 text-white/90" />
                 <span className="text-sm">+500 escolas confiam</span>
               </div>
             </motion.div>
 
-            {/* Hero Slideshow */}
+            {/* Slide Info + Dot Indicators */}
             <motion.div
-              className="mt-10"
+              className="mt-12"
               variants={fadeIn}
               transition={{ duration: 0.8, delay: 0.6 }}
             >
-              <Carousel
-                opts={{ loop: true }}
-                setApi={setHeroCarouselApi}
-                className="relative mx-auto max-w-5xl"
-                aria-label="Slideshow de recursos"
-              >
-                <CarouselContent>
-                  {heroSlides.map((slide, index) => (
-                    <CarouselItem key={index}>
-                      <div className="relative h-72 sm:h-80 md:h-[28rem] rounded-2xl overflow-hidden group shadow-2xl shadow-primary/10 border border-border/40">
-                        <img
-                          src={slide.image}
-                          alt={slide.title}
-                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                          loading={index === 0 ? "eager" : "lazy"}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                        <div className="relative h-full flex flex-col items-center justify-end gap-2 p-6 pb-10 md:p-8 md:pb-14 text-center">
-                          <span className="inline-flex items-center rounded-full bg-primary/90 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-primary-foreground mb-2">
-                            {slide.title}
-                          </span>
-                          <p className="text-white/90 max-w-lg mx-auto text-sm md:text-lg drop-shadow-lg">{slide.description}</p>
-                        </div>
-                      </div>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <CarouselPrevious className="hidden md:inline-flex left-4 bg-white/20 border-white/30 text-white hover:bg-white/30" />
-                <CarouselNext className="hidden md:inline-flex right-4 bg-white/20 border-white/30 text-white hover:bg-white/30" />
-              </Carousel>
-              {/* Dot indicators */}
-              <div className="flex justify-center gap-2 mt-5">
+              <div className="inline-flex items-center rounded-full bg-white/15 backdrop-blur-sm px-5 py-2 text-white text-sm font-medium mb-4">
+                {heroSlides[activeSlide]?.title} — {heroSlides[activeSlide]?.description}
+              </div>
+              <div className="flex justify-center gap-2">
                 {heroSlides.map((_, index) => (
                   <button
                     key={index}
-                    onClick={() => heroCarouselApi?.scrollTo(index)}
+                    onClick={() => setActiveSlide(index)}
                     className={`h-2.5 rounded-full transition-all duration-300 ${
                       activeSlide === index
-                        ? "w-8 bg-primary"
-                        : "w-2.5 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                        ? "w-8 bg-white"
+                        : "w-2.5 bg-white/40 hover:bg-white/60"
                     }`}
                     aria-label={`Ir para slide ${index + 1}`}
                   />
@@ -590,7 +551,7 @@ const Index = () => {
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 2, repeat: Infinity }}
         >
-          <MousePointer2 className="h-6 w-6 text-muted-foreground" />
+          <MousePointer2 className="h-6 w-6 text-white/60" />
         </motion.div>
       </section>
 
