@@ -446,14 +446,14 @@ const Index = () => {
         {/* Arrow Navigation */}
         <button
           onClick={() => setActiveSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length)}
-          className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white opacity-0 group-hover/hero:opacity-100 transition-opacity duration-300 hover:bg-white/25"
+          className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white opacity-100 md:opacity-0 md:group-hover/hero:opacity-100 transition-opacity duration-300 hover:bg-white/25"
           aria-label="Slide anterior"
         >
           <ChevronLeft className="h-6 w-6" />
         </button>
         <button
           onClick={() => setActiveSlide((prev) => (prev + 1) % heroSlides.length)}
-          className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white opacity-0 group-hover/hero:opacity-100 transition-opacity duration-300 hover:bg-white/25"
+          className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white opacity-100 md:opacity-0 md:group-hover/hero:opacity-100 transition-opacity duration-300 hover:bg-white/25"
           aria-label="Próximo slide"
         >
           <ChevronRight className="h-6 w-6" />
