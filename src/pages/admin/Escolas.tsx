@@ -13,6 +13,7 @@ import {
   CheckCircle,
   XCircle,
   Clock,
+  Link2,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -48,14 +49,14 @@ import { toast } from "sonner";
 import { useActivityLog } from "@/contexts/ActivityLogContext";
 
 const escolasIniciais: Escola[] = [
-  { id: "1", nome: "Colégio São Paulo", cnpj: "12.345.678/0001-90", cidade: "São Paulo", uf: "SP", porte: "Grande", plano: "Premium", alunos: 1250, professores: 85, status: "ativo", datacadastro: "2023-01-15" },
-  { id: "2", nome: "Escola Municipal Centro", cnpj: "23.456.789/0001-01", cidade: "Rio de Janeiro", uf: "RJ", porte: "Grande", plano: "Pro", alunos: 850, professores: 52, status: "ativo", datacadastro: "2023-03-20" },
-  { id: "3", nome: "Instituto Educacional ABC", cnpj: "34.567.890/0001-12", cidade: "Belo Horizonte", uf: "MG", porte: "Médio", plano: "Start", alunos: 420, professores: 28, status: "trial", datacadastro: "2024-01-10" },
-  { id: "4", nome: "Colégio Novo Horizonte", cnpj: "45.678.901/0001-23", cidade: "Curitiba", uf: "PR", porte: "Grande", plano: "Premium", alunos: 980, professores: 65, status: "ativo", datacadastro: "2023-06-05" },
-  { id: "5", nome: "Escola Estadual Central", cnpj: "56.789.012/0001-34", cidade: "Salvador", uf: "BA", porte: "Médio", plano: "Free", alunos: 320, professores: 22, status: "ativo", datacadastro: "2023-09-12" },
-  { id: "6", nome: "Colégio Esperança", cnpj: "67.890.123/0001-45", cidade: "Fortaleza", uf: "CE", porte: "Pequeno", plano: "Start", alunos: 180, professores: 15, status: "inativo", datacadastro: "2023-04-18" },
-  { id: "7", nome: "Instituto Federal Norte", cnpj: "78.901.234/0001-56", cidade: "Manaus", uf: "AM", porte: "Grande", plano: "Pro", alunos: 720, professores: 48, status: "ativo", datacadastro: "2023-07-22" },
-  { id: "8", nome: "Escola Técnica Sul", cnpj: "89.012.345/0001-67", cidade: "Porto Alegre", uf: "RS", porte: "Médio", plano: "Pro", alunos: 560, professores: 38, status: "ativo", datacadastro: "2023-11-30" },
+  { id: "1", nome: "Colégio São Paulo", cnpj: "12.345.678/0001-90", cidade: "São Paulo", uf: "SP", porte: "Grande", plano: "Premium", alunos: 1250, professores: 85, status: "ativo", datacadastro: "2023-01-15", linkAcesso: `${window.location.origin}/login?escola=colegio-sao-paulo-1` },
+  { id: "2", nome: "Escola Municipal Centro", cnpj: "23.456.789/0001-01", cidade: "Rio de Janeiro", uf: "RJ", porte: "Grande", plano: "Pro", alunos: 850, professores: 52, status: "ativo", datacadastro: "2023-03-20", linkAcesso: `${window.location.origin}/login?escola=escola-municipal-centro-2` },
+  { id: "3", nome: "Instituto Educacional ABC", cnpj: "34.567.890/0001-12", cidade: "Belo Horizonte", uf: "MG", porte: "Médio", plano: "Start", alunos: 420, professores: 28, status: "trial", datacadastro: "2024-01-10", linkAcesso: `${window.location.origin}/login?escola=instituto-educacional-abc-3` },
+  { id: "4", nome: "Colégio Novo Horizonte", cnpj: "45.678.901/0001-23", cidade: "Curitiba", uf: "PR", porte: "Grande", plano: "Premium", alunos: 980, professores: 65, status: "ativo", datacadastro: "2023-06-05", linkAcesso: `${window.location.origin}/login?escola=colegio-novo-horizonte-4` },
+  { id: "5", nome: "Escola Estadual Central", cnpj: "56.789.012/0001-34", cidade: "Salvador", uf: "BA", porte: "Médio", plano: "Free", alunos: 320, professores: 22, status: "ativo", datacadastro: "2023-09-12", linkAcesso: `${window.location.origin}/login?escola=escola-estadual-central-5` },
+  { id: "6", nome: "Colégio Esperança", cnpj: "67.890.123/0001-45", cidade: "Fortaleza", uf: "CE", porte: "Pequeno", plano: "Start", alunos: 180, professores: 15, status: "inativo", datacadastro: "2023-04-18", linkAcesso: `${window.location.origin}/login?escola=colegio-esperanca-6` },
+  { id: "7", nome: "Instituto Federal Norte", cnpj: "78.901.234/0001-56", cidade: "Manaus", uf: "AM", porte: "Grande", plano: "Pro", alunos: 720, professores: 48, status: "ativo", datacadastro: "2023-07-22", linkAcesso: `${window.location.origin}/login?escola=instituto-federal-norte-7` },
+  { id: "8", nome: "Escola Técnica Sul", cnpj: "89.012.345/0001-67", cidade: "Porto Alegre", uf: "RS", porte: "Médio", plano: "Pro", alunos: 560, professores: 38, status: "ativo", datacadastro: "2023-11-30", linkAcesso: `${window.location.origin}/login?escola=escola-tecnica-sul-8` },
 ];
 
 const getPlanoColor = (plano: string) => {
@@ -380,6 +381,18 @@ export default function AdminEscolas() {
                           >
                             <Edit className="mr-2 h-4 w-4" />
                             Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            className="cursor-pointer"
+                            onClick={() => {
+                              if (escola.linkAcesso) {
+                                navigator.clipboard.writeText(escola.linkAcesso);
+                                toast.success("Link de acesso copiado!");
+                              }
+                            }}
+                          >
+                            <Link2 className="mr-2 h-4 w-4" />
+                            Copiar Link de Acesso
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             className="text-red-500 cursor-pointer"

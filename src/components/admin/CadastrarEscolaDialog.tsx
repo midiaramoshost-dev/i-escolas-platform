@@ -30,7 +30,8 @@ import {
   Eye, 
   EyeOff,
   Check,
-  AlertCircle
+  AlertCircle,
+  Link2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Escola } from "./EditarEscolaDialog";
@@ -240,8 +241,17 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
       }
     }
 
+    const escolaSlug = formData.nome
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
+    const escolaId = Date.now().toString();
+    const linkAcesso = `${window.location.origin}/login?escola=${escolaSlug}-${escolaId}`;
+
     const novaEscola: Escola = {
-      id: Date.now().toString(),
+      id: escolaId,
       nome: formData.nome,
       cnpj: formData.cnpj,
       cidade: formData.cidade,
@@ -252,6 +262,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
       professores: 0,
       status: "trial",
       datacadastro: new Date().toISOString().split("T")[0],
+      linkAcesso,
     };
 
     onSave(novaEscola);
@@ -510,6 +521,33 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                 </div>
               </div>
             </div>
+
+            {/* Link de Acesso Preview */}
+            {formData.nome && (
+              <Card className="border border-primary/20 bg-primary/5">
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    <Link2 className="h-5 w-5 text-primary mt-0.5" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm">Link de Acesso da Escola</p>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        Este link será gerado automaticamente ao finalizar o cadastro.
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <code className="text-xs bg-muted px-2 py-1 rounded break-all flex-1">
+                          {window.location.origin}/login?escola={formData.nome
+                            .toLowerCase()
+                            .normalize("NFD")
+                            .replace(/[\u0300-\u036f]/g, "")
+                            .replace(/[^a-z0-9]+/g, "-")
+                            .replace(/^-|-$/g, "")}-preview
+                        </code>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {formData.loginProvisorio && formData.senhaProvisoria && (
               <Card className="bg-muted/50">
