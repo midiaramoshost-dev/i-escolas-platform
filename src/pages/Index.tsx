@@ -421,16 +421,22 @@ const Index = () => {
         {/* Slideshow Background */}
         <div className="absolute inset-0">
           {heroSlides.map((slide, index) => (
-            <img
+            <div
               key={index}
-              src={slide.image}
-              alt=""
-              aria-hidden="true"
-              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+              className={`absolute inset-0 transition-opacity duration-1000 ${
                 activeSlide === index ? "opacity-100" : "opacity-0"
               }`}
-              loading={index === 0 ? "eager" : "lazy"}
-            />
+            >
+              <img
+                src={slide.image}
+                alt=""
+                aria-hidden="true"
+                className={`absolute inset-0 w-full h-full object-cover transition-transform duration-[8000ms] ease-linear ${
+                  activeSlide === index ? "scale-110" : "scale-100"
+                }`}
+                loading={index === 0 ? "eager" : "lazy"}
+              />
+            </div>
           ))}
           {/* Dark overlay for text readability */}
           <div className="absolute inset-0 bg-black/60" />
