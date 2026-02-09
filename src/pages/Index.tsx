@@ -513,7 +513,7 @@ const Index = () => {
                 </motion.div>
               </Link>
               <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
-                <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 text-lg px-8 py-6 border-white/40 text-white hover:bg-white/10 group">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 text-lg px-8 py-6 border-white/40 bg-white/10 text-white hover:bg-white/20 group">
                   <Play className="h-5 w-5 group-hover:text-white transition-colors" />
                   Ver Demonstração
                 </Button>
