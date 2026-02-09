@@ -31,6 +31,7 @@ export interface Escola {
   professores: number;
   status: string;
   datacadastro: string;
+  linkAcesso?: string;
 }
 
 interface EditarEscolaDialogProps {

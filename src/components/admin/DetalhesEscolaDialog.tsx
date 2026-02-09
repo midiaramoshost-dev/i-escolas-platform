@@ -23,7 +23,11 @@ import {
   TrendingUp,
   Mail,
   Phone,
+  Link2,
+  Copy,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import type { Escola } from "./EditarEscolaDialog";
 
 interface DetalhesEscolaDialogProps {
@@ -147,6 +151,34 @@ export function DetalhesEscolaDialog({ escola, open, onOpenChange }: DetalhesEsc
                   </p>
                 </CardContent>
               </Card>
+
+              {escola.linkAcesso && (
+                <Card className="md:col-span-2 border-primary/20 bg-primary/5">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      <Link2 className="h-4 w-4" />
+                      Link de Acesso
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center gap-2">
+                      <code className="text-sm bg-muted px-3 py-2 rounded break-all flex-1">
+                        {escola.linkAcesso}
+                      </code>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={() => {
+                          navigator.clipboard.writeText(escola.linkAcesso!);
+                          toast.success("Link copiado!");
+                        }}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               <Card>
                 <CardHeader className="pb-2">
