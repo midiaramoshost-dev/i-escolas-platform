@@ -35,6 +35,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Escola } from "./EditarEscolaDialog";
+import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
 
 interface CadastrarEscolaDialogProps {
   open: boolean;
@@ -135,6 +137,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
   const [activeTab, setActiveTab] = useState("dados");
   const [showPassword, setShowPassword] = useState(false);
   const [showApiSecret, setShowApiSecret] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     nome: "",
     cnpj: "",
@@ -231,7 +234,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Validar todas as abas
     const tabs = ["dados", "acesso", "cobranca", "pagamento"];
     for (const tab of tabs) {
@@ -241,56 +244,90 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
       }
     }
 
-    const escolaSlug = formData.nome
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "");
-    const escolaId = Date.now().toString();
-    const linkAcesso = `${window.location.origin}/login?escola=${escolaSlug}-${escolaId}`;
+    setIsCreating(true);
 
-    const novaEscola: Escola = {
-      id: escolaId,
-      nome: formData.nome,
-      cnpj: formData.cnpj,
-      cidade: formData.cidade,
-      uf: formData.uf,
-      porte: formData.porte,
-      plano: formData.plano,
-      alunos: 0,
-      professores: 0,
-      status: "trial",
-      datacadastro: new Date().toISOString().split("T")[0],
-      linkAcesso,
-    };
+    try {
+      // Criar usuário no Supabase Auth via edge function
+      const { data: fnData, error: fnError } = await supabase.functions.invoke("create-school-user", {
+        body: {
+          email: formData.emailDiretor,
+          password: formData.senhaProvisoria,
+          name: formData.nome,
+          phone: formData.telefoneDiretor || null,
+        },
+      });
 
-    onSave(novaEscola);
-    toast.success("Escola cadastrada com sucesso! Credenciais enviadas por e-mail.");
-    
-    // Reset form
-    setFormData({
-      nome: "",
-      cnpj: "",
-      cidade: "",
-      uf: "",
-      porte: "",
-      plano: "",
-      emailDiretor: "",
-      telefoneDiretor: "",
-      loginProvisorio: "",
-      senhaProvisoria: "",
-      valorImplantacao: "",
-      descricaoCobranca: "Taxa de implantação do sistema i ESCOLAS",
-      dataVencimento: "",
-      provedorPagamento: "",
-      apiKey: "",
-      apiSecret: "",
-      webhookUrl: "",
-      ambiente: "sandbox",
-    });
-    setActiveTab("dados");
-    onOpenChange(false);
+      if (fnError) {
+        console.error("Edge function error:", fnError);
+        toast.error("Erro ao criar credenciais de acesso. Tente novamente.");
+        setIsCreating(false);
+        return;
+      }
+
+      if (fnData?.error) {
+        toast.error(fnData.error);
+        setIsCreating(false);
+        return;
+      }
+
+      const escolaSlug = formData.nome
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "");
+      const escolaId = fnData?.userId || Date.now().toString();
+      const linkAcesso = `${window.location.origin}/login?escola=${escolaSlug}-${escolaId}`;
+
+      const novaEscola: Escola = {
+        id: escolaId,
+        nome: formData.nome,
+        cnpj: formData.cnpj,
+        cidade: formData.cidade,
+        uf: formData.uf,
+        porte: formData.porte,
+        plano: formData.plano,
+        alunos: 0,
+        professores: 0,
+        status: "trial",
+        datacadastro: new Date().toISOString().split("T")[0],
+        linkAcesso,
+      };
+
+      onSave(novaEscola);
+      toast.success("Escola cadastrada com sucesso! Credenciais criadas no sistema.", {
+        description: `O diretor pode acessar com o e-mail ${formData.emailDiretor}`,
+      });
+      
+      // Reset form
+      setFormData({
+        nome: "",
+        cnpj: "",
+        cidade: "",
+        uf: "",
+        porte: "",
+        plano: "",
+        emailDiretor: "",
+        telefoneDiretor: "",
+        loginProvisorio: "",
+        senhaProvisoria: "",
+        valorImplantacao: "",
+        descricaoCobranca: "Taxa de implantação do sistema i ESCOLAS",
+        dataVencimento: "",
+        provedorPagamento: "",
+        apiKey: "",
+        apiSecret: "",
+        webhookUrl: "",
+        ambiente: "sandbox",
+      });
+      setActiveTab("dados");
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Error creating school:", error);
+      toast.error("Erro inesperado ao cadastrar escola. Tente novamente.");
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   const getTabStatus = (tab: string): "complete" | "current" | "pending" => {
@@ -470,20 +507,20 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="loginProvisorio">Login Provisório *</Label>
+                <Label htmlFor="loginProvisorio">Login (E-mail do Diretor)</Label>
                 <div className="flex gap-2">
                   <Input
                     id="loginProvisorio"
-                    value={formData.loginProvisorio}
-                    onChange={(e) => handleInputChange("loginProvisorio", e.target.value)}
-                    placeholder="login.escola"
-                    className="flex-1"
+                    value={formData.emailDiretor || formData.loginProvisorio}
+                    disabled
+                    placeholder="Definido pelo e-mail do diretor"
+                    className="flex-1 bg-muted"
                   />
                   <Button 
                     type="button" 
                     size="icon" 
                     variant="outline"
-                    onClick={() => copyToClipboard(formData.loginProvisorio, "Login")}
+                    onClick={() => copyToClipboard(formData.emailDiretor, "Login")}
                   >
                     <Copy className="h-4 w-4" />
                   </Button>
@@ -549,14 +586,17 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
               </Card>
             )}
 
-            {formData.loginProvisorio && formData.senhaProvisoria && (
+            {formData.emailDiretor && formData.senhaProvisoria && (
               <Card className="bg-muted/50">
                 <CardContent className="p-4">
-                  <p className="text-sm text-muted-foreground mb-2">Resumo das credenciais:</p>
+                  <p className="text-sm text-muted-foreground mb-2">Resumo das credenciais de acesso:</p>
                   <div className="font-mono text-sm bg-background p-3 rounded-md">
-                    <p><strong>Login:</strong> {formData.loginProvisorio}</p>
+                    <p><strong>E-mail (Login):</strong> {formData.emailDiretor}</p>
                     <p><strong>Senha:</strong> {showPassword ? formData.senhaProvisoria : "••••••••••••"}</p>
                   </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    ⚠️ Estas credenciais serão criadas no sistema. O diretor poderá fazer login na página de acesso.
+                  </p>
                 </CardContent>
               </Card>
             )}
@@ -768,8 +808,9 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
               Próximo
             </Button>
           ) : (
-            <Button onClick={handleSave} className="bg-rose-500 hover:bg-rose-600 w-full sm:w-auto">
-              Cadastrar Escola
+            <Button onClick={handleSave} disabled={isCreating} className="bg-rose-500 hover:bg-rose-600 w-full sm:w-auto">
+              {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isCreating ? "Criando..." : "Cadastrar Escola"}
             </Button>
           )}
         </DialogFooter>
