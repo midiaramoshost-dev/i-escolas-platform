@@ -95,12 +95,13 @@ export function ResponsavelSidebar() {
           </div>
           {!isCollapsed && (
             <div className="flex flex-col">
-              <span className="text-lg font-bold text-sidebar-foreground">
+              <span className="text-sm font-semibold text-sidebar-foreground">
                 Portal do Responsável
               </span>
-              <span className="text-xs text-sidebar-foreground/60">
-                i ESCOLAS
-              </span>
+              <div className="flex items-baseline gap-[1px]">
+                <span className="text-xs font-light italic text-primary tracking-tight">i</span>
+                <span className="text-[10px] font-bold tracking-[0.12em] text-sidebar-foreground/60">ESCOLAS</span>
+              </div>
             </div>
           )}
         </Link>

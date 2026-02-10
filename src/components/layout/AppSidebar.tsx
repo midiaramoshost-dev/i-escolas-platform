@@ -143,16 +143,16 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarHeader className="border-b border-sidebar-border p-4">
         <Link to="/escola/dashboard" className="flex items-center gap-3">
-          <div className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 shadow-md ring-1 ring-primary/30">
-            <School className="h-6 w-6 text-white drop-shadow" />
-            <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-emerald-400 ring-2 ring-card" />
+          <div className="relative flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary via-primary/90 to-violet-600 shadow-md ring-1 ring-primary/20">
+            <School className="h-5 w-5 text-white" />
           </div>
           {!isCollapsed && (
             <div className="flex flex-col">
-              <span className="text-lg font-bold tracking-tight bg-gradient-to-r from-primary via-violet-500 to-sky-500 bg-clip-text text-transparent drop-shadow-[0_2px_10px_rgba(80,70,255,0.45)]">
-                iESCOLAS
-              </span>
-              <span className="text-xs text-sidebar-foreground/60">
+              <div className="flex items-baseline gap-[1px]">
+                <span className="text-lg font-light italic text-primary tracking-tight">i</span>
+                <span className="text-[15px] font-bold tracking-[0.12em] text-sidebar-foreground">ESCOLAS</span>
+              </div>
+              <span className="text-[10px] uppercase tracking-[0.2em] text-sidebar-foreground/50">
                 Gestão Escolar
               </span>
             </div>

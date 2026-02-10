@@ -1,4 +1,4 @@
-import { Bell, Search, Moon, Sun, User, ChevronDown } from "lucide-react";
+import { Bell, Search, Moon, Sun, User, ChevronDown, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -23,14 +23,13 @@ export function AppHeader() {
         <SidebarTrigger className="-ml-1" />
 
         <div className="hidden sm:flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-primary via-violet-500 to-sky-500 shadow-sm ring-1 ring-primary/25">
-            <span className="text-xs font-semibold tracking-tight text-white">
-              IE
-            </span>
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary via-primary/90 to-violet-600 shadow-sm ring-1 ring-primary/20">
+            <GraduationCap className="h-4 w-4 text-white" />
           </div>
-          <span className="text-sm font-semibold tracking-[0.3em] text-foreground/90">
-            iESCOLAS
-          </span>
+          <div className="flex items-baseline gap-[1px]">
+            <span className="text-base font-light italic text-primary tracking-tight">i</span>
+            <span className="text-[13px] font-bold tracking-[0.12em] text-foreground">ESCOLAS</span>
+          </div>
         </div>
         
         <div className="hidden md:flex relative">

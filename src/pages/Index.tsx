@@ -358,13 +358,13 @@ const Index = () => {
             className="flex items-center gap-3"
             whileHover={{ scale: 1.02 }}
           >
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/25">
-              <GraduationCap className="h-5 w-5 text-primary-foreground" />
-              <div className="absolute -inset-1 rounded-xl bg-primary/20 blur-lg" />
+            <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary via-primary/90 to-violet-600 shadow-lg shadow-primary/30 ring-1 ring-primary/20">
+              <GraduationCap className="h-[18px] w-[18px] text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-              i ESCOLAS
-            </span>
+            <div className="flex items-baseline gap-[2px]">
+              <span className="text-[22px] font-light italic text-primary tracking-tight">i</span>
+              <span className="text-[18px] font-bold tracking-[0.15em] text-foreground">ESCOLAS</span>
+            </div>
           </motion.div>
           
           <div className="hidden md:flex items-center gap-8">
@@ -1302,10 +1302,13 @@ const Index = () => {
           <div className="grid md:grid-cols-4 gap-8">
             <div className="md:col-span-2">
               <div className="flex items-center gap-3 mb-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-                  <GraduationCap className="h-5 w-5" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary via-primary/90 to-violet-600 shadow-md ring-1 ring-primary/20">
+                  <GraduationCap className="h-[18px] w-[18px] text-primary-foreground" />
                 </div>
-                <span className="text-xl font-bold">i ESCOLAS</span>
+                <div className="flex items-baseline gap-[2px]">
+                  <span className="text-[22px] font-light italic text-primary tracking-tight">i</span>
+                  <span className="text-[18px] font-bold tracking-[0.15em] text-foreground">ESCOLAS</span>
+                </div>
               </div>
               <p className="text-muted-foreground max-w-sm mb-6">
                 Plataforma completa de gestão escolar para educação infantil, fundamental e médio. 
