@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface Escola {
   id: string;
@@ -34,6 +35,10 @@ export interface Escola {
   datacadastro: string;
   linkAcesso?: string;
   modulos?: string[];
+
+  // Credenciais (para o painel ADM Master conseguir ajustar)
+  emailDiretor?: string;
+  novaSenha?: string;
 }
 
 interface EditarEscolaDialogProps {
@@ -59,6 +64,7 @@ const MODULOS_OPTIONS = [
 export function EditarEscolaDialog({ escola, open, onOpenChange, onSave, destacarPlano }: EditarEscolaDialogProps) {
   const [formData, setFormData] = useState<Escola | null>(null);
   const [planoDestacado, setPlanoDestacado] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (destacarPlano && open) {
@@ -71,7 +77,12 @@ export function EditarEscolaDialog({ escola, open, onOpenChange, onSave, destaca
 
   useEffect(() => {
     if (escola) {
-      setFormData({ ...escola, modulos: escola.modulos || [] });
+      setFormData({
+        ...escola,
+        modulos: escola.modulos || [],
+        emailDiretor: escola.emailDiretor || "",
+        novaSenha: "",
+      });
     }
   }, [escola]);
 
@@ -83,7 +94,7 @@ export function EditarEscolaDialog({ escola, open, onOpenChange, onSave, destaca
     setFormData({ ...formData, modulos: Array.from(current) });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData) return;
 
     // Validation
@@ -100,9 +111,56 @@ export function EditarEscolaDialog({ escola, open, onOpenChange, onSave, destaca
       return;
     }
 
-    onSave(formData);
-    toast.success("Escola atualizada com sucesso!");
-    onOpenChange(false);
+    // Regras simples de credenciais
+    const emailChanged = (formData.emailDiretor || "").trim() !== (escola?.emailDiretor || "").trim();
+    const passwordProvided = !!(formData.novaSenha || "").trim();
+
+    if (emailChanged && !(formData.emailDiretor || "").trim()) {
+      toast.error("Informe o e-mail (login) da instituição");
+      return;
+    }
+
+    if (passwordProvided && (formData.novaSenha || "").trim().length < 6) {
+      toast.error("A nova senha deve ter no mínimo 6 caracteres");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      // Se o ADM master alterou e-mail e/ou senha, chamamos a edge function.
+      // (A função é a mesma ideia do create-school-user, mas para update)
+      if (emailChanged || passwordProvided) {
+        const { data: fnData, error: fnError } = await supabase.functions.invoke("update-school-credentials", {
+          body: {
+            userId: formData.id,
+            email: emailChanged ? (formData.emailDiretor || "").trim() : undefined,
+            password: passwordProvided ? (formData.novaSenha || "").trim() : undefined,
+          },
+        });
+
+        if (fnError) {
+          console.error("Edge function error:", fnError);
+          toast.error("Erro ao atualizar credenciais. Tente novamente.");
+          return;
+        }
+
+        if (fnData?.error) {
+          toast.error(fnData.error);
+          return;
+        }
+
+        toast.success("Credenciais atualizadas com sucesso!");
+      }
+
+      onSave({ ...formData, novaSenha: "" });
+      toast.success("Escola atualizada com sucesso!");
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Error saving school:", error);
+      toast.error("Erro inesperado ao salvar. Tente novamente.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (!formData) return null;
@@ -226,6 +284,36 @@ export function EditarEscolaDialog({ escola, open, onOpenChange, onSave, destaca
             </div>
           </div>
 
+          {/* Credenciais */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="emailDiretor">Login (E-mail do Diretor)</Label>
+              <Input
+                id="emailDiretor"
+                type="email"
+                value={formData.emailDiretor || ""}
+                onChange={(e) => setFormData({ ...formData, emailDiretor: e.target.value })}
+                placeholder="diretor@escola.com.br"
+              />
+              <p className="text-xs text-muted-foreground">
+                Se alterar aqui, o e-mail do usuário no Auth será atualizado.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="novaSenha">Nova senha</Label>
+              <Input
+                id="novaSenha"
+                type="password"
+                value={formData.novaSenha || ""}
+                onChange={(e) => setFormData({ ...formData, novaSenha: e.target.value })}
+                placeholder="Deixe em branco para não alterar"
+              />
+              <p className="text-xs text-muted-foreground">
+                Por segurança, não exibimos a senha atual. Preencha apenas se quiser trocar.
+              </p>
+            </div>
+          </div>
+
           {/* Módulos (implantação) */}
           <div className="space-y-2">
             <Label>Módulos implantados</Label>
@@ -275,11 +363,11 @@ export function EditarEscolaDialog({ escola, open, onOpenChange, onSave, destaca
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>
             Cancelar
           </Button>
-          <Button onClick={handleSave} className="bg-rose-500 hover:bg-rose-600">
-            Salvar Alterações
+          <Button onClick={handleSave} className="bg-rose-500 hover:bg-rose-600" disabled={isSaving}>
+            {isSaving ? "Salvando..." : "Salvar Alterações"}
           </Button>
         </DialogFooter>
       </DialogContent>
