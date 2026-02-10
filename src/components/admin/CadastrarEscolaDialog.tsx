@@ -31,12 +31,13 @@ import {
   EyeOff,
   Check,
   AlertCircle,
-  Link2
+  Link2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Escola } from "./EditarEscolaDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 interface CadastrarEscolaDialogProps {
   open: boolean;
@@ -93,6 +94,9 @@ interface FormData {
 
   // Módulos (implantação)
   modulos: string[];
+
+  // Pagamentos
+  integrarPagamentos: boolean;
 
   // Provedor de pagamento
   provedorPagamento: string;
@@ -163,6 +167,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
     descricaoCobranca: "Taxa de implantação do sistema i ESCOLAS",
     dataVencimento: "",
     modulos: [],
+    integrarPagamentos: true,
     provedorPagamento: "",
     apiKey: "",
     apiSecret: "",
@@ -171,21 +176,34 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
   });
 
   const handleInputChange = (field: keyof FormData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
 
     // Auto-gerar login quando nome é preenchido
     if (field === "nome" && typeof value === "string" && value.length > 3 && !formData.loginProvisorio) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         nome: value,
         loginProvisorio: generateLogin(value),
         senhaProvisoria: generatePassword(),
       }));
     }
+
+    // Se desligar integração de pagamentos, limpamos os campos pra não "forçar" config
+    if (field === "integrarPagamentos" && value === false) {
+      setFormData((prev) => ({
+        ...prev,
+        integrarPagamentos: false,
+        provedorPagamento: "",
+        apiKey: "",
+        apiSecret: "",
+        webhookUrl: "",
+        ambiente: "sandbox",
+      }));
+    }
   };
 
   const toggleModulo = (id: string) => {
-    setFormData(prev => {
+    setFormData((prev) => {
       const current = new Set(prev.modulos || []);
       if (current.has(id)) current.delete(id);
       else current.add(id);
@@ -194,7 +212,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
   };
 
   const handleGenerateCredentials = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       loginProvisorio: generateLogin(formData.nome || "escola"),
       senhaProvisoria: generatePassword(),
@@ -228,6 +246,9 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
         }
         return true;
       case "pagamento":
+        // Se não integrar pagamentos, não valida provedor.
+        if (!formData.integrarPagamentos) return true;
+
         if (!formData.provedorPagamento) {
           toast.error("Selecione um provedor de pagamento");
           return false;
@@ -336,6 +357,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
         descricaoCobranca: "Taxa de implantação do sistema i ESCOLAS",
         dataVencimento: "",
         modulos: [],
+        integrarPagamentos: true,
         provedorPagamento: "",
         apiKey: "",
         apiSecret: "",
@@ -441,7 +463,9 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                   </SelectTrigger>
                   <SelectContent>
                     {UF_OPTIONS.map((uf) => (
-                      <SelectItem key={uf} value={uf}>{uf}</SelectItem>
+                      <SelectItem key={uf} value={uf}>
+                        {uf}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -454,7 +478,9 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                   </SelectTrigger>
                   <SelectContent>
                     {PORTE_OPTIONS.map((porte) => (
-                      <SelectItem key={porte} value={porte}>{porte}</SelectItem>
+                      <SelectItem key={porte} value={porte}>
+                        {porte}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -470,7 +496,9 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                   </SelectTrigger>
                   <SelectContent>
                     {PLANO_OPTIONS.map((plano) => (
-                      <SelectItem key={plano} value={plano}>{plano}</SelectItem>
+                      <SelectItem key={plano} value={plano}>
+                        {plano}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -511,16 +539,8 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                   {MODULOS_OPTIONS.map((m) => {
                     const active = formData.modulos.includes(m.id);
                     return (
-                      <button
-                        key={m.id}
-                        type="button"
-                        onClick={() => toggleModulo(m.id)}
-                        className="focus:outline-none"
-                      >
-                        <Badge
-                          variant={active ? "default" : "secondary"}
-                          className={active ? "bg-rose-500 hover:bg-rose-600" : ""}
-                        >
+                      <button key={m.id} type="button" onClick={() => toggleModulo(m.id)} className="focus:outline-none">
+                        <Badge variant={active ? "default" : "secondary"} className={active ? "bg-rose-500 hover:bg-rose-600" : ""}>
                           {m.label}
                         </Badge>
                       </button>
@@ -570,12 +590,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                     placeholder="Definido pelo e-mail do diretor"
                     className="flex-1 bg-muted"
                   />
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="outline"
-                    onClick={() => copyToClipboard(formData.emailDiretor, "Login")}
-                  >
+                  <Button type="button" size="icon" variant="outline" onClick={() => copyToClipboard(formData.emailDiretor, "Login")}>
                     <Copy className="h-4 w-4" />
                   </Button>
                 </div>
@@ -601,12 +616,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </Button>
                   </div>
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="outline"
-                    onClick={() => copyToClipboard(formData.senhaProvisoria, "Senha")}
-                  >
+                  <Button type="button" size="icon" variant="outline" onClick={() => copyToClipboard(formData.senhaProvisoria, "Senha")}>
                     <Copy className="h-4 w-4" />
                   </Button>
                 </div>
@@ -621,17 +631,17 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                     <Link2 className="h-5 w-5 text-primary mt-0.5" />
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm">Link de Acesso da Escola</p>
-                      <p className="text-xs text-muted-foreground mb-2">
-                        Este link será gerado automaticamente ao finalizar o cadastro.
-                      </p>
+                      <p className="text-xs text-muted-foreground mb-2">Este link será gerado automaticamente ao finalizar o cadastro.</p>
                       <div className="flex items-center gap-2">
                         <code className="text-xs bg-muted px-2 py-1 rounded break-all flex-1">
-                          {window.location.origin}/login?escola={formData.nome
+                          {window.location.origin}/login?escola=
+                          {formData.nome
                             .toLowerCase()
                             .normalize("NFD")
                             .replace(/[\u0300-\u036f]/g, "")
                             .replace(/[^a-z0-9]+/g, "-")
-                            .replace(/^-|-$/g, "")}-preview
+                            .replace(/^-|-$/g, "")}
+                          -preview
                         </code>
                       </div>
                     </div>
@@ -645,12 +655,14 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                 <CardContent className="p-4">
                   <p className="text-sm text-muted-foreground mb-2">Resumo das credenciais de acesso:</p>
                   <div className="font-mono text-sm bg-background p-3 rounded-md">
-                    <p><strong>E-mail (Login):</strong> {formData.emailDiretor}</p>
-                    <p><strong>Senha:</strong> {showPassword ? formData.senhaProvisoria : "••••••••••••"}</p>
+                    <p>
+                      <strong>E-mail (Login):</strong> {formData.emailDiretor}
+                    </p>
+                    <p>
+                      <strong>Senha:</strong> {showPassword ? formData.senhaProvisoria : "••••••••••••"}
+                    </p>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    ⚠️ Estas credenciais serão criadas no sistema. O diretor poderá fazer login na página de acesso.
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-2">⚠️ Estas credenciais serão criadas no sistema. O diretor poderá fazer login na página de acesso.</p>
                 </CardContent>
               </Card>
             )}
@@ -673,12 +685,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
               </div>
               <div className="space-y-2">
                 <Label htmlFor="dataVencimento">Data de Vencimento</Label>
-                <Input
-                  id="dataVencimento"
-                  type="date"
-                  value={formData.dataVencimento}
-                  onChange={(e) => handleInputChange("dataVencimento", e.target.value)}
-                />
+                <Input id="dataVencimento" type="date" value={formData.dataVencimento} onChange={(e) => handleInputChange("dataVencimento", e.target.value)} />
               </div>
             </div>
 
@@ -701,13 +708,9 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                       <p className="font-medium">{formData.descricaoCobranca}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-green-600">
-                        R$ {Number(formData.valorImplantacao).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </p>
+                      <p className="text-2xl font-bold text-green-600">R$ {Number(formData.valorImplantacao).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</p>
                       {formData.dataVencimento && (
-                        <p className="text-sm text-muted-foreground">
-                          Venc: {new Date(formData.dataVencimento + "T00:00:00").toLocaleDateString('pt-BR')}
-                        </p>
+                        <p className="text-sm text-muted-foreground">Venc: {new Date(formData.dataVencimento + "T00:00:00").toLocaleDateString("pt-BR")}</p>
                       )}
                     </div>
                   </div>
@@ -718,128 +721,147 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
 
           {/* Tab: Configuração de Pagamentos */}
           <TabsContent value="pagamento" className="space-y-4">
-            <div className="space-y-3">
-              <Label>Provedor de Pagamento *</Label>
-              <p className="text-sm text-muted-foreground">
-                Selecione o provedor que a escola usará para cobrar os alunos
-              </p>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {paymentProviders.map((provider) => (
-                  <button
-                    key={provider.id}
-                    type="button"
-                    onClick={() => handleInputChange("provedorPagamento", provider.id)}
-                    className={cn(
-                      "relative flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all",
-                      "hover:border-rose-300 hover:bg-rose-50/50 dark:hover:bg-rose-950/20",
-                      formData.provedorPagamento === provider.id
-                        ? "border-rose-500 bg-rose-50 dark:bg-rose-950/30"
-                        : "border-border"
-                    )}
-                  >
-                    {formData.provedorPagamento === provider.id && (
-                      <div className="absolute top-2 right-2">
-                        <Check className="h-4 w-4 text-rose-500" />
-                      </div>
-                    )}
-                    <span className="text-3xl">{provider.logo}</span>
-                    <span className="font-medium text-sm">{provider.name}</span>
-                    <span className="text-xs text-muted-foreground">{provider.description}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {formData.provedorPagamento && (
-              <Card className="border-rose-200">
-                <CardContent className="p-4 space-y-4">
+            <Card className="border-dashed border-2 border-rose-200 bg-rose-50/50 dark:bg-rose-950/20">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="font-medium text-rose-700 dark:text-rose-400">Integração com API de pagamento</p>
+                    <p className="text-sm text-rose-600/80 dark:text-rose-400/80">
+                      Se preferir, você pode cadastrar a escola sem configurar cobrança/pagamentos agora.
+                    </p>
+                  </div>
                   <div className="flex items-center gap-2">
-                    <Settings className="h-5 w-5 text-rose-500" />
-                    <span className="font-medium">
-                      Configurar API - {paymentProviders.find(p => p.id === formData.provedorPagamento)?.name}
-                    </span>
+                    <Label className="text-sm">{formData.integrarPagamentos ? "Ativo" : "Não incluir"}</Label>
+                    <Switch checked={formData.integrarPagamentos} onCheckedChange={(v) => handleInputChange("integrarPagamentos", v)} />
                   </div>
+                </div>
+              </CardContent>
+            </Card>
 
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="apiKey">Chave da API (Public Key)</Label>
-                      <Input
-                        id="apiKey"
-                        value={formData.apiKey}
-                        onChange={(e) => handleInputChange("apiKey", e.target.value)}
-                        placeholder="pk_live_..."
-                        className="font-mono text-sm"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="apiSecret">Chave Secreta (Secret Key)</Label>
-                      <div className="relative">
-                        <Input
-                          id="apiSecret"
-                          type={showApiSecret ? "text" : "password"}
-                          value={formData.apiSecret}
-                          onChange={(e) => handleInputChange("apiSecret", e.target.value)}
-                          placeholder="sk_live_..."
-                          className="font-mono text-sm pr-10"
-                        />
-                        <Button
-                          type="button"
-                          size="icon"
-                          variant="ghost"
-                          className="absolute right-0 top-0 h-full px-3"
-                          onClick={() => setShowApiSecret(!showApiSecret)}
-                        >
-                          {showApiSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </Button>
+            {formData.integrarPagamentos ? (
+              <>
+                <div className="space-y-3">
+                  <Label>Provedor de Pagamento *</Label>
+                  <p className="text-sm text-muted-foreground">Selecione o provedor que a escola usará para cobrar os alunos</p>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {paymentProviders.map((provider) => (
+                      <button
+                        key={provider.id}
+                        type="button"
+                        onClick={() => handleInputChange("provedorPagamento", provider.id)}
+                        className={cn(
+                          "relative flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all",
+                          "hover:border-rose-300 hover:bg-rose-50/50 dark:hover:bg-rose-950/20",
+                          formData.provedorPagamento === provider.id ? "border-rose-500 bg-rose-50 dark:bg-rose-950/30" : "border-border"
+                        )}
+                      >
+                        {formData.provedorPagamento === provider.id && (
+                          <div className="absolute top-2 right-2">
+                            <Check className="h-4 w-4 text-rose-500" />
+                          </div>
+                        )}
+                        <span className="text-3xl">{provider.logo}</span>
+                        <span className="font-medium text-sm">{provider.name}</span>
+                        <span className="text-xs text-muted-foreground">{provider.description}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {formData.provedorPagamento && (
+                  <Card className="border-rose-200">
+                    <CardContent className="p-4 space-y-4">
+                      <div className="flex items-center gap-2">
+                        <Settings className="h-5 w-5 text-rose-500" />
+                        <span className="font-medium">Configurar API - {paymentProviders.find((p) => p.id === formData.provedorPagamento)?.name}</span>
                       </div>
-                    </div>
-                  </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="webhookUrl">URL do Webhook (opcional)</Label>
-                    <Input
-                      id="webhookUrl"
-                      value={formData.webhookUrl}
-                      onChange={(e) => handleInputChange("webhookUrl", e.target.value)}
-                      placeholder="https://api.escola.com/webhook/pagamentos"
-                      className="font-mono text-sm"
-                    />
-                  </div>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label htmlFor="apiKey">Chave da API (Public Key)</Label>
+                          <Input
+                            id="apiKey"
+                            value={formData.apiKey}
+                            onChange={(e) => handleInputChange("apiKey", e.target.value)}
+                            placeholder="pk_live_..."
+                            className="font-mono text-sm"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="apiSecret">Chave Secreta (Secret Key)</Label>
+                          <div className="relative">
+                            <Input
+                              id="apiSecret"
+                              type={showApiSecret ? "text" : "password"}
+                              value={formData.apiSecret}
+                              onChange={(e) => handleInputChange("apiSecret", e.target.value)}
+                              placeholder="sk_live_..."
+                              className="font-mono text-sm pr-10"
+                            />
+                            <Button
+                              type="button"
+                              size="icon"
+                              variant="ghost"
+                              className="absolute right-0 top-0 h-full px-3"
+                              onClick={() => setShowApiSecret(!showApiSecret)}
+                            >
+                              {showApiSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
 
-                  <div className="space-y-2">
-                    <Label>Ambiente</Label>
-                    <div className="flex gap-2">
-                      <Button
-                        type="button"
-                        variant={formData.ambiente === "sandbox" ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => handleInputChange("ambiente", "sandbox")}
-                        className={formData.ambiente === "sandbox" ? "bg-yellow-500 hover:bg-yellow-600" : ""}
-                      >
-                        🧪 Sandbox (Testes)
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={formData.ambiente === "producao" ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => handleInputChange("ambiente", "producao")}
-                        className={formData.ambiente === "producao" ? "bg-green-500 hover:bg-green-600" : ""}
-                      >
-                        🚀 Produção
-                      </Button>
-                    </div>
-                  </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="webhookUrl">URL do Webhook (opcional)</Label>
+                        <Input
+                          id="webhookUrl"
+                          value={formData.webhookUrl}
+                          onChange={(e) => handleInputChange("webhookUrl", e.target.value)}
+                          placeholder="https://api.escola.com/webhook/pagamentos"
+                          className="font-mono text-sm"
+                        />
+                      </div>
 
-                  <div className="flex items-center gap-2 p-3 rounded-md bg-muted/50">
-                    <Badge variant={formData.ambiente === "producao" ? "default" : "secondary"}>
-                      {formData.ambiente === "producao" ? "PRODUÇÃO" : "SANDBOX"}
-                    </Badge>
-                    <span className="text-sm text-muted-foreground">
-                      {formData.ambiente === "producao"
-                        ? "As transações serão reais"
-                        : "Ambiente de testes - sem cobrança real"}
-                    </span>
-                  </div>
+                      <div className="space-y-2">
+                        <Label>Ambiente</Label>
+                        <div className="flex gap-2">
+                          <Button
+                            type="button"
+                            variant={formData.ambiente === "sandbox" ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => handleInputChange("ambiente", "sandbox")}
+                            className={formData.ambiente === "sandbox" ? "bg-yellow-500 hover:bg-yellow-600" : ""}
+                          >
+                            🧪 Sandbox (Testes)
+                          </Button>
+                          <Button
+                            type="button"
+                            variant={formData.ambiente === "producao" ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => handleInputChange("ambiente", "producao")}
+                            className={formData.ambiente === "producao" ? "bg-green-500 hover:bg-green-600" : ""}
+                          >
+                            🚀 Produção
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 p-3 rounded-md bg-muted/50">
+                        <Badge variant={formData.ambiente === "producao" ? "default" : "secondary"}>
+                          {formData.ambiente === "producao" ? "PRODUÇÃO" : "SANDBOX"}
+                        </Badge>
+                        <span className="text-sm text-muted-foreground">
+                          {formData.ambiente === "producao" ? "As transações serão reais" : "Ambiente de testes - sem cobrança real"}
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </>
+            ) : (
+              <Card className="border border-border bg-muted/30">
+                <CardContent className="p-4">
+                  <p className="text-sm text-muted-foreground">Pagamentos não serão configurados no cadastro. Você poderá ativar e configurar depois.</p>
                 </CardContent>
               </Card>
             )}
