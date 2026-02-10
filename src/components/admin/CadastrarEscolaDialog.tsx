@@ -253,6 +253,8 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
           toast.error("Selecione um provedor de pagamento");
           return false;
         }
+
+        // Chaves de API são opcionais (podem ser preenchidas depois)
         return true;
       default:
         return true;
@@ -778,7 +780,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
 
                       <div className="grid gap-4 md:grid-cols-2">
                         <div className="space-y-2">
-                          <Label htmlFor="apiKey">Chave da API (Public Key)</Label>
+                          <Label htmlFor="apiKey">Chave da API (Public Key) <span className="text-muted-foreground">(opcional)</span></Label>
                           <Input
                             id="apiKey"
                             value={formData.apiKey}
@@ -788,7 +790,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="apiSecret">Chave Secreta (Secret Key)</Label>
+                          <Label htmlFor="apiSecret">Chave Secreta (Secret Key) <span className="text-muted-foreground">(opcional)</span></Label>
                           <div className="relative">
                             <Input
                               id="apiSecret"
@@ -810,6 +812,10 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                           </div>
                         </div>
                       </div>
+
+                      <p className="text-xs text-muted-foreground">
+                        Dica: você pode deixar as chaves em branco e configurar depois.
+                      </p>
 
                       <div className="space-y-2">
                         <Label htmlFor="webhookUrl">URL do Webhook (opcional)</Label>
