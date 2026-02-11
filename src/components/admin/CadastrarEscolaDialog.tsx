@@ -328,6 +328,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
         datacadastro: new Date().toISOString().split("T")[0],
         linkAcesso,
         modulos: formData.modulos,
+        emailDiretor: formData.emailDiretor,
       };
 
       onSave(novaEscola);
@@ -735,7 +736,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
             {formData.integrarPagamentos ? (
               <>
                 <div className="space-y-3">
-                  <Label>Provedor de Pagamento *</Label>
+                  <Label>Provedor de Pagamento <span className="text-muted-foreground">(opcional)</span></Label>
                   <p className="text-sm text-muted-foreground">Selecione o provedor que a escola usará para cobrar os alunos</p>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     {paymentProviders.map((provider) => (
