@@ -246,15 +246,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
         }
         return true;
       case "pagamento":
-        // Se não integrar pagamentos, não valida provedor.
-        if (!formData.integrarPagamentos) return true;
-
-        if (!formData.provedorPagamento) {
-          toast.error("Selecione um provedor de pagamento");
-          return false;
-        }
-
-        // Chaves de API são opcionais (podem ser preenchidas depois)
+        // Tudo é opcional nesta aba – provedor e chaves podem ser configurados depois
         return true;
       default:
         return true;
