@@ -40,24 +40,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { EditarEscolaDialog, Escola } from "@/components/admin/EditarEscolaDialog";
 import { DetalhesEscolaDialog } from "@/components/admin/DetalhesEscolaDialog";
 import { CadastrarEscolaDialog } from "@/components/admin/CadastrarEscolaDialog";
 import { toast } from "sonner";
 import { useActivityLog } from "@/contexts/ActivityLogContext";
-
-const escolasIniciais: Escola[] = [
-  { id: "1", nome: "Colégio São Paulo", cnpj: "12.345.678/0001-90", cidade: "São Paulo", uf: "SP", porte: "Grande", plano: "Premium", alunos: 1250, professores: 85, status: "ativo", datacadastro: "2023-01-15", linkAcesso: `${window.location.origin}/login?escola=colegio-sao-paulo-1` },
-  { id: "2", nome: "Escola Municipal Centro", cnpj: "23.456.789/0001-01", cidade: "Rio de Janeiro", uf: "RJ", porte: "Grande", plano: "Pro", alunos: 850, professores: 52, status: "ativo", datacadastro: "2023-03-20", linkAcesso: `${window.location.origin}/login?escola=escola-municipal-centro-2` },
-  { id: "3", nome: "Instituto Educacional ABC", cnpj: "34.567.890/0001-12", cidade: "Belo Horizonte", uf: "MG", porte: "Médio", plano: "Start", alunos: 420, professores: 28, status: "trial", datacadastro: "2024-01-10", linkAcesso: `${window.location.origin}/login?escola=instituto-educacional-abc-3` },
-  { id: "4", nome: "Colégio Novo Horizonte", cnpj: "45.678.901/0001-23", cidade: "Curitiba", uf: "PR", porte: "Grande", plano: "Premium", alunos: 980, professores: 65, status: "ativo", datacadastro: "2023-06-05", linkAcesso: `${window.location.origin}/login?escola=colegio-novo-horizonte-4` },
-  { id: "5", nome: "Escola Estadual Central", cnpj: "56.789.012/0001-34", cidade: "Salvador", uf: "BA", porte: "Médio", plano: "Free", alunos: 320, professores: 22, status: "ativo", datacadastro: "2023-09-12", linkAcesso: `${window.location.origin}/login?escola=escola-estadual-central-5` },
-  { id: "6", nome: "Colégio Esperança", cnpj: "67.890.123/0001-45", cidade: "Fortaleza", uf: "CE", porte: "Pequeno", plano: "Start", alunos: 180, professores: 15, status: "inativo", datacadastro: "2023-04-18", linkAcesso: `${window.location.origin}/login?escola=colegio-esperanca-6` },
-  { id: "7", nome: "Instituto Federal Norte", cnpj: "78.901.234/0001-56", cidade: "Manaus", uf: "AM", porte: "Grande", plano: "Pro", alunos: 720, professores: 48, status: "ativo", datacadastro: "2023-07-22", linkAcesso: `${window.location.origin}/login?escola=instituto-federal-norte-7` },
-  { id: "8", nome: "Escola Técnica Sul", cnpj: "89.012.345/0001-67", cidade: "Porto Alegre", uf: "RS", porte: "Médio", plano: "Pro", alunos: 560, professores: 38, status: "ativo", datacadastro: "2023-11-30", linkAcesso: `${window.location.origin}/login?escola=escola-tecnica-sul-8` },
-];
+import { supabase } from "@/integrations/supabase/client";
 
 const getPlanoColor = (plano: string) => {
   switch (plano.toLowerCase()) {
@@ -89,7 +79,8 @@ const getStatusIcon = (status: string) => {
 export default function AdminEscolas() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [escolas, setEscolas] = useState<Escola[]>(escolasIniciais);
+  const [escolas, setEscolas] = useState<Escola[]>([]);
+  const [loading, setLoading] = useState(true);
   const [busca, setBusca] = useState("");
   const [filtroPlano, setFiltroPlano] = useState("todos");
   const [filtroStatus, setFiltroStatus] = useState("todos");
@@ -99,6 +90,43 @@ export default function AdminEscolas() {
   const [escolaSelecionada, setEscolaSelecionada] = useState<Escola | null>(null);
   const [abaInicial, setAbaInicial] = useState<string | undefined>();
   const { registrarAtividade } = useActivityLog();
+
+  const fetchEscolas = useCallback(async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("escolas")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Erro ao carregar escolas:", error);
+      toast.error("Erro ao carregar escolas");
+    } else {
+      setEscolas(
+        (data || []).map((e: any) => ({
+          id: e.id,
+          nome: e.nome,
+          cnpj: e.cnpj,
+          cidade: e.cidade,
+          uf: e.uf,
+          porte: e.porte,
+          plano: e.plano,
+          alunos: e.alunos,
+          professores: e.professores,
+          status: e.status,
+          datacadastro: e.datacadastro,
+          linkAcesso: e.link_acesso,
+          modulos: e.modulos || [],
+          emailDiretor: e.email_diretor,
+        }))
+      );
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    fetchEscolas();
+  }, [fetchEscolas]);
 
   // Processar parâmetros da URL para abrir dialog de edição
   useEffect(() => {
@@ -111,7 +139,6 @@ export default function AdminEscolas() {
         setEscolaSelecionada(escola);
         setAbaInicial(aba || undefined);
         setEditDialogOpen(true);
-        // Limpar parâmetros da URL
         setSearchParams({});
       }
     }
@@ -127,8 +154,32 @@ export default function AdminEscolas() {
     setEditDialogOpen(true);
   };
 
-  const handleSaveEscola = (escolaAtualizada: Escola) => {
-    setEscolas(escolas.map(e => e.id === escolaAtualizada.id ? escolaAtualizada : e));
+  const handleSaveEscola = async (escolaAtualizada: Escola) => {
+    const { error } = await supabase
+      .from("escolas")
+      .update({
+        nome: escolaAtualizada.nome,
+        cnpj: escolaAtualizada.cnpj,
+        cidade: escolaAtualizada.cidade,
+        uf: escolaAtualizada.uf,
+        porte: escolaAtualizada.porte,
+        plano: escolaAtualizada.plano,
+        alunos: escolaAtualizada.alunos,
+        professores: escolaAtualizada.professores,
+        status: escolaAtualizada.status,
+        modulos: escolaAtualizada.modulos || [],
+        email_diretor: escolaAtualizada.emailDiretor,
+        link_acesso: escolaAtualizada.linkAcesso,
+      })
+      .eq("id", escolaAtualizada.id);
+
+    if (error) {
+      console.error("Erro ao atualizar escola:", error);
+      toast.error("Erro ao salvar alterações");
+      return;
+    }
+
+    await fetchEscolas();
     registrarAtividade(
       "escola_editada",
       `Escola "${escolaAtualizada.nome}" foi editada`,
@@ -138,8 +189,32 @@ export default function AdminEscolas() {
     );
   };
 
-  const handleAddEscola = (novaEscola: Escola) => {
-    setEscolas([novaEscola, ...escolas]);
+  const handleAddEscola = async (novaEscola: Escola) => {
+    const { error } = await supabase.from("escolas").insert({
+      id: novaEscola.id,
+      nome: novaEscola.nome,
+      cnpj: novaEscola.cnpj,
+      cidade: novaEscola.cidade,
+      uf: novaEscola.uf,
+      porte: novaEscola.porte,
+      plano: novaEscola.plano,
+      alunos: novaEscola.alunos,
+      professores: novaEscola.professores,
+      status: novaEscola.status,
+      datacadastro: novaEscola.datacadastro,
+      link_acesso: novaEscola.linkAcesso,
+      modulos: novaEscola.modulos || [],
+      email_diretor: novaEscola.emailDiretor,
+      user_id: novaEscola.id, // userId from edge function
+    });
+
+    if (error) {
+      console.error("Erro ao salvar escola:", error);
+      toast.error("Erro ao salvar escola no banco de dados");
+      return;
+    }
+
+    await fetchEscolas();
     registrarAtividade(
       "escola_criada",
       `Nova escola "${novaEscola.nome}" foi cadastrada`,
@@ -149,9 +224,20 @@ export default function AdminEscolas() {
     );
   };
 
-  const handleDesativarEscola = (escola: Escola) => {
+  const handleDesativarEscola = async (escola: Escola) => {
     const novoStatus = escola.status === "inativo" ? "ativo" : "inativo";
-    setEscolas(escolas.map(e => e.id === escola.id ? { ...e, status: novoStatus } : e));
+    const { error } = await supabase
+      .from("escolas")
+      .update({ status: novoStatus })
+      .eq("id", escola.id);
+
+    if (error) {
+      console.error("Erro ao alterar status:", error);
+      toast.error("Erro ao alterar status da escola");
+      return;
+    }
+
+    await fetchEscolas();
     toast.success(`Escola ${novoStatus === "inativo" ? "desativada" : "ativada"} com sucesso!`);
     registrarAtividade(
       novoStatus === "ativo" ? "escola_ativada" : "escola_desativada",

@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      escolas: {
+        Row: {
+          alunos: number
+          cidade: string
+          cnpj: string
+          created_at: string
+          datacadastro: string
+          email_diretor: string | null
+          id: string
+          link_acesso: string | null
+          modulos: string[] | null
+          nome: string
+          plano: string
+          porte: string
+          professores: number
+          status: string
+          uf: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          alunos?: number
+          cidade: string
+          cnpj: string
+          created_at?: string
+          datacadastro?: string
+          email_diretor?: string | null
+          id?: string
+          link_acesso?: string | null
+          modulos?: string[] | null
+          nome: string
+          plano?: string
+          porte?: string
+          professores?: number
+          status?: string
+          uf: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          alunos?: number
+          cidade?: string
+          cnpj?: string
+          created_at?: string
+          datacadastro?: string
+          email_diretor?: string | null
+          id?: string
+          link_acesso?: string | null
+          modulos?: string[] | null
+          nome?: string
+          plano?: string
+          porte?: string
+          professores?: number
+          status?: string
+          uf?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
