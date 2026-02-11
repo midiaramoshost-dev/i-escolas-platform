@@ -62,6 +62,7 @@ const MODULOS_OPTIONS = [
   { id: "financeiro", label: "Financeiro" },
   { id: "biblioteca", label: "Biblioteca" },
   { id: "comunicacao", label: "Comunicação" },
+  { id: "importacao", label: "Importação (Migração)" },
 ];
 
 export function EditarEscolaDialog({ escola, open, onOpenChange, onSave, destacarPlano }: EditarEscolaDialogProps) {

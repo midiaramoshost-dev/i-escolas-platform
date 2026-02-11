@@ -89,6 +89,7 @@ const MODULOS_LABELS: Record<string, string> = {
   financeiro: "Financeiro",
   biblioteca: "Biblioteca",
   comunicacao: "Comunicação",
+  importacao: "Importação (Migração)",
 };
 
 export function DetalhesEscolaDialog({ escola, open, onOpenChange }: DetalhesEscolaDialogProps) {

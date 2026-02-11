@@ -54,6 +54,8 @@ const MODULOS_OPTIONS = [
   { id: "financeiro", label: "Financeiro" },
   { id: "biblioteca", label: "Biblioteca" },
   { id: "comunicacao", label: "Comunicação" },
+  // Módulo estratégico de migração (deve viver no ADM Master e ser herdado por padrão quando ativo)
+  { id: "importacao", label: "Importação (Migração)" },
 ];
 
 interface PaymentProvider {
@@ -147,12 +149,13 @@ const formatPhone = (value: string): string => {
   return digits.replace(/^(\d{2})(\d)/, "($1) $2").replace(/(\d{5})(\d)/, "$1-$2");
 };
 
+// Herdado por padrão quando o ADM MASTER implanta uma nova escola.
+// (Mínimo para nascer operacional + migração estratégica)
 const DEFAULT_MODULOS_ESCOLA = [
-  // Núcleo (gestão interna)
   "academico",
-  // Base ped/secretaria/comunicação/financeiro (mínimo para nascer operacional)
   "comunicacao",
   "financeiro",
+  "importacao",
 ];
 
 export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarEscolaDialogProps) {
@@ -375,8 +378,8 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
       const escolaId = fnData?.userId || Date.now().toString();
       const linkAcesso = `${window.location.origin}/login?escola=${escolaSlug}-${escolaId}`;
 
-      // 2) Definir módulos padrão (conteúdo padrão da escola)
-      // Regra: se o ADM não selecionou nenhum, a escola já nasce com uma base operacional.
+      // 2) Módulos herdados
+      // Regra: se o ADM não selecionou nenhum, a escola herda automaticamente os módulos ativos (default).
       const modulosSelecionados = (formData.modulos || []).length > 0 ? formData.modulos : DEFAULT_MODULOS_ESCOLA;
 
       const novaEscola: Escola = {
@@ -645,7 +648,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                   <p className="font-medium text-rose-700 dark:text-rose-400">Módulos da Implantação</p>
                   <p className="text-sm text-rose-600/80 dark:text-rose-400/80">Selecione os módulos que ficarão ativos para esta escola.</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Se nenhum for selecionado, a escola nascerá com um conjunto padrão (Acadêmico, Comunicação e Financeiro).
+                    Se nenhum for selecionado, a escola herdará automaticamente os módulos ativos padrão (inclui Importação/Migração).
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
