@@ -11,6 +11,12 @@ import {
   Activity,
   Puzzle,
   ClipboardList,
+  Headset,
+  UserCog,
+  HeartPulse,
+  Landmark,
+  FileLock2,
+  Crown,
 } from "lucide-react";
 import {
   Sidebar,
@@ -36,9 +42,44 @@ const menuItems = [
     url: "/admin/dashboard",
   },
   {
+    title: "Dashboard CEO",
+    icon: Crown,
+    url: "/admin/dashboard#ceo",
+  },
+  {
+    title: "Analytics (SaaS)",
+    icon: BarChart3,
+    url: "/admin/dashboard#analytics",
+  },
+  {
     title: "Escolas",
     icon: Building2,
     url: "/admin/escolas",
+  },
+  {
+    title: "Financeiro",
+    icon: Landmark,
+    url: "/admin/dashboard#financeiro",
+  },
+  {
+    title: "Suporte (Help Desk)",
+    icon: Headset,
+    url: "/admin/dashboard#suporte",
+  },
+  {
+    title: "Retenção (Anti-churn)",
+    icon: HeartPulse,
+    url: "/admin/dashboard#retencao",
+  },
+  {
+    title: "RBAC / Permissões",
+    icon: UserCog,
+    url: "/admin/usuarios#rbac",
+  },
+  {
+    title: "Governança / LGPD",
+    icon: FileLock2,
+    url: "/admin/dashboard#governanca",
   },
   {
     title: "Planos",
@@ -121,11 +162,11 @@ export function AdminSidebar() {
               <Avatar className="h-10 w-10">
                 <AvatarImage src="/placeholder.svg" />
                 <AvatarFallback className="bg-rose-500 text-white">
-                  {user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2) || 'SA'}
+                  {user?.name?.split(" ").map((n) => n[0]).join("").slice(0, 2) || "SA"}
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
-                <span className="text-sm font-medium text-sidebar-foreground">{user?.name || 'Admin'}</span>
+                <span className="text-sm font-medium text-sidebar-foreground">{user?.name || "Admin"}</span>
                 <Badge className="bg-rose-500/10 text-rose-500 text-[10px] w-fit">
                   Master
                 </Badge>
@@ -142,11 +183,7 @@ export function AdminSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.url)}
-                    tooltip={item.title}
-                  >
+                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
                     <Link to={item.url}>
                       <item.icon className="h-5 w-5" />
                       {!isCollapsed && <span>{item.title}</span>}
