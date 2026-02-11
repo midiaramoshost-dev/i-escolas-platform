@@ -192,7 +192,7 @@ const Index = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveSlide((prev) => (prev + 1) % 4);
+      setActiveSlide((prev) => (prev + 1) % 6);
     }, 5000);
 
     return () => clearInterval(interval);
@@ -323,6 +323,21 @@ const Index = () => {
 
   const heroSlides = [
     {
+      title: "Berçário Acolhedor",
+      description: "Um ambiente seguro e confortável para os primeiros aprendizados.",
+      image: "https://images.unsplash.com/photo-1526634332515-d56cfc19cd97?auto=format&fit=crop&w=2400&q=80",
+    },
+    {
+      title: "Cuidado e Carinho",
+      description: "Rotina com atenção individual e acompanhamento de perto.",
+      image: "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&w=2400&q=80",
+    },
+    {
+      title: "Berçário em Escola",
+      description: "Estrutura completa para descanso, alimentação e desenvolvimento.",
+      image: "https://images.unsplash.com/photo-1604881991405-b273c30e1b0c?auto=format&fit=crop&w=2400&q=80",
+    },
+    {
       title: "Dashboard Inteligente",
       description: "Indicadores em tempo real para decisões rápidas e seguras.",
       image: heroSlide1,
@@ -336,11 +351,6 @@ const Index = () => {
       title: "Portal do Responsável",
       description: "Comunicação e acompanhamento em tempo real com as famílias.",
       image: heroSlide3,
-    },
-    {
-      title: "Gestão Completa",
-      description: "Tudo integrado em um só lugar para sua equipe pedagógica.",
-      image: heroSlide4,
     }
   ];
 
