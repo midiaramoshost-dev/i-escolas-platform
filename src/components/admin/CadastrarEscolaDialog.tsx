@@ -82,6 +82,7 @@ interface FormData {
   plano: string;
   emailDiretor: string;
   telefoneDiretor: string;
+  logoUrl: string;
 
   // Credenciais
   loginProvisorio: string;
@@ -168,6 +169,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
     plano: "",
     emailDiretor: "",
     telefoneDiretor: "",
+    logoUrl: "",
     loginProvisorio: "",
     senhaProvisoria: "",
     valorImplantacao: "",
@@ -354,6 +356,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
         linkAcesso,
         modulos: modulosSelecionados,
         emailDiretor: formData.emailDiretor,
+        logoUrl: (formData.logoUrl || "").trim() || undefined,
       };
 
       // Importante: aguardar o onSave persistir no banco antes de fechar/resetar
@@ -373,6 +376,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
         plano: "",
         emailDiretor: "",
         telefoneDiretor: "",
+        logoUrl: "",
         loginProvisorio: "",
         senhaProvisoria: "",
         valorImplantacao: "",
@@ -459,6 +463,32 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                   maxLength={18}
                 />
               </div>
+            </div>
+
+            {/* Logo */}
+            <div className="space-y-2">
+              <Label htmlFor="logoUrl">Logo da escola (URL)</Label>
+              <Input
+                id="logoUrl"
+                value={formData.logoUrl}
+                onChange={(e) => handleInputChange("logoUrl", e.target.value)}
+                placeholder="https://.../logo.png"
+              />
+              {(formData.logoUrl || "").trim() ? (
+                <div className="flex items-center gap-3 rounded-md border bg-muted/20 p-3">
+                  <img
+                    src={formData.logoUrl}
+                    alt={`Logo ${formData.nome || "da escola"}`}
+                    className="h-12 w-12 rounded-md object-contain bg-background border"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.display = "none";
+                    }}
+                  />
+                  <p className="text-xs text-muted-foreground break-all">{formData.logoUrl}</p>
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">Opcional: cole uma URL pública da imagem (PNG/JPG/SVG).</p>
+              )}
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">

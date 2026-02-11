@@ -36,6 +36,9 @@ export interface Escola {
   linkAcesso?: string;
   modulos?: string[];
 
+  // Logo (URL)
+  logoUrl?: string;
+
   // Credenciais (para o painel ADM Master conseguir ajustar)
   emailDiretor?: string;
   novaSenha?: string;
@@ -82,6 +85,7 @@ export function EditarEscolaDialog({ escola, open, onOpenChange, onSave, destaca
         modulos: escola.modulos || [],
         emailDiretor: escola.emailDiretor || "",
         novaSenha: "",
+        logoUrl: escola.logoUrl || "",
       });
     }
   }, [escola]);
@@ -195,6 +199,33 @@ export function EditarEscolaDialog({ escola, open, onOpenChange, onSave, destaca
               />
             </div>
           </div>
+
+          {/* Logo */}
+          <div className="space-y-2">
+            <Label htmlFor="logoUrl">Logo da escola (URL)</Label>
+            <Input
+              id="logoUrl"
+              value={formData.logoUrl || ""}
+              onChange={(e) => setFormData({ ...formData, logoUrl: e.target.value })}
+              placeholder="https://.../logo.png"
+            />
+            {(formData.logoUrl || "").trim() ? (
+              <div className="flex items-center gap-3 rounded-md border bg-muted/20 p-3">
+                <img
+                  src={formData.logoUrl}
+                  alt={`Logo ${formData.nome}`}
+                  className="h-12 w-12 rounded-md object-contain bg-background border"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).style.display = "none";
+                  }}
+                />
+                <p className="text-xs text-muted-foreground break-all">{formData.logoUrl}</p>
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">Opcional: cole uma URL pública da imagem (PNG/JPG/SVG).</p>
+            )}
+          </div>
+
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
               <Label htmlFor="cidade">Cidade</Label>

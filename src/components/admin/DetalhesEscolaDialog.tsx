@@ -115,8 +115,19 @@ export function DetalhesEscolaDialog({ escola, open, onOpenChange }: DetalhesEsc
         <DialogHeader>
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
-              <div className="rounded-full p-3 bg-rose-500/10">
-                <Building2 className="h-6 w-6 text-rose-500" />
+              <div className="rounded-full p-3 bg-rose-500/10 overflow-hidden">
+                {escola.logoUrl ? (
+                  <img
+                    src={escola.logoUrl}
+                    alt={`Logo ${escola.nome}`}
+                    className="h-6 w-6 object-contain"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.display = "none";
+                    }}
+                  />
+                ) : (
+                  <Building2 className="h-6 w-6 text-rose-500" />
+                )}
               </div>
               <div>
                 <DialogTitle className="text-xl text-blue-500">{escola.nome}</DialogTitle>
