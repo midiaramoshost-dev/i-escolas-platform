@@ -146,6 +146,14 @@ const formatPhone = (value: string): string => {
   return digits.replace(/^(\d{2})(\d)/, "($1) $2").replace(/(\d{5})(\d)/, "$1-$2");
 };
 
+const DEFAULT_MODULOS_ESCOLA = [
+  // Núcleo (gestão interna)
+  "academico",
+  // Base ped/secretaria/comunicação/financeiro (mínimo para nascer operacional)
+  "comunicacao",
+  "financeiro",
+];
+
 export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarEscolaDialogProps) {
   const [activeTab, setActiveTab] = useState("dados");
   const [showPassword, setShowPassword] = useState(false);
@@ -295,7 +303,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
     setIsCreating(true);
 
     try {
-      // Criar usuário no Supabase Auth via edge function
+      // 1) Criar usuário no Supabase Auth via edge function
       const { data: fnData, error: fnError } = await supabase.functions.invoke("create-school-user", {
         body: {
           email: formData.emailDiretor,
@@ -327,6 +335,10 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
       const escolaId = fnData?.userId || Date.now().toString();
       const linkAcesso = `${window.location.origin}/login?escola=${escolaSlug}-${escolaId}`;
 
+      // 2) Definir módulos padrão (conteúdo padrão da escola)
+      // Regra: se o ADM não selecionou nenhum, a escola já nasce com uma base operacional.
+      const modulosSelecionados = (formData.modulos || []).length > 0 ? formData.modulos : DEFAULT_MODULOS_ESCOLA;
+
       const novaEscola: Escola = {
         id: escolaId,
         nome: formData.nome,
@@ -340,14 +352,14 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
         status: "trial",
         datacadastro: new Date().toISOString().split("T")[0],
         linkAcesso,
-        modulos: formData.modulos,
+        modulos: modulosSelecionados,
         emailDiretor: formData.emailDiretor,
       };
 
       // Importante: aguardar o onSave persistir no banco antes de fechar/resetar
       await onSave(novaEscola);
 
-      toast.success("Escola cadastrada com sucesso! Credenciais criadas no sistema.", {
+      toast.success("Escola cadastrada com sucesso! Conteúdo padrão criado.", {
         description: `O diretor pode acessar com o e-mail ${formData.emailDiretor}`,
       });
 
@@ -531,6 +543,9 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                 <div>
                   <p className="font-medium text-rose-700 dark:text-rose-400">Módulos da Implantação</p>
                   <p className="text-sm text-rose-600/80 dark:text-rose-400/80">Selecione os módulos que ficarão ativos para esta escola.</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Se nenhum for selecionado, a escola nascerá com um conjunto padrão (Acadêmico, Comunicação e Financeiro).
+                  </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {MODULOS_OPTIONS.map((m) => {
@@ -654,9 +669,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                       <strong>Senha:</strong> {showPassword ? formData.senhaProvisoria : "••••••••••••"}
                     </p>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    ⚠️ Estas credenciais serão criadas no sistema. O diretor poderá fazer login na página de acesso.
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-2">⚠️ Estas credenciais serão criadas no sistema. O diretor poderá fazer login na página de acesso.</p>
                 </CardContent>
               </Card>
             )}
@@ -722,9 +735,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="font-medium text-rose-700 dark:text-rose-400">Integração com API de pagamento</p>
-                    <p className="text-sm text-rose-600/80 dark:text-rose-400/80">
-                      Se preferir, você pode cadastrar a escola sem configurar cobrança/pagamentos agora.
-                    </p>
+                    <p className="text-sm text-rose-600/80 dark:text-rose-400/80">Se preferir, você pode cadastrar a escola sem configurar cobrança/pagamentos agora.</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <Label className="text-sm">{formData.integrarPagamentos ? "Ativo" : "Não incluir"}</Label>
@@ -764,9 +775,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                         onClick={() => handleInputChange("provedorPagamento", provider.id)}
                         className={cn(
                           "relative flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all",
-                          !formData.habilitarSelecaoProvedor
-                            ? "cursor-not-allowed"
-                            : "hover:border-rose-300 hover:bg-rose-50/50 dark:hover:bg-rose-950/20",
+                          !formData.habilitarSelecaoProvedor ? "cursor-not-allowed" : "hover:border-rose-300 hover:bg-rose-50/50 dark:hover:bg-rose-950/20",
                           formData.provedorPagamento === provider.id ? "border-rose-500 bg-rose-50 dark:bg-rose-950/30" : "border-border"
                         )}
                       >
@@ -796,13 +805,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                           <Label htmlFor="apiKey">
                             Chave da API (Public Key) <span className="text-muted-foreground">(opcional)</span>
                           </Label>
-                          <Input
-                            id="apiKey"
-                            value={formData.apiKey}
-                            onChange={(e) => handleInputChange("apiKey", e.target.value)}
-                            placeholder="pk_live_..."
-                            className="font-mono text-sm"
-                          />
+                          <Input id="apiKey" value={formData.apiKey} onChange={(e) => handleInputChange("apiKey", e.target.value)} placeholder="pk_live_..." className="font-mono text-sm" />
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="apiSecret">
@@ -817,13 +820,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                               placeholder="sk_live_..."
                               className="font-mono text-sm pr-10"
                             />
-                            <Button
-                              type="button"
-                              size="icon"
-                              variant="ghost"
-                              className="absolute right-0 top-0 h-full px-3"
-                              onClick={() => setShowApiSecret(!showApiSecret)}
-                            >
+                            <Button type="button" size="icon" variant="ghost" className="absolute right-0 top-0 h-full px-3" onClick={() => setShowApiSecret(!showApiSecret)}>
                               {showApiSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                             </Button>
                           </div>
@@ -869,9 +866,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
 
                       <div className="flex items-center gap-2 p-3 rounded-md bg-muted/50">
                         <Badge variant={formData.ambiente === "producao" ? "default" : "secondary"}>{formData.ambiente === "producao" ? "PRODUÇÃO" : "SANDBOX"}</Badge>
-                        <span className="text-sm text-muted-foreground">
-                          {formData.ambiente === "producao" ? "As transações serão reais" : "Ambiente de testes - sem cobrança real"}
-                        </span>
+                        <span className="text-sm text-muted-foreground">{formData.ambiente === "producao" ? "As transações serão reais" : "Ambiente de testes - sem cobrança real"}</span>
                       </div>
                     </CardContent>
                   </Card>
