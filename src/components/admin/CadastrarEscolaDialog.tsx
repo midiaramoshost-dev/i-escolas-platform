@@ -42,7 +42,7 @@ import { Switch } from "@/components/ui/switch";
 interface CadastrarEscolaDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (escola: Escola) => void;
+  onSave: (escola: Escola) => Promise<void> | void;
 }
 
 const UF_OPTIONS = ["SP", "RJ", "MG", "PR", "BA", "CE", "AM", "RS", "SC", "PE", "GO", "DF"];
@@ -141,13 +141,9 @@ const formatCNPJ = (value: string): string => {
 const formatPhone = (value: string): string => {
   const digits = value.replace(/\D/g, "").slice(0, 11);
   if (digits.length <= 10) {
-    return digits
-      .replace(/^(\d{2})(\d)/, "($1) $2")
-      .replace(/(\d{4})(\d)/, "$1-$2");
+    return digits.replace(/^(\d{2})(\d)/, "($1) $2").replace(/(\d{4})(\d)/, "$1-$2");
   }
-  return digits
-    .replace(/^(\d{2})(\d)/, "($1) $2")
-    .replace(/(\d{5})(\d)/, "$1-$2");
+  return digits.replace(/^(\d{2})(\d)/, "($1) $2").replace(/(\d{5})(\d)/, "$1-$2");
 };
 
 export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarEscolaDialogProps) {
@@ -348,7 +344,9 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
         emailDiretor: formData.emailDiretor,
       };
 
-      onSave(novaEscola);
+      // Importante: aguardar o onSave persistir no banco antes de fechar/resetar
+      await onSave(novaEscola);
+
       toast.success("Escola cadastrada com sucesso! Credenciais criadas no sistema.", {
         description: `O diretor pode acessar com o e-mail ${formData.emailDiretor}`,
       });
@@ -405,9 +403,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
             <Building2 className="h-5 w-5 text-rose-500" />
             Cadastrar Nova Escola
           </DialogTitle>
-          <DialogDescription>
-            Complete todas as etapas para cadastrar a escola na plataforma.
-          </DialogDescription>
+          <DialogDescription>Complete todas as etapas para cadastrar a escola na plataforma.</DialogDescription>
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -439,12 +435,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="nome">Nome da Escola *</Label>
-                <Input
-                  id="nome"
-                  value={formData.nome}
-                  onChange={(e) => handleInputChange("nome", e.target.value)}
-                  placeholder="Ex: Colégio São Paulo"
-                />
+                <Input id="nome" value={formData.nome} onChange={(e) => handleInputChange("nome", e.target.value)} placeholder="Ex: Colégio São Paulo" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="cnpj">CNPJ *</Label>
@@ -461,12 +452,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
             <div className="grid gap-4 md:grid-cols-3">
               <div className="space-y-2">
                 <Label htmlFor="cidade">Cidade *</Label>
-                <Input
-                  id="cidade"
-                  value={formData.cidade}
-                  onChange={(e) => handleInputChange("cidade", e.target.value)}
-                  placeholder="São Paulo"
-                />
+                <Input id="cidade" value={formData.cidade} onChange={(e) => handleInputChange("cidade", e.target.value)} placeholder="São Paulo" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="uf">UF *</Label>
@@ -544,9 +530,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
               <CardContent className="p-4 space-y-3">
                 <div>
                   <p className="font-medium text-rose-700 dark:text-rose-400">Módulos da Implantação</p>
-                  <p className="text-sm text-rose-600/80 dark:text-rose-400/80">
-                    Selecione os módulos que ficarão ativos para esta escola.
-                  </p>
+                  <p className="text-sm text-rose-600/80 dark:text-rose-400/80">Selecione os módulos que ficarão ativos para esta escola.</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {MODULOS_OPTIONS.map((m) => {
@@ -581,12 +565,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
             </Card>
 
             <div className="flex justify-end">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleGenerateCredentials}
-                className="border-rose-300 text-rose-600 hover:bg-rose-50"
-              >
+              <Button type="button" variant="outline" onClick={handleGenerateCredentials} className="border-rose-300 text-rose-600 hover:bg-rose-50">
                 <Key className="mr-2 h-4 w-4" />
                 Gerar Novas Credenciais
               </Button>
@@ -653,7 +632,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                             .normalize("NFD")
                             .replace(/[\u0300-\u036f]/g, "")
                             .replace(/[^a-z0-9]+/g, "-")
-                            .replace(/^-|-$/g, "")} 
+                            .replace(/^-|-$/g, "")}
                           -preview
                         </code>
                       </div>
@@ -675,7 +654,9 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                       <strong>Senha:</strong> {showPassword ? formData.senhaProvisoria : "••••••••••••"}
                     </p>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2">⚠️ Estas credenciais serão criadas no sistema. O diretor poderá fazer login na página de acesso.</p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    ⚠️ Estas credenciais serão criadas no sistema. O diretor poderá fazer login na página de acesso.
+                  </p>
                 </CardContent>
               </Card>
             )}
@@ -721,7 +702,9 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                       <p className="font-medium">{formData.descricaoCobranca}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-green-600">R$ {Number(formData.valorImplantacao).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</p>
+                      <p className="text-2xl font-bold text-green-600">
+                        R$ {Number(formData.valorImplantacao).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                      </p>
                       {formData.dataVencimento && (
                         <p className="text-sm text-muted-foreground">Venc: {new Date(formData.dataVencimento + "T00:00:00").toLocaleDateString("pt-BR")}</p>
                       )}
@@ -758,16 +741,11 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                     <div className="flex items-start justify-between gap-4">
                       <div className="space-y-1">
                         <Label className="text-sm">Seleção do provedor</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Selecione o provedor que a escola usará para cobrar os alunos.
-                        </p>
+                        <p className="text-sm text-muted-foreground">Selecione o provedor que a escola usará para cobrar os alunos.</p>
                       </div>
                       <div className="flex items-center gap-2">
                         <Label className="text-sm">{formData.habilitarSelecaoProvedor ? "Habilitado" : "Desabilitado"}</Label>
-                        <Switch
-                          checked={formData.habilitarSelecaoProvedor}
-                          onCheckedChange={(v) => handleInputChange("habilitarSelecaoProvedor", v)}
-                        />
+                        <Switch checked={formData.habilitarSelecaoProvedor} onCheckedChange={(v) => handleInputChange("habilitarSelecaoProvedor", v)} />
                       </div>
                     </div>
                   </CardContent>
@@ -815,7 +793,9 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
 
                       <div className="grid gap-4 md:grid-cols-2">
                         <div className="space-y-2">
-                          <Label htmlFor="apiKey">Chave da API (Public Key) <span className="text-muted-foreground">(opcional)</span></Label>
+                          <Label htmlFor="apiKey">
+                            Chave da API (Public Key) <span className="text-muted-foreground">(opcional)</span>
+                          </Label>
                           <Input
                             id="apiKey"
                             value={formData.apiKey}
@@ -825,7 +805,9 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="apiSecret">Chave Secreta (Secret Key) <span className="text-muted-foreground">(opcional)</span></Label>
+                          <Label htmlFor="apiSecret">
+                            Chave Secreta (Secret Key) <span className="text-muted-foreground">(opcional)</span>
+                          </Label>
                           <div className="relative">
                             <Input
                               id="apiSecret"
@@ -848,9 +830,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                         </div>
                       </div>
 
-                      <p className="text-xs text-muted-foreground">
-                        Dica: você pode deixar as chaves em branco e configurar depois.
-                      </p>
+                      <p className="text-xs text-muted-foreground">Dica: você pode deixar as chaves em branco e configurar depois.</p>
 
                       <div className="space-y-2">
                         <Label htmlFor="webhookUrl">URL do Webhook (opcional)</Label>
@@ -888,9 +868,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                       </div>
 
                       <div className="flex items-center gap-2 p-3 rounded-md bg-muted/50">
-                        <Badge variant={formData.ambiente === "producao" ? "default" : "secondary"}>
-                          {formData.ambiente === "producao" ? "PRODUÇÃO" : "SANDBOX"}
-                        </Badge>
+                        <Badge variant={formData.ambiente === "producao" ? "default" : "secondary"}>{formData.ambiente === "producao" ? "PRODUÇÃO" : "SANDBOX"}</Badge>
                         <span className="text-sm text-muted-foreground">
                           {formData.ambiente === "producao" ? "As transações serão reais" : "Ambiente de testes - sem cobrança real"}
                         </span>

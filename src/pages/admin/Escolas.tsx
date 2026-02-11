@@ -41,7 +41,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState, useEffect, useCallback } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { EditarEscolaDialog, Escola } from "@/components/admin/EditarEscolaDialog";
 import { DetalhesEscolaDialog } from "@/components/admin/DetalhesEscolaDialog";
 import { CadastrarEscolaDialog } from "@/components/admin/CadastrarEscolaDialog";
@@ -51,34 +51,45 @@ import { supabase } from "@/integrations/supabase/client";
 
 const getPlanoColor = (plano: string) => {
   switch (plano.toLowerCase()) {
-    case "premium": return "bg-rose-500/10 text-rose-500";
-    case "pro": return "bg-purple-500/10 text-purple-500";
-    case "start": return "bg-blue-500/10 text-blue-500";
-    default: return "bg-gray-500/10 text-gray-500";
+    case "premium":
+      return "bg-rose-500/10 text-rose-500";
+    case "pro":
+      return "bg-purple-500/10 text-purple-500";
+    case "start":
+      return "bg-blue-500/10 text-blue-500";
+    default:
+      return "bg-gray-500/10 text-gray-500";
   }
 };
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case "ativo": return "bg-green-500/10 text-green-500";
-    case "trial": return "bg-yellow-500/10 text-yellow-500";
-    case "inativo": return "bg-red-500/10 text-red-500";
-    default: return "bg-gray-500/10 text-gray-500";
+    case "ativo":
+      return "bg-green-500/10 text-green-500";
+    case "trial":
+      return "bg-yellow-500/10 text-yellow-500";
+    case "inativo":
+      return "bg-red-500/10 text-red-500";
+    default:
+      return "bg-gray-500/10 text-gray-500";
   }
 };
 
 const getStatusIcon = (status: string) => {
   switch (status) {
-    case "ativo": return <CheckCircle className="h-4 w-4" />;
-    case "trial": return <Clock className="h-4 w-4" />;
-    case "inativo": return <XCircle className="h-4 w-4" />;
-    default: return null;
+    case "ativo":
+      return <CheckCircle className="h-4 w-4" />;
+    case "trial":
+      return <Clock className="h-4 w-4" />;
+    case "inativo":
+      return <XCircle className="h-4 w-4" />;
+    default:
+      return null;
   }
 };
 
 export default function AdminEscolas() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
   const [escolas, setEscolas] = useState<Escola[]>([]);
   const [loading, setLoading] = useState(true);
   const [busca, setBusca] = useState("");
@@ -132,9 +143,9 @@ export default function AdminEscolas() {
   useEffect(() => {
     const editarId = searchParams.get("editar");
     const aba = searchParams.get("aba");
-    
+
     if (editarId) {
-      const escola = escolas.find(e => e.id === editarId);
+      const escola = escolas.find((e) => e.id === editarId);
       if (escola) {
         setEscolaSelecionada(escola);
         setAbaInicial(aba || undefined);
@@ -262,38 +273,35 @@ export default function AdminEscolas() {
   };
 
   const escolasFiltradas = escolas.filter((escola) => {
-    const matchBusca = escola.nome.toLowerCase().includes(busca.toLowerCase()) ||
-                       escola.cidade.toLowerCase().includes(busca.toLowerCase());
-    const matchPlano = filtroPlano === "todos" || escola.plano.toLowerCase() === filtroPlano.toLowerCase();
+    const matchBusca =
+      escola.nome.toLowerCase().includes(busca.toLowerCase()) ||
+      escola.cidade.toLowerCase().includes(busca.toLowerCase());
+    const matchPlano =
+      filtroPlano === "todos" ||
+      escola.plano.toLowerCase() === filtroPlano.toLowerCase();
     const matchStatus = filtroStatus === "todos" || escola.status === filtroStatus;
     return matchBusca && matchPlano && matchStatus;
   });
 
   return (
-    <motion.div
-      className="space-y-6"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
+    <motion.div className="space-y-6" variants={containerVariants} initial="hidden" animate="visible">
       {/* Header */}
       <motion.div variants={itemVariants} className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Gestão de Escolas</h1>
-          <p className="text-muted-foreground">
-            Cadastre e gerencie escolas na plataforma
-          </p>
+          <p className="text-muted-foreground">Cadastre e gerencie escolas na plataforma</p>
         </div>
-        <Button className="bg-rose-500 hover:bg-rose-600" onClick={() => setDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Nova Escola
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={fetchEscolas} disabled={loading}>
+            {loading ? "Atualizando..." : "Recarregar"}
+          </Button>
+          <Button className="bg-rose-500 hover:bg-rose-600" onClick={() => setDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Nova Escola
+          </Button>
+        </div>
 
-        <CadastrarEscolaDialog
-          open={dialogOpen}
-          onOpenChange={setDialogOpen}
-          onSave={handleAddEscola}
-        />
+        <CadastrarEscolaDialog open={dialogOpen} onOpenChange={setDialogOpen} onSave={handleAddEscola} />
       </motion.div>
 
       {/* Resumo */}
@@ -316,7 +324,7 @@ export default function AdminEscolas() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Ativos</p>
-                <p className="text-3xl font-bold text-green-500">{escolas.filter(e => e.status === "ativo").length}</p>
+                <p className="text-3xl font-bold text-green-500">{escolas.filter((e) => e.status === "ativo").length}</p>
               </div>
               <div className="rounded-full p-3 bg-green-500/10">
                 <CheckCircle className="h-6 w-6 text-green-500" />
@@ -329,7 +337,7 @@ export default function AdminEscolas() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Em Trial</p>
-                <p className="text-3xl font-bold text-yellow-500">{escolas.filter(e => e.status === "trial").length}</p>
+                <p className="text-3xl font-bold text-yellow-500">{escolas.filter((e) => e.status === "trial").length}</p>
               </div>
               <div className="rounded-full p-3 bg-yellow-500/10">
                 <Clock className="h-6 w-6 text-yellow-500" />
@@ -342,7 +350,7 @@ export default function AdminEscolas() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Inativos</p>
-                <p className="text-3xl font-bold text-red-500">{escolas.filter(e => e.status === "inativo").length}</p>
+                <p className="text-3xl font-bold text-red-500">{escolas.filter((e) => e.status === "inativo").length}</p>
               </div>
               <div className="rounded-full p-3 bg-red-500/10">
                 <XCircle className="h-6 w-6 text-red-500" />
@@ -359,12 +367,7 @@ export default function AdminEscolas() {
             <div className="flex flex-col gap-4 md:flex-row md:items-center">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar por nome ou cidade..."
-                  value={busca}
-                  onChange={(e) => setBusca(e.target.value)}
-                  className="pl-10"
-                />
+                <Input placeholder="Buscar por nome ou cidade..." value={busca} onChange={(e) => setBusca(e.target.value)} className="pl-10" />
               </div>
               <Select value={filtroPlano} onValueChange={setFiltroPlano}>
                 <SelectTrigger className="w-full md:w-40">
@@ -411,87 +414,94 @@ export default function AdminEscolas() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {escolasFiltradas.map((escola) => (
-                  <TableRow key={escola.id}>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">{escola.nome}</p>
-                        <p className="text-xs text-muted-foreground">{escola.cnpj}</p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1 text-muted-foreground">
-                        <MapPin className="h-3 w-3" />
-                        <span className="text-sm">{escola.cidade} - {escola.uf}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getPlanoColor(escola.plano)}>{escola.plano}</Badge>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        <GraduationCap className="h-4 w-4 text-muted-foreground" />
-                        <span>{escola.alunos.toLocaleString()}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        <Users className="h-4 w-4 text-muted-foreground" />
-                        <span>{escola.professores}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={`${getStatusColor(escola.status)} flex items-center gap-1 w-fit`}>
-                        {getStatusIcon(escola.status)}
-                        {escola.status === "ativo" ? "Ativo" : escola.status === "trial" ? "Trial" : "Inativo"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button size="icon" variant="ghost">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
-                          <DropdownMenuItem 
-                            className="cursor-pointer"
-                            onClick={() => handleVerDetalhes(escola)}
-                          >
-                            <Eye className="mr-2 h-4 w-4" />
-                            Ver Detalhes
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            className="cursor-pointer"
-                            onClick={() => handleEditEscola(escola)}
-                          >
-                            <Edit className="mr-2 h-4 w-4" />
-                            Editar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            className="cursor-pointer"
-                            onClick={() => {
-                              if (escola.linkAcesso) {
-                                navigator.clipboard.writeText(escola.linkAcesso);
-                                toast.success("Link de acesso copiado!");
-                              }
-                            }}
-                          >
-                            <Link2 className="mr-2 h-4 w-4" />
-                            Copiar Link de Acesso
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            className="text-red-500 cursor-pointer"
-                            onClick={() => handleDesativarEscola(escola)}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            {escola.status === "inativo" ? "Ativar" : "Desativar"}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
+                      Carregando...
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : escolasFiltradas.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
+                      Nenhuma escola encontrada.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  escolasFiltradas.map((escola) => (
+                    <TableRow key={escola.id}>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium">{escola.nome}</p>
+                          <p className="text-xs text-muted-foreground">{escola.cnpj}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                          <MapPin className="h-3 w-3" />
+                          <span className="text-sm">
+                            {escola.cidade} - {escola.uf}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getPlanoColor(escola.plano)}>{escola.plano}</Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center gap-1">
+                          <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                          <span>{escola.alunos.toLocaleString()}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center gap-1">
+                          <Users className="h-4 w-4 text-muted-foreground" />
+                          <span>{escola.professores}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={`${getStatusColor(escola.status)} flex items-center gap-1 w-fit`}>
+                          {getStatusIcon(escola.status)}
+                          {escola.status === "ativo" ? "Ativo" : escola.status === "trial" ? "Trial" : "Inativo"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button size="icon" variant="ghost">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => handleVerDetalhes(escola)}>
+                              <Eye className="mr-2 h-4 w-4" />
+                              Ver Detalhes
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => handleEditEscola(escola)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="cursor-pointer"
+                              onClick={() => {
+                                if (escola.linkAcesso) {
+                                  navigator.clipboard.writeText(escola.linkAcesso);
+                                  toast.success("Link de acesso copiado!");
+                                }
+                              }}
+                            >
+                              <Link2 className="mr-2 h-4 w-4" />
+                              Copiar Link de Acesso
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-red-500 cursor-pointer" onClick={() => handleDesativarEscola(escola)}>
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              {escola.status === "inativo" ? "Ativar" : "Desativar"}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </CardContent>
@@ -499,11 +509,7 @@ export default function AdminEscolas() {
       </motion.div>
 
       {/* Dialog de Detalhes */}
-      <DetalhesEscolaDialog
-        escola={escolaSelecionada}
-        open={detalhesDialogOpen}
-        onOpenChange={setDetalhesDialogOpen}
-      />
+      <DetalhesEscolaDialog escola={escolaSelecionada} open={detalhesDialogOpen} onOpenChange={setDetalhesDialogOpen} />
 
       {/* Dialog de Edição */}
       <EditarEscolaDialog
