@@ -10,7 +10,6 @@ import {
   DollarSign,
   Calendar,
   Filter,
-  Check,
   Loader2,
   Search,
 } from "lucide-react";
@@ -131,29 +130,65 @@ const categoriaLabels: Record<string, { label: string; color: string }> = {
 };
 
 const turmasDisponiveis = [
-  "1º Ano A", "2º Ano A", "3º Ano A", "4º Ano A", "4º Ano B",
-  "5º Ano A", "7º Ano B", "9º Ano A", "3º EM A",
+  "1º Ano A",
+  "2º Ano A",
+  "3º Ano A",
+  "4º Ano A",
+  "4º Ano B",
+  "5º Ano A",
+  "7º Ano B",
+  "9º Ano A",
+  "3º EM A",
 ];
 
 const seriesDisponiveis = [
-  "1º Ano", "2º Ano", "3º Ano", "4º Ano", "5º Ano",
-  "6º Ano", "7º Ano", "8º Ano", "9º Ano", "1º Médio", "2º Médio", "3º Médio",
+  "1º Ano",
+  "2º Ano",
+  "3º Ano",
+  "4º Ano",
+  "5º Ano",
+  "6º Ano",
+  "7º Ano",
+  "8º Ano",
+  "9º Ano",
+  "1º Médio",
+  "2º Médio",
+  "3º Médio",
 ];
 
 const disciplinasDisponiveis = [
-  "Matemática", "Português", "Ciências", "História", "Geografia",
-  "Inglês", "Ed. Física", "Artes",
+  "Matemática",
+  "Português",
+  "Ciências",
+  "História",
+  "Geografia",
+  "Inglês",
+  "Ed. Física",
+  "Artes",
 ];
 
 // Mock data generator for reports
-function generateMockData(relatorio: Relatorio, filters: {
-  periodo: string; turma: string; serie: string; disciplina: string;
-}) {
-  const periodoLabel = filters.periodo === "atual" ? "2026" :
-    filters.periodo === "1bim" ? "1º Bimestre 2026" :
-    filters.periodo === "2bim" ? "2º Bimestre 2026" :
-    filters.periodo === "3bim" ? "3º Bimestre 2026" :
-    filters.periodo === "4bim" ? "4º Bimestre 2026" : "2025";
+function generateMockData(
+  relatorio: Relatorio,
+  filters: {
+    periodo: string;
+    turma: string;
+    serie: string;
+    disciplina: string;
+  },
+) {
+  const periodoLabel =
+    filters.periodo === "atual"
+      ? "2026"
+      : filters.periodo === "1bim"
+        ? "1º Bimestre 2026"
+        : filters.periodo === "2bim"
+          ? "2º Bimestre 2026"
+          : filters.periodo === "3bim"
+            ? "3º Bimestre 2026"
+            : filters.periodo === "4bim"
+              ? "4º Bimestre 2026"
+              : "2025";
 
   const turmaLabel = filters.turma === "all" ? "Todas" : filters.turma;
   const serieLabel = filters.serie === "all" ? "Todas" : filters.serie;
@@ -216,16 +251,106 @@ function generateMockData(relatorio: Relatorio, filters: {
         subtitle: `Turma: ${turmaLabel} | Série: ${serieLabel}`,
         headers: ["Matrícula", "Nome", "Turma", "Série", "Turno", "Responsável", "Telefone", "Status"],
         rows: [
-          ["2024001", "Ana Beatriz Silva", "5º Ano A", "5º Ano", "Manhã", "Maria Silva", "(11) 98888-1111", "Regular"],
-          ["2024002", "Bruno Costa Santos", "5º Ano A", "5º Ano", "Manhã", "Carlos Santos", "(11) 98888-2222", "Alerta"],
-          ["2024003", "Carolina Mendes", "7º Ano B", "7º Ano", "Tarde", "Paula Mendes", "(11) 98888-3333", "Regular"],
-          ["2024004", "Daniel Oliveira", "9º Ano A", "9º Ano", "Manhã", "Roberto Oliveira", "(11) 98888-4444", "Crítico"],
-          ["2024005", "Eduarda Lima", "3º Ano A", "3º Ano", "Manhã", "Fernanda Lima", "(11) 98888-5555", "Regular"],
-          ["2024006", "Felipe Almeida", "1º Ano A", "1º Ano", "Manhã", "Juliana Almeida", "(11) 98888-6666", "Regular"],
-          ["2024007", "Gabriela Ferreira", "3º EM A", "3º Médio", "Manhã", "Marcos Ferreira", "(11) 98888-7777", "Regular"],
-          ["2024008", "Henrique Souza", "7º Ano B", "7º Ano", "Tarde", "Luciana Souza", "(11) 98888-8888", "Alerta"],
-          ["2024009", "Lucas Mendes", "4º Ano A", "4º Ano", "Manhã", "Paula Mendes", "(11) 98888-3333", "Regular"],
-          ["2024010", "Marina Almeida", "4º Ano B", "4º Ano", "Tarde", "Juliana Almeida", "(11) 98888-6666", "Regular"],
+          [
+            "2024001",
+            "Ana Beatriz Silva",
+            "5º Ano A",
+            "5º Ano",
+            "Manhã",
+            "Maria Silva",
+            "(11) 98888-1111",
+            "Regular",
+          ],
+          [
+            "2024002",
+            "Bruno Costa Santos",
+            "5º Ano A",
+            "5º Ano",
+            "Manhã",
+            "Carlos Santos",
+            "(11) 98888-2222",
+            "Alerta",
+          ],
+          [
+            "2024003",
+            "Carolina Mendes",
+            "7º Ano B",
+            "7º Ano",
+            "Tarde",
+            "Paula Mendes",
+            "(11) 98888-3333",
+            "Regular",
+          ],
+          [
+            "2024004",
+            "Daniel Oliveira",
+            "9º Ano A",
+            "9º Ano",
+            "Manhã",
+            "Roberto Oliveira",
+            "(11) 98888-4444",
+            "Crítico",
+          ],
+          [
+            "2024005",
+            "Eduarda Lima",
+            "3º Ano A",
+            "3º Ano",
+            "Manhã",
+            "Fernanda Lima",
+            "(11) 98888-5555",
+            "Regular",
+          ],
+          [
+            "2024006",
+            "Felipe Almeida",
+            "1º Ano A",
+            "1º Ano",
+            "Manhã",
+            "Juliana Almeida",
+            "(11) 98888-6666",
+            "Regular",
+          ],
+          [
+            "2024007",
+            "Gabriela Ferreira",
+            "3º EM A",
+            "3º Médio",
+            "Manhã",
+            "Marcos Ferreira",
+            "(11) 98888-7777",
+            "Regular",
+          ],
+          [
+            "2024008",
+            "Henrique Souza",
+            "7º Ano B",
+            "7º Ano",
+            "Tarde",
+            "Luciana Souza",
+            "(11) 98888-8888",
+            "Alerta",
+          ],
+          [
+            "2024009",
+            "Lucas Mendes",
+            "4º Ano A",
+            "4º Ano",
+            "Manhã",
+            "Paula Mendes",
+            "(11) 98888-3333",
+            "Regular",
+          ],
+          [
+            "2024010",
+            "Marina Almeida",
+            "4º Ano B",
+            "4º Ano",
+            "Tarde",
+            "Juliana Almeida",
+            "(11) 98888-6666",
+            "Regular",
+          ],
         ],
       };
     default:
@@ -255,7 +380,11 @@ function downloadPDF(data: { title: string; subtitle: string; headers: string[];
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
   doc.text(data.subtitle, 14, 37);
-  doc.text(`Gerado em: ${new Date().toLocaleDateString("pt-BR")} às ${new Date().toLocaleTimeString("pt-BR")}`, 14, 43);
+  doc.text(
+    `Gerado em: ${new Date().toLocaleDateString("pt-BR")} às ${new Date().toLocaleTimeString("pt-BR")}`,
+    14,
+    43,
+  );
 
   // Table
   autoTable(doc, {
@@ -274,7 +403,12 @@ function downloadPDF(data: { title: string; subtitle: string; headers: string[];
     doc.setPage(i);
     doc.setFontSize(8);
     doc.setTextColor(128);
-    doc.text(`Página ${i} de ${pageCount}`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, { align: "center" });
+    doc.text(
+      `Página ${i} de ${pageCount}`,
+      doc.internal.pageSize.width / 2,
+      doc.internal.pageSize.height - 10,
+      { align: "center" },
+    );
   }
 
   doc.save(`${data.title.replace(/\s+/g, "_")}.pdf`);
@@ -283,10 +417,10 @@ function downloadPDF(data: { title: string; subtitle: string; headers: string[];
 function downloadExcel(data: { title: string; headers: string[]; rows: string[][] }) {
   const wsData = [data.headers, ...data.rows];
   const ws = XLSX.utils.aoa_to_sheet(wsData);
-  
+
   // Auto-width columns
   const colWidths = data.headers.map((h, i) => {
-    const maxLen = Math.max(h.length, ...data.rows.map(r => (r[i] || "").length));
+    const maxLen = Math.max(h.length, ...data.rows.map((r) => (r[i] || "").length));
     return { wch: Math.min(maxLen + 4, 40) };
   });
   ws["!cols"] = colWidths;
@@ -309,42 +443,51 @@ export default function Relatorios() {
 
   const filteredRelatorios = relatorios.filter((rel) => {
     const matchCategoria = filterCategoria === "all" || rel.categoria === filterCategoria;
-    const matchSearch = searchTerm === "" || rel.nome.toLowerCase().includes(searchTerm.toLowerCase()) || rel.descricao.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchSearch =
+      searchTerm === "" ||
+      rel.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      rel.descricao.toLowerCase().includes(searchTerm.toLowerCase());
     return matchCategoria && matchSearch;
   });
 
   const toggleSelect = (id: string) => {
-    setSelectedReports(prev =>
-      prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id]
-    );
+    setSelectedReports((prev) => (prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id]));
   };
 
-  const selectAll = () => {
-    if (selectedReports.length === filteredRelatorios.length) {
+  const selectAll = (checked: boolean | "indeterminate") => {
+    if (checked === true) {
+      setSelectedReports(filteredRelatorios.map((r) => r.id));
+    } else {
       setSelectedReports([]);
-    } else {
-      setSelectedReports(filteredRelatorios.map(r => r.id));
     }
   };
 
-  const filters = { periodo: filterPeriodo, turma: filterTurma, serie: filterSerie, disciplina: filterDisciplina };
+  const filters = {
+    periodo: filterPeriodo,
+    turma: filterTurma,
+    serie: filterSerie,
+    disciplina: filterDisciplina,
+  };
 
-  const handleGenerate = useCallback(async (relatorio: Relatorio, formato: string) => {
-    setGenerating(`${relatorio.id}-${formato}`);
-    const data = generateMockData(relatorio, filters);
+  const handleGenerate = useCallback(
+    async (relatorio: Relatorio, formato: string) => {
+      setGenerating(`${relatorio.id}-${formato}`);
+      const data = generateMockData(relatorio, filters);
 
-    // Small delay for UX feedback
-    await new Promise(resolve => setTimeout(resolve, 300));
+      // Small delay for UX feedback
+      await new Promise((resolve) => setTimeout(resolve, 300));
 
-    if (formato === "PDF") {
-      downloadPDF(data);
-    } else {
-      downloadExcel(data);
-    }
+      if (formato === "PDF") {
+        downloadPDF(data);
+      } else {
+        downloadExcel(data);
+      }
 
-    toast.success(`"${relatorio.nome}" baixado em ${formato}!`);
-    setGenerating(null);
-  }, [filters]);
+      toast.success(`"${relatorio.nome}" baixado em ${formato}!`);
+      setGenerating(null);
+    },
+    [filters],
+  );
 
   const handleBatchDownload = async (formato: "PDF" | "Excel") => {
     if (selectedReports.length === 0) {
@@ -352,23 +495,41 @@ export default function Relatorios() {
       return;
     }
 
+    const selectedRelatorios = selectedReports
+      .map((id) => relatorios.find((r) => r.id === id))
+      .filter(Boolean) as Relatorio[];
+
+    const compatible = selectedRelatorios.filter((r) => r.formato.includes(formato));
+
+    if (compatible.length === 0) {
+      toast.error(`Nenhum dos relatórios selecionados possui formato ${formato}.`);
+      return;
+    }
+
+    if (compatible.length < selectedRelatorios.length) {
+      toast.message(`Alguns relatórios não possuem ${formato} e foram ignorados.`);
+    }
+
     setBatchGenerating(true);
-    for (const id of selectedReports) {
-      const rel = relatorios.find(r => r.id === id);
-      if (rel && rel.formato.includes(formato)) {
+    try {
+      for (const rel of compatible) {
         const data = generateMockData(rel, filters);
         if (formato === "PDF") {
           downloadPDF(data);
         } else {
           downloadExcel(data);
         }
-        await new Promise(resolve => setTimeout(resolve, 400));
+        await new Promise((resolve) => setTimeout(resolve, 400));
       }
+      toast.success(`${compatible.length} relatório(s) baixados em ${formato}!`);
+      setSelectedReports([]);
+    } finally {
+      setBatchGenerating(false);
     }
-    toast.success(`${selectedReports.length} relatório(s) baixados em ${formato}!`);
-    setBatchGenerating(false);
-    setSelectedReports([]);
   };
+
+  const allChecked = selectedReports.length === filteredRelatorios.length && filteredRelatorios.length > 0;
+  const someChecked = selectedReports.length > 0 && selectedReports.length < filteredRelatorios.length;
 
   return (
     <div className="space-y-6">
@@ -376,9 +537,7 @@ export default function Relatorios() {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Relatórios</h1>
-          <p className="text-muted-foreground">
-            Selecione, filtre e baixe relatórios detalhados da sua escola
-          </p>
+          <p className="text-muted-foreground">Selecione, filtre e baixe relatórios detalhados da sua escola</p>
         </div>
         {selectedReports.length > 0 && (
           <div className="flex items-center gap-2">
@@ -463,8 +622,10 @@ export default function Relatorios() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas Séries</SelectItem>
-                  {seriesDisponiveis.map(s => (
-                    <SelectItem key={s} value={s}>{s}</SelectItem>
+                  {seriesDisponiveis.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {s}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -475,8 +636,10 @@ export default function Relatorios() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas Turmas</SelectItem>
-                  {turmasDisponiveis.map(t => (
-                    <SelectItem key={t} value={t}>{t}</SelectItem>
+                  {turmasDisponiveis.map((t) => (
+                    <SelectItem key={t} value={t}>
+                      {t}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -487,8 +650,10 @@ export default function Relatorios() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas Disciplinas</SelectItem>
-                  {disciplinasDisponiveis.map(d => (
-                    <SelectItem key={d} value={d}>{d}</SelectItem>
+                  {disciplinasDisponiveis.map((d) => (
+                    <SelectItem key={d} value={d}>
+                      {d}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -500,12 +665,10 @@ export default function Relatorios() {
       {/* Select All */}
       <div className="flex items-center gap-3">
         <Checkbox
-          checked={selectedReports.length === filteredRelatorios.length && filteredRelatorios.length > 0}
+          checked={allChecked ? true : someChecked ? "indeterminate" : false}
           onCheckedChange={selectAll}
         />
-        <span className="text-sm text-muted-foreground">
-          Selecionar todos ({filteredRelatorios.length} relatórios)
-        </span>
+        <span className="text-sm text-muted-foreground">Selecionar todos ({filteredRelatorios.length} relatórios)</span>
       </div>
 
       {/* Reports Grid */}
@@ -520,12 +683,13 @@ export default function Relatorios() {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <Checkbox
-                      checked={isSelected}
-                      onCheckedChange={() => toggleSelect(relatorio.id)}
-                    />
-                    <div className={`p-2 rounded-lg ${categoriaLabels[relatorio.categoria].color} bg-opacity-10`}>
-                      <relatorio.icon className={`h-5 w-5 ${categoriaLabels[relatorio.categoria].color.replace("bg-", "text-")}`} />
+                    <Checkbox checked={isSelected} onCheckedChange={() => toggleSelect(relatorio.id)} />
+                    <div
+                      className={`p-2 rounded-lg ${categoriaLabels[relatorio.categoria].color} bg-opacity-10`}
+                    >
+                      <relatorio.icon
+                        className={`h-5 w-5 ${categoriaLabels[relatorio.categoria].color.replace("bg-", "text-")}`}
+                      />
                     </div>
                   </div>
                   <Badge variant="outline" className="text-xs">
@@ -579,9 +743,7 @@ export default function Relatorios() {
             <BarChart3 className="h-5 w-5" />
             Resumo Rápido
           </CardTitle>
-          <CardDescription>
-            Indicadores principais do período selecionado
-          </CardDescription>
+          <CardDescription>Indicadores principais do período selecionado</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-4">
