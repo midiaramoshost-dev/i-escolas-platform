@@ -1,4 +1,4 @@
-import { Bell, Search, Moon, Sun, User, ChevronDown, GraduationCap, Users as UsersIcon } from "lucide-react";
+import { Bell, Search, Moon, Sun, User, ChevronDown, GraduationCap, Users as UsersIcon, IdCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -16,7 +16,11 @@ import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-export function AppHeader() {
+type AppHeaderProps = {
+  onOpenCarteirinha?: () => void;
+};
+
+export function AppHeader({ onOpenCarteirinha }: AppHeaderProps) {
   const { theme, toggleTheme } = useTheme();
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
@@ -51,6 +55,13 @@ export function AppHeader() {
     navigate("/login");
   };
 
+  const handleOpenCarteirinha = () => {
+    if (onOpenCarteirinha) return onOpenCarteirinha();
+    navigate("/aluno/carteirinha");
+  };
+
+  const isAluno = user?.role === "aluno";
+
   return (
     <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b border-border bg-card px-4 shadow-card">
       <div className="flex items-center gap-4">
@@ -73,6 +84,14 @@ export function AppHeader() {
       </div>
 
       <div className="flex items-center gap-3">
+        {/* Atalho Carteirinha (Aluno) */}
+        {isAluno ? (
+          <Button variant="outline" size="sm" className="hidden lg:inline-flex" onClick={handleOpenCarteirinha}>
+            <IdCard className="h-4 w-4" />
+            Carteirinha
+          </Button>
+        ) : null}
+
         {/* Atalho para gestão (Responsável Geral) */}
         {isResponsavelGeral ? (
           <Button
@@ -153,11 +172,13 @@ export function AppHeader() {
               <User className="mr-2 h-4 w-4" />
               Meu Perfil
             </DropdownMenuItem>
+            {isAluno ? <DropdownMenuItem onClick={handleOpenCarteirinha}>Crachá e Carteirinha</DropdownMenuItem> : null}
             <DropdownMenuItem>Configurações</DropdownMenuItem>
             {isResponsavelGeral ? (
               <>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate("/escola/usuarios/departamentos")}>
+                <DropdownMenuItem onClick={() => navigate("/escola/usuarios/departamentos")}
+                >
                   <UsersIcon className="mr-2 h-4 w-4" />
                   Usuários por departamento
                 </DropdownMenuItem>

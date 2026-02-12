@@ -9,6 +9,7 @@ import {
   GraduationCap,
   LogOut,
   User,
+  IdCard,
 } from "lucide-react";
 import {
   Sidebar,
@@ -59,6 +60,11 @@ const menuItems = [
     url: "/aluno/comunicados",
   },
   {
+    title: "Crachá e Carteirinha",
+    icon: IdCard,
+    url: "/aluno/carteirinha",
+  },
+  {
     title: "Meu Perfil",
     icon: User,
     url: "/aluno/perfil",
@@ -83,7 +89,7 @@ export function AlunoSidebar() {
   // VibeCoding: mudança mínima pra já aparecer a foto no boletim/portal do aluno.
   // Enquanto não tem vínculo real com auth, tentamos achar pelo nome.
   const alunoAtual = alunos.find((a) => a.nome === user?.name);
-  const fotoUrl = alunoAtual?.fotoUrl || "/placeholder.svg";
+  const fotoUrl = alunoAtual?.fotoUrl || localStorage.getItem("aluno:foto") || "/placeholder.svg";
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
