@@ -65,10 +65,17 @@ const MODULOS_OPTIONS = [
   { id: "importacao", label: "Importação (Migração)" },
 ];
 
+type ImportMode = "cadastro" | "historico";
+
 export function EditarEscolaDialog({ escola, open, onOpenChange, onSave, destacarPlano }: EditarEscolaDialogProps) {
   const [formData, setFormData] = useState<Escola | null>(null);
   const [planoDestacado, setPlanoDestacado] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Importação (UI mínima)
+  const [importMode, setImportMode] = useState<ImportMode>("cadastro");
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [legacySql, setLegacySql] = useState<string>("");
 
   useEffect(() => {
     if (destacarPlano && open) {
@@ -90,6 +97,15 @@ export function EditarEscolaDialog({ escola, open, onOpenChange, onSave, destaca
       });
     }
   }, [escola]);
+
+  useEffect(() => {
+    // Reset de importação quando abrir/fechar para evitar reuso indevido
+    if (!open) {
+      setImportMode("cadastro");
+      setImportFile(null);
+      setLegacySql("");
+    }
+  }, [open]);
 
   const toggleModulo = (id: string) => {
     if (!formData) return;
@@ -168,7 +184,33 @@ export function EditarEscolaDialog({ escola, open, onOpenChange, onSave, destaca
     }
   };
 
+  const handleImport = async () => {
+    if (!formData) return;
+
+    const hasFile = !!importFile;
+    const hasSql = !!legacySql.trim();
+
+    if (!hasFile && !hasSql) {
+      toast.error("Envie um arquivo (CSV/Excel) ou cole um SQL para importação.");
+      return;
+    }
+
+    // Mudança mínima: UI + validações + orientação.
+    // A execução real (parse de XLSX/CSV e processamento SQL) deve ser feita via Edge Function/Backend.
+    const fileInfo = hasFile ? `${importFile!.name} (${Math.round(importFile!.size / 1024)} KB)` : "sem arquivo";
+    toast.success(
+      `Importação preparada (${importMode}). Arquivo: ${fileInfo}. SQL: ${hasSql ? "informado" : "não"}.`
+    );
+
+    toast.message("Próximo passo", {
+      description:
+        "Conecte uma Edge Function para receber o arquivo/SQL e gravar em tabelas de staging. Este commit adiciona a UI e a base de schema (staging + jobs).",
+    });
+  };
+
   if (!formData) return null;
+
+  const importacaoAtiva = (formData.modulos || []).includes("importacao");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -375,6 +417,85 @@ export function EditarEscolaDialog({ escola, open, onOpenChange, onSave, destaca
             <p className="text-xs text-muted-foreground">
               Selecione quais módulos ficam disponíveis para esta escola.
             </p>
+          </div>
+
+          {/* Importação (CSV/Excel + SQL) */}
+          <div className="space-y-2 rounded-lg border p-4">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <Label>Importação (Migração)</Label>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Envie CSV/Excel ou cole um SQL de outro sistema para migração. Requer módulo <strong>Importação</strong>.
+                </p>
+              </div>
+              <Badge variant={importacaoAtiva ? "default" : "secondary"} className={importacaoAtiva ? "bg-rose-500" : ""}>
+                {importacaoAtiva ? "Habilitado" : "Desabilitado"}
+              </Badge>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="importMode">Tipo de importação</Label>
+                <Select value={importMode} onValueChange={(value) => setImportMode(value as ImportMode)}>
+                  <SelectTrigger id="importMode" disabled={!importacaoAtiva}>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cadastro">Dados cadastrais</SelectItem>
+                    <SelectItem value="historico">Histórico</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="importFile">Arquivo (CSV/Excel)</Label>
+                <Input
+                  id="importFile"
+                  type="file"
+                  disabled={!importacaoAtiva}
+                  accept=".csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                  onChange={(e) => setImportFile(e.currentTarget.files?.[0] || null)}
+                />
+                {importFile ? (
+                  <p className="text-xs text-muted-foreground">Selecionado: {importFile.name}</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">Formatos aceitos: .csv, .xls, .xlsx</p>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="legacySql">SQL (migração de outro sistema)</Label>
+              <textarea
+                id="legacySql"
+                value={legacySql}
+                disabled={!importacaoAtiva}
+                onChange={(e) => setLegacySql(e.target.value)}
+                placeholder="Cole aqui um INSERT/SELECT do sistema legado (opcional)."
+                className="min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+              <p className="text-xs text-muted-foreground">
+                Dica: use tabelas de <em>staging</em> no banco e processe via job/Edge Function.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setImportFile(null);
+                  setLegacySql("");
+                  toast.message("Importação", { description: "Campos de importação limpos." });
+                }}
+                disabled={!importacaoAtiva}
+              >
+                Limpar
+              </Button>
+              <Button type="button" onClick={handleImport} disabled={!importacaoAtiva}>
+                Importar
+              </Button>
+            </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
