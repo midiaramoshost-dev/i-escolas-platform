@@ -44,12 +44,12 @@ const menuItems = [
   {
     title: "Dashboard CEO",
     icon: Crown,
-    url: "/admin/dashboard#ceo",
+    url: "/admin/dashboard?tab=ceo",
   },
   {
     title: "Analytics (SaaS)",
     icon: BarChart3,
-    url: "/admin/dashboard#analytics",
+    url: "/admin/dashboard?tab=analytics",
   },
   {
     title: "Escolas",
@@ -59,27 +59,27 @@ const menuItems = [
   {
     title: "Financeiro",
     icon: Landmark,
-    url: "/admin/dashboard#financeiro",
+    url: "/admin/dashboard?tab=financeiro",
   },
   {
     title: "Suporte (Help Desk)",
     icon: Headset,
-    url: "/admin/dashboard#suporte",
+    url: "/admin/dashboard?tab=suporte",
   },
   {
     title: "Retenção (Anti-churn)",
     icon: HeartPulse,
-    url: "/admin/dashboard#retencao",
+    url: "/admin/dashboard?tab=retencao",
   },
   {
     title: "RBAC / Permissões",
     icon: UserCog,
-    url: "/admin/usuarios#rbac",
+    url: "/admin/usuarios?tab=rbac",
   },
   {
     title: "Governança / LGPD",
     icon: FileLock2,
-    url: "/admin/dashboard#governanca",
+    url: "/admin/dashboard?tab=governanca",
   },
   {
     title: "Planos",
@@ -96,7 +96,7 @@ const menuItems = [
   {
     title: "Módulos",
     icon: Puzzle,
-    url: "/admin/escolas#modulos",
+    url: "/admin/escolas?tab=modulos",
   },
   {
     title: "Usuários",
@@ -122,11 +122,8 @@ export function AdminSidebar() {
   const { user, logout } = useAuth();
   const isCollapsed = state === "collapsed";
 
-  const isActive = (url: string) => {
-    // considera hash como ativo quando a rota base bate
-    const baseUrl = url.split("#")[0];
-    return location.pathname === baseUrl;
-  };
+  const normalize = (url: string) => url.split("?")[0].split("#")[0];
+  const isActive = (url: string) => location.pathname === normalize(url);
 
   const handleLogout = () => {
     logout();
