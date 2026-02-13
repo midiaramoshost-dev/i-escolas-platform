@@ -13,6 +13,7 @@ import {
   Briefcase,
   MessageSquare,
   FileText,
+  FileUp,
 } from "lucide-react";
 import {
   Sidebar,
@@ -83,6 +84,7 @@ const menuItems = [
       { title: "Estoque", url: "/escola/estoque" },
       { title: "Recibos", url: "/escola/recibos" },
       { title: "Contratos", url: "/escola/contratos" },
+      { title: "Importar Dados", url: "/escola/importar-dados" },
     ],
   },
   {
