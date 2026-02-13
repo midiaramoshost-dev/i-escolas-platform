@@ -44,12 +44,12 @@ const menuItems = [
   {
     title: "Dashboard CEO",
     icon: Crown,
-    url: "/admin/dashboard?tab=ceo",
+    url: "/admin/dashboard#ceo",
   },
   {
     title: "Analytics (SaaS)",
     icon: BarChart3,
-    url: "/admin/dashboard?tab=analytics",
+    url: "/admin/dashboard#analytics",
   },
   {
     title: "Escolas",
@@ -59,17 +59,17 @@ const menuItems = [
   {
     title: "Financeiro",
     icon: Landmark,
-    url: "/admin/dashboard?tab=financeiro",
+    url: "/admin/dashboard#financeiro",
   },
   {
     title: "Suporte (Help Desk)",
     icon: Headset,
-    url: "/admin/dashboard?tab=suporte",
+    url: "/admin/dashboard#suporte",
   },
   {
     title: "Retenção (Anti-churn)",
     icon: HeartPulse,
-    url: "/admin/dashboard?tab=retencao",
+    url: "/admin/dashboard#retencao",
   },
   {
     title: "RBAC / Permissões",
