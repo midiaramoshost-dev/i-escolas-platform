@@ -8,16 +8,21 @@ export function AdminLayout() {
   const location = useLocation();
 
   useEffect(() => {
-    if (location.hash) {
-      const id = decodeURIComponent(location.hash.replace("#", ""));
-      const el = document.getElementById(id);
+    const hashId = location.hash ? decodeURIComponent(location.hash.replace("#", "")) : "";
+    const params = new URLSearchParams(location.search);
+    const tabId = params.get("tab") ? decodeURIComponent(params.get("tab") || "") : "";
+    const targetId = hashId || tabId;
+
+    if (targetId) {
+      const el = document.getElementById(targetId);
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "start" });
         return;
       }
     }
+
     window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-  }, [location.pathname, location.hash]);
+  }, [location.pathname, location.hash, location.search]);
 
   return (
     <SidebarProvider>
