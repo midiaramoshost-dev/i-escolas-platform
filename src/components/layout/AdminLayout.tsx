@@ -65,6 +65,27 @@ export function AdminLayout() {
                     <p className="text-xs text-muted-foreground">Base ativa: 512 escolas</p>
                   </div>
                 </div>
+                <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-3">
+                  <div className="rounded-md border border-border p-4 lg:col-span-2">
+                    <p className="text-sm font-medium text-foreground">Resumo do trimestre</p>
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Crescimento consistente nas regiões Sul/Sudeste e aumento de adesão em planos anuais.
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs text-emerald-600">+42 novas escolas</span>
+                      <span className="rounded-full bg-sky-500/10 px-2.5 py-1 text-xs text-sky-600">ARPA +5%</span>
+                      <span className="rounded-full bg-amber-500/10 px-2.5 py-1 text-xs text-amber-600">NPS 71</span>
+                    </div>
+                  </div>
+                  <div className="rounded-md border border-border p-4">
+                    <p className="text-sm font-medium text-foreground">Alertas & Riscos</p>
+                    <ul className="mt-3 space-y-2 text-xs text-muted-foreground">
+                      <li>• 6 escolas com inadimplência &gt; 30 dias</li>
+                      <li>• 12 tickets críticos sem SLA finalizado</li>
+                      <li>• 4 contratos em renovação no próximo mês</li>
+                    </ul>
+                  </div>
+                </div>
               </section>
             )}
 
