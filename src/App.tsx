@@ -66,6 +66,8 @@ import AdminUsuarios from "./pages/admin/Usuarios";
 import AdminConfiguracoes from "./pages/admin/Configuracoes";
 import AdminModulos from "./pages/admin/Modulos";
 import AdminLogAtividades from "./pages/admin/LogAtividades";
+import AdminFolhaPagamento from "./pages/admin/FolhaPagamento";
+import AdminPresencaFuncionarios from "./pages/admin/PresencaFuncionarios";
 import NotFound from "./pages/NotFound";
 import { ActivityLogProvider } from "./contexts/ActivityLogContext";
 import { AuthActivityMonitor } from "./components/auth/AuthActivityMonitor";
@@ -175,6 +177,8 @@ const App = () => (
                 <Route path="configuracoes" element={<AdminConfiguracoes />} />
                 <Route path="modulos" element={<AdminModulos />} />
                 <Route path="log-atividades" element={<AdminLogAtividades />} />
+                <Route path="folha-pagamento" element={<AdminFolhaPagamento />} />
+                <Route path="presenca-funcionarios" element={<AdminPresencaFuncionarios />} />
               </Route>
 
               <Route path="*" element={<NotFound />} />

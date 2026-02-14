@@ -17,6 +17,9 @@ import {
   Landmark,
   FileLock2,
   Crown,
+  Briefcase,
+  DollarSign,
+  Clock,
 } from "lucide-react";
 import {
   Sidebar,
@@ -115,6 +118,19 @@ const menuItems = [
   },
 ];
 
+const adminItems = [
+  {
+    title: "Folha de Pagamento",
+    icon: DollarSign,
+    url: "/admin/folha-pagamento",
+  },
+  {
+    title: "Presença Funcionários",
+    icon: Clock,
+    url: "/admin/presenca-funcionarios",
+  },
+];
+
 export function AdminSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -179,6 +195,26 @@ export function AdminSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
+                    <Link to={item.url}>
+                      <item.icon className="h-5 w-5" />
+                      {!isCollapsed && <span>{item.title}</span>}
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-sidebar-foreground/50 text-xs uppercase tracking-wider mb-2">
+            Administrativo
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {adminItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
                     <Link to={item.url}>
