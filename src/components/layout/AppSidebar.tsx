@@ -61,6 +61,7 @@ const menuItems = [
     submenu: [
       { title: "Professores", url: "/escola/professores" },
       { title: "Alunos", url: "/escola/alunos" },
+      { title: "Crachás / Carteirinhas", url: "/escola/crachas" },
       { title: "Responsáveis", url: "/escola/responsaveis" },
       { title: "Funcionários", url: "/escola/funcionarios" },
     ],

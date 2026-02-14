@@ -42,6 +42,7 @@ import Estoque from "./pages/escola/Estoque";
 import Recibos from "./pages/escola/Recibos";
 import Contratos from "./pages/escola/Contratos";
 import ImportarDados from "./pages/escola/ImportarDados";
+import Crachas from "./pages/escola/Crachas";
 import AlunoDashboard from "./pages/aluno/Dashboard";
 import AlunoNotas from "./pages/aluno/Notas";
 import AlunoFrequencia from "./pages/aluno/Frequencia";
@@ -123,6 +124,7 @@ const App = () => (
                 <Route path="recibos" element={<Recibos />} />
                 <Route path="contratos" element={<Contratos />} />
                 <Route path="importar-dados" element={<ImportarDados />} />
+                <Route path="crachas" element={<Crachas />} />
               </Route>
 
               {/* Portal do Aluno Routes - Protected */}
