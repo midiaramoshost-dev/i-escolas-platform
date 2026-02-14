@@ -161,99 +161,155 @@ export default function AdminFolhaPagamento() {
   const gerarReciboPDF = (item: FolhaItem) => {
     const doc = new jsPDF({ unit: "mm", format: "a4" });
     const w = doc.internal.pageSize.getWidth();
-    let y = 20;
+    const marginL = 10;
+    const marginR = w - 10;
+    const colW = marginR - marginL;
+    let y = 12;
 
-    // Header
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.text("RECIBO DE PAGAMENTO DE SALÁRIO", w / 2, y, { align: "center" });
-    y += 8;
+    const drawLine = (yPos: number) => { doc.setLineWidth(0.3); doc.line(marginL, yPos, marginR, yPos); };
+    const drawRect = (x: number, yPos: number, width: number, h: number) => { doc.setLineWidth(0.3); doc.rect(x, yPos, width, h); };
+
+    // === HEADER ===
     doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
-    doc.text(`Competência: ${mes}/${ano}`, w / 2, y, { align: "center" });
-    y += 10;
-
-    // Employee info
-    doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
-    doc.text("DADOS DO FUNCIONÁRIO", 15, y);
-    y += 6;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.text(`Nome: ${item.nome}`, 15, y); y += 5;
-    doc.text(`Cargo: ${item.cargo}`, 15, y); y += 5;
-    doc.text(`Salário Base: ${fmt(item.salarioBase)}`, 15, y); y += 10;
-
-    // Proventos
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.text("PROVENTOS", 15, y);
-    doc.text("VALOR", w - 15, y, { align: "right" });
-    y += 2;
-    doc.setLineWidth(0.3);
-    doc.line(15, y, w - 15, y);
-    y += 5;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-
-    const proventos = [
-      ["Salário Base", fmt(item.salarioBase)],
-      [`Horas Extras (${item.horasExtras}h)`, fmt(item.valorHorasExtras)],
-      ["Bonificação", fmt(item.bonificacao)],
-    ];
-    proventos.forEach(([label, val]) => {
-      doc.text(label, 15, y);
-      doc.text(val, w - 15, y, { align: "right" });
-      y += 5;
-    });
-    doc.setFont("helvetica", "bold");
-    doc.text("Total Proventos", 15, y);
-    doc.text(fmt(item.totalProventos), w - 15, y, { align: "right" });
+    drawRect(marginL, y, colW, 8);
+    doc.text("DEMONSTRATIVO DE PAGAMENTO DE SALÁRIO", w / 2, y + 5.5, { align: "center" });
     y += 8;
 
-    // Descontos
-    doc.text("DESCONTOS", 15, y);
-    doc.text("VALOR", w - 15, y, { align: "right" });
-    y += 2;
-    doc.line(15, y, w - 15, y);
-    y += 5;
+    // === EMPRESA / PERÍODO ===
+    drawRect(marginL, y, colW, 10);
+    doc.setFontSize(7);
     doc.setFont("helvetica", "normal");
-
-    const descontos = [
-      ["INSS", fmt(item.inss)],
-      ["IRRF", fmt(item.irrf)],
-      ["Vale Transporte (6%)", fmt(item.valeTransporte)],
-      ["Outros Descontos", fmt(item.outrosDescontos)],
-    ];
-    descontos.forEach(([label, val]) => {
-      doc.text(label, 15, y);
-      doc.text(val, w - 15, y, { align: "right" });
-      y += 5;
-    });
-    doc.setFont("helvetica", "bold");
-    doc.text("Total Descontos", 15, y);
-    doc.text(fmt(item.totalDescontos), w - 15, y, { align: "right" });
+    doc.text("Empresa: iEscolas Plataforma Educacional", marginL + 2, y + 4);
+    const mesNome = new Date(2026, parseInt(mes) - 1).toLocaleString("pt-BR", { month: "long" });
+    doc.text(`Período: 01/${mes}/${ano}  a  ${new Date(parseInt(ano), parseInt(mes), 0).getDate()}/${mes}/${ano}`, marginL + 2, y + 8);
+    doc.text(`Competência: ${mesNome.charAt(0).toUpperCase() + mesNome.slice(1)} / ${ano}`, marginR - 2, y + 4, { align: "right" });
     y += 10;
 
-    // Líquido
-    doc.setFontSize(12);
-    doc.setFillColor(59, 130, 246);
-    doc.rect(15, y - 1, w - 30, 10, "F");
-    doc.setTextColor(255, 255, 255);
-    doc.text("VALOR LÍQUIDO:", 20, y + 6);
-    doc.text(fmt(item.liquido), w - 20, y + 6, { align: "right" });
-    y += 18;
-
-    // Signature
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(9);
+    // === FUNCIONÁRIO ===
+    drawRect(marginL, y, colW, 8);
+    doc.setFont("helvetica", "bold");
+    doc.text("Funcionário:", marginL + 2, y + 5.5);
     doc.setFont("helvetica", "normal");
-    doc.text(`Declaro ter recebido a importância líquida de ${fmt(item.liquido)} referente ao mês ${mes}/${ano}.`, 15, y);
-    y += 20;
-    doc.line(15, y, 90, y);
-    doc.text("Assinatura do Funcionário", 15, y + 5);
-    doc.line(110, y, w - 15, y);
-    doc.text("Assinatura do Empregador", 110, y + 5);
+    doc.text(item.nome.toUpperCase(), marginL + 25, y + 5.5);
+    doc.text(`Cargo: ${item.cargo}`, marginR - 2, y + 5.5, { align: "right" });
+    y += 8;
+
+    // === TABLE HEADER ===
+    const colCod = marginL;
+    const colDesc = marginL + 15;
+    const colRef = marginL + 90;
+    const colVenc = marginL + 125;
+    const colDesconto = marginL + 160;
+
+    drawRect(marginL, y, colW, 7);
+    doc.setFontSize(7);
+    doc.setFont("helvetica", "bold");
+    doc.text("Cód.", colCod + 2, y + 5);
+    doc.text("Descrição", colDesc, y + 5);
+    doc.text("Referência", colRef, y + 5);
+    doc.text("Vencimentos", colVenc, y + 5);
+    doc.text("Descontos", colDesconto, y + 5);
+    // vertical lines
+    doc.line(colDesc - 2, y, colDesc - 2, y + 7);
+    doc.line(colRef - 2, y, colRef - 2, y + 7);
+    doc.line(colVenc - 2, y, colVenc - 2, y + 7);
+    doc.line(colDesconto - 2, y, colDesconto - 2, y + 7);
+    y += 7;
+
+    // === TABLE ROWS ===
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7);
+
+    const rows: { cod: string; desc: string; ref: string; venc: string; desconto: string }[] = [
+      { cod: "001", desc: "Salário Base", ref: "30 dias", venc: fmt(item.salarioBase), desconto: "" },
+      ...(item.horasExtras > 0 ? [{ cod: "002", desc: "Horas Extras 50%", ref: `${item.horasExtras}h`, venc: fmt(item.valorHorasExtras), desconto: "" }] : []),
+      ...(item.bonificacao > 0 ? [{ cod: "003", desc: "Bonificação / Gratificação", ref: "", venc: fmt(item.bonificacao), desconto: "" }] : []),
+      { cod: "101", desc: "INSS", ref: "", venc: "", desconto: fmt(item.inss) },
+      ...(item.irrf > 0 ? [{ cod: "102", desc: "IRRF", ref: "", venc: "", desconto: fmt(item.irrf) }] : []),
+      { cod: "103", desc: "Vale Transporte (6%)", ref: "", venc: "", desconto: fmt(item.valeTransporte) },
+      ...(item.outrosDescontos > 0 ? [{ cod: "199", desc: "Outros Descontos", ref: "", venc: "", desconto: fmt(item.outrosDescontos) }] : []),
+    ];
+
+    const rowH = 6;
+    const tableStartY = y;
+    rows.forEach((r) => {
+      doc.text(r.cod, colCod + 2, y + 4);
+      doc.text(r.desc, colDesc, y + 4);
+      doc.text(r.ref, colRef, y + 4);
+      doc.text(r.venc, colVenc + 30, y + 4, { align: "right" });
+      doc.text(r.desconto, colDesconto + 30, y + 4, { align: "right" });
+      y += rowH;
+    });
+
+    // fill remaining empty rows to give standard look
+    const minRows = 10;
+    const emptyRows = Math.max(0, minRows - rows.length);
+    for (let i = 0; i < emptyRows; i++) { y += rowH; }
+
+    // draw outer box and vertical lines for data area
+    const tableEndY = y;
+    drawRect(marginL, tableStartY, colW, tableEndY - tableStartY);
+    doc.line(colDesc - 2, tableStartY, colDesc - 2, tableEndY);
+    doc.line(colRef - 2, tableStartY, colRef - 2, tableEndY);
+    doc.line(colVenc - 2, tableStartY, colVenc - 2, tableEndY);
+    doc.line(colDesconto - 2, tableStartY, colDesconto - 2, tableEndY);
+
+    // === TOTALS ROW ===
+    drawRect(marginL, y, colW, 8);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7);
+    doc.text("TOTAIS", colDesc, y + 5.5);
+    doc.text(fmt(item.totalProventos), colVenc + 30, y + 5.5, { align: "right" });
+    doc.text(fmt(item.totalDescontos), colDesconto + 30, y + 5.5, { align: "right" });
+    doc.line(colDesc - 2, y, colDesc - 2, y + 8);
+    doc.line(colRef - 2, y, colRef - 2, y + 8);
+    doc.line(colVenc - 2, y, colVenc - 2, y + 8);
+    doc.line(colDesconto - 2, y, colDesconto - 2, y + 8);
+    y += 8;
+
+    // === VALOR LÍQUIDO ===
+    drawRect(marginL, y, colW, 8);
+    doc.setFontSize(8);
+    doc.text("VALOR LÍQUIDO", marginL + 2, y + 5.5);
+    doc.text(fmt(item.liquido), marginR - 4, y + 5.5, { align: "right" });
+    y += 8;
+
+    // === BASE DE CÁLCULOS ===
+    drawRect(marginL, y, colW, 10);
+    doc.setFontSize(6);
+    doc.setFont("helvetica", "normal");
+    const bases = [
+      { label: "Salário Base", value: fmt(item.salarioBase) },
+      { label: "Sal. Contr. INSS", value: fmt(item.totalProventos) },
+      { label: "Base Cálc. FGTS", value: fmt(item.totalProventos) },
+      { label: "F.G.T.S do mês", value: fmt(item.totalProventos * 0.08) },
+      { label: "Base Cálc. IRRF", value: fmt(item.totalProventos - item.inss) },
+    ];
+    const baseColW = colW / bases.length;
+    bases.forEach((b, i) => {
+      const x = marginL + i * baseColW;
+      doc.setFont("helvetica", "bold");
+      doc.text(b.label, x + 2, y + 4);
+      doc.setFont("helvetica", "normal");
+      doc.text(b.value, x + 2, y + 8);
+      if (i > 0) doc.line(x, y, x, y + 10);
+    });
+    y += 10;
+
+    // === DECLARAÇÃO ===
+    y += 4;
+    doc.setFontSize(7);
+    doc.setFont("helvetica", "normal");
+    doc.text("DECLARO TER RECEBIDO A IMPORTÂNCIA LÍQUIDA DISCRIMINADA NESTE RECIBO", w / 2, y, { align: "center" });
+    y += 12;
+
+    // Signature lines
+    doc.line(marginL, y, marginL + 60, y);
+    doc.text("DATA", marginL + 25, y + 4, { align: "center" });
+
+    doc.line(marginR - 80, y, marginR, y);
+    doc.text("ASSINATURA DO FUNCIONÁRIO", marginR - 40, y + 4, { align: "center" });
 
     doc.save(`recibo_${item.nome.replace(/\s+/g, "_")}_${mes}_${ano}.pdf`);
     toast.success("Recibo gerado em PDF!");
