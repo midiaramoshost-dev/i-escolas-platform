@@ -147,13 +147,7 @@ export default function AdminPlanos() {
                     </>
                   )}
                 </div>
-                <div className="flex items-center justify-center gap-2 mb-4">
-                  <Building2 className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">{plano.escolas} escolas</span>
-                </div>
-                <div className={`rounded-lg p-2 ${getPlanoColorLight(plano.cor)}`}>
-                  <p className="text-sm font-medium">{((plano.escolas / totalEscolas) * 100).toFixed(1)}% do total</p>
-                </div>
+                
               </CardContent>
               <CardFooter>
                 <Button 
