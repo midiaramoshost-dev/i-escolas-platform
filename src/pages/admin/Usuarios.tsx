@@ -11,6 +11,9 @@ import {
   UserX,
   Mail,
   Key,
+  Link,
+  Copy,
+  ExternalLink,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -59,6 +62,7 @@ interface Usuario {
   status: "ativo" | "inativo";
   ultimoAcesso: string;
   dataCriacao: string;
+  linkAcesso?: string;
 }
 
 const usuariosIniciais: Usuario[] = [
@@ -204,6 +208,26 @@ export default function AdminUsuarios() {
     );
   };
 
+  const gerarLinkAcesso = (usuario: Usuario) => {
+    const slug = usuario.nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+    const link = `${window.location.origin}/login?user=${slug}-${usuario.id}`;
+    setUsuarios(usuarios.map(u => u.id === usuario.id ? { ...u, linkAcesso: link } : u));
+    navigator.clipboard.writeText(link);
+    toast.success("Link de acesso gerado e copiado!");
+    registrarAtividade(
+      "usuario_link_gerado",
+      `Link de acesso gerado para "${usuario.nome}"`,
+      `Link: ${link}`,
+      "Usuário",
+      usuario.id
+    );
+  };
+
+  const copiarLink = (link: string) => {
+    navigator.clipboard.writeText(link);
+    toast.success("Link copiado para a área de transferência!");
+  };
+
   return (
     <motion.div
       className="space-y-6"
@@ -321,8 +345,9 @@ export default function AdminUsuarios() {
                 <TableRow>
                   <TableHead>Usuário</TableHead>
                   <TableHead>Perfil</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Último Acesso</TableHead>
+                   <TableHead>Status</TableHead>
+                    <TableHead>Link de Acesso</TableHead>
+                    <TableHead>Último Acesso</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -351,6 +376,28 @@ export default function AdminUsuarios() {
                       <Badge className={usuario.status === "ativo" ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"}>
                         {usuario.status === "ativo" ? "Ativo" : "Inativo"}
                       </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {usuario.linkAcesso ? (
+                        <div className="flex items-center gap-1">
+                          <code className="text-xs bg-muted px-2 py-1 rounded max-w-[180px] truncate block">
+                            {usuario.linkAcesso}
+                          </code>
+                          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => copiarLink(usuario.linkAcesso!)}>
+                            <Copy className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button size="icon" variant="ghost" className="h-7 w-7" asChild>
+                            <a href={usuario.linkAcesso} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="h-3.5 w-3.5" />
+                            </a>
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button size="sm" variant="outline" className="text-xs h-7" onClick={() => gerarLinkAcesso(usuario)}>
+                          <Link className="mr-1 h-3.5 w-3.5" />
+                          Gerar Link
+                        </Button>
+                      )}
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">
                       {usuario.ultimoAcesso}
@@ -392,6 +439,13 @@ export default function AdminUsuarios() {
                                 Ativar
                               </>
                             )}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            className="cursor-pointer"
+                            onClick={() => gerarLinkAcesso(usuario)}
+                          >
+                            <Link className="mr-2 h-4 w-4" />
+                            {usuario.linkAcesso ? "Regerar Link" : "Gerar Link de Acesso"}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>

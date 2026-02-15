@@ -11,6 +11,7 @@ export type ActivityType =
   | "usuario_ativado"
   | "usuario_desativado"
   | "usuario_senha_resetada"
+  | "usuario_link_gerado"
   | "plano_editado"
   | "modulo_ativado"
   | "modulo_desativado"

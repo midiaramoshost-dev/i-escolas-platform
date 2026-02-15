@@ -74,6 +74,7 @@ const tipoAtividadeInfo: Record<ActivityType, { label: string; icon: React.Eleme
   usuario_ativado: { label: "Usuário Ativado", icon: CheckCircle, cor: "text-green-500 bg-green-500/10" },
   usuario_desativado: { label: "Usuário Desativado", icon: XCircle, cor: "text-red-500 bg-red-500/10" },
   usuario_senha_resetada: { label: "Senha Resetada", icon: Key, cor: "text-amber-500 bg-amber-500/10" },
+  usuario_link_gerado: { label: "Link Gerado", icon: Key, cor: "text-blue-500 bg-blue-500/10" },
   plano_editado: { label: "Plano Editado", icon: Layers, cor: "text-purple-500 bg-purple-500/10" },
   modulo_ativado: { label: "Módulo Ativado", icon: CheckCircle, cor: "text-green-500 bg-green-500/10" },
   modulo_desativado: { label: "Módulo Desativado", icon: XCircle, cor: "text-red-500 bg-red-500/10" },
