@@ -149,7 +149,16 @@ export function ActivityLogProvider({ children }: { children: ReactNode }) {
 export function useActivityLog() {
   const context = useContext(ActivityLogContext);
   if (context === undefined) {
-    throw new Error("useActivityLog deve ser usado dentro de um ActivityLogProvider");
+    // Return a no-op fallback instead of throwing, to prevent crashes
+    // when components render before the provider is ready
+    return {
+      logs: [],
+      registrarAtividade: () => {},
+      limparLogs: () => {},
+      getLogsPorTipo: () => [],
+      getLogsPorUsuario: () => [],
+      getLogsPorPeriodo: () => [],
+    } as ActivityLogContextType;
   }
   return context;
 }
