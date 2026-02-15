@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAlunosResponsaveis } from "@/contexts/AlunosResponsaveisContext";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { IdCard, CreditCard, Download, Upload, Camera, QrCode } from "lucide-react";
+import { IdCard, CreditCard, Download, Upload, Camera, QrCode, Printer } from "lucide-react";
 import { toast } from "sonner";
 import {
   readFileAsDataURL,
@@ -84,6 +84,40 @@ export default function Carteirinha() {
     downloadBytes(bytes, isCarteirinha ? "carteirinha-aluno.pdf" : "cracha-aluno.pdf");
     toast.success(`${isCarteirinha ? "Carteirinha" : "Crachá"} gerado com sucesso!`);
   };
+
+  const carteirinhaRef = useRef<HTMLDivElement>(null);
+  const crachaRef = useRef<HTMLDivElement>(null);
+
+  const handleImprimir = useCallback((ref: React.RefObject<HTMLDivElement | null>) => {
+    const el = ref.current;
+    if (!el) return;
+    const printWindow = window.open("", "_blank", "width=600,height=500");
+    if (!printWindow) {
+      toast.error("Pop-ups bloqueados. Permita pop-ups para imprimir.");
+      return;
+    }
+    const clone = el.cloneNode(true) as HTMLElement;
+    // Inline all images as they already are data URLs
+    printWindow.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Imprimir</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{display:flex;justify-content:center;align-items:center;min-height:100vh;background:#fff;font-family:system-ui,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+@media print{body{margin:0}}
+</style></head><body></body></html>`);
+    printWindow.document.close();
+    // Copy computed styles as inline
+    const sourceEl = el;
+    const applyStyles = (src: Element, dest: Element) => {
+      const computed = window.getComputedStyle(src);
+      (dest as HTMLElement).style.cssText = computed.cssText;
+      for (let i = 0; i < src.children.length; i++) {
+        if (dest.children[i]) applyStyles(src.children[i], dest.children[i]);
+      }
+    };
+    applyStyles(sourceEl, clone);
+    printWindow.document.body.appendChild(clone);
+    setTimeout(() => { printWindow.print(); }, 300);
+  }, []);
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -191,7 +225,7 @@ export default function Carteirinha() {
             <TabsContent value="carteirinha" className="mt-4">
               <div className="flex flex-col items-center gap-4">
                 {/* Preview visual */}
-                <div className="w-full max-w-sm aspect-[85.6/53.98] rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-4 flex flex-col justify-between shadow-lg">
+                <div ref={carteirinhaRef} className="w-full max-w-sm aspect-[85.6/53.98] rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-4 flex flex-col justify-between shadow-lg">
                   <div className="bg-primary rounded-lg px-3 py-1.5 text-primary-foreground text-xs font-bold tracking-wide">
                     CARTEIRINHA DO ALUNO
                   </div>
@@ -214,17 +248,23 @@ export default function Carteirinha() {
                   </p>
                 </div>
 
-                <Button onClick={() => handleGerarPdf(true)} className="w-full max-w-sm">
-                  <Download className="h-4 w-4 mr-2" />
-                  Baixar Carteirinha (PDF)
-                </Button>
+                <div className="flex gap-2 w-full max-w-sm">
+                  <Button onClick={() => handleGerarPdf(true)} className="flex-1">
+                    <Download className="h-4 w-4 mr-2" />
+                    Baixar PDF
+                  </Button>
+                  <Button variant="outline" onClick={() => handleImprimir(carteirinhaRef)}>
+                    <Printer className="h-4 w-4 mr-2" />
+                    Imprimir
+                  </Button>
+                </div>
               </div>
             </TabsContent>
 
             <TabsContent value="cracha" className="mt-4">
               <div className="flex flex-col items-center gap-4">
                 {/* Preview visual crachá - vertical */}
-                <div className="w-48 aspect-[53.98/85.6] rounded-xl border-2 border-primary/30 bg-gradient-to-b from-primary/5 to-primary/10 p-3 flex flex-col items-center justify-between shadow-lg">
+                <div ref={crachaRef} className="w-48 aspect-[53.98/85.6] rounded-xl border-2 border-primary/30 bg-gradient-to-b from-primary/5 to-primary/10 p-3 flex flex-col items-center justify-between shadow-lg">
                   <div className="bg-primary rounded-lg px-3 py-1.5 text-primary-foreground text-[10px] font-bold tracking-wide text-center w-full">
                     CRACHÁ DO ALUNO
                   </div>
@@ -245,10 +285,16 @@ export default function Carteirinha() {
                   </p>
                 </div>
 
-                <Button variant="outline" onClick={() => handleGerarPdf(false)} className="w-full max-w-sm">
-                  <Download className="h-4 w-4 mr-2" />
-                  Baixar Crachá (PDF)
-                </Button>
+                <div className="flex gap-2 w-full max-w-sm">
+                  <Button variant="outline" onClick={() => handleGerarPdf(false)} className="flex-1">
+                    <Download className="h-4 w-4 mr-2" />
+                    Baixar PDF
+                  </Button>
+                  <Button variant="outline" onClick={() => handleImprimir(crachaRef)}>
+                    <Printer className="h-4 w-4 mr-2" />
+                    Imprimir
+                  </Button>
+                </div>
               </div>
             </TabsContent>
           </Tabs>
