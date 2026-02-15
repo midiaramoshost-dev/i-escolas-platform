@@ -19,6 +19,7 @@ import Register from "./pages/Register";
 import RecoverPassword from "./pages/RecoverPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Indicacao from "./pages/Indicacao";
+import VerificarCarteirinha from "./pages/VerificarCarteirinha";
 import EscolaDashboard from "./pages/escola/Dashboard";
 import Turmas from "./pages/escola/Turmas";
 import Series from "./pages/escola/Series";
@@ -96,6 +97,7 @@ const App = () => (
               <Route path="/recuperar-senha" element={<RecoverPassword />} />
               <Route path="/redefinir-senha" element={<ResetPassword />} />
               <Route path="/indicacao" element={<Indicacao />} />
+              <Route path="/verificar-carteirinha" element={<VerificarCarteirinha />} />
               
               {/* Escola Routes - Protected */}
               <Route path="/escola" element={
