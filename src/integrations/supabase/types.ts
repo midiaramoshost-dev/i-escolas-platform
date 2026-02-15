@@ -110,6 +110,51 @@ export type Database = {
         }
         Relationships: []
       }
+      materiais_didaticos: {
+        Row: {
+          arquivo_path: string | null
+          created_at: string | null
+          descricao: string | null
+          disciplina: string
+          duracao: string | null
+          escola_id: string | null
+          id: string
+          professor: string
+          tamanho: string | null
+          tipo: string
+          titulo: string
+          url_externa: string | null
+        }
+        Insert: {
+          arquivo_path?: string | null
+          created_at?: string | null
+          descricao?: string | null
+          disciplina: string
+          duracao?: string | null
+          escola_id?: string | null
+          id?: string
+          professor: string
+          tamanho?: string | null
+          tipo: string
+          titulo: string
+          url_externa?: string | null
+        }
+        Update: {
+          arquivo_path?: string | null
+          created_at?: string | null
+          descricao?: string | null
+          disciplina?: string
+          duracao?: string | null
+          escola_id?: string | null
+          id?: string
+          professor?: string
+          tamanho?: string | null
+          tipo?: string
+          titulo?: string
+          url_externa?: string | null
+        }
+        Relationships: []
+      }
       pagamentos: {
         Row: {
           created_at: string
