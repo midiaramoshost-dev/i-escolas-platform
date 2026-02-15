@@ -110,6 +110,56 @@ export type Database = {
         }
         Relationships: []
       }
+      pagamentos: {
+        Row: {
+          created_at: string
+          data_pagamento: string | null
+          data_vencimento: string
+          escola_id: string
+          id: string
+          metodo_pagamento: string | null
+          observacoes: string | null
+          referencia: string | null
+          status: string
+          updated_at: string
+          valor: number
+        }
+        Insert: {
+          created_at?: string
+          data_pagamento?: string | null
+          data_vencimento: string
+          escola_id: string
+          id?: string
+          metodo_pagamento?: string | null
+          observacoes?: string | null
+          referencia?: string | null
+          status?: string
+          updated_at?: string
+          valor?: number
+        }
+        Update: {
+          created_at?: string
+          data_pagamento?: string | null
+          data_vencimento?: string
+          escola_id?: string
+          id?: string
+          metodo_pagamento?: string | null
+          observacoes?: string | null
+          referencia?: string | null
+          status?: string
+          updated_at?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pagamentos_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
