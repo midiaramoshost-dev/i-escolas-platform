@@ -161,65 +161,18 @@ export default function AdminFolhaPagamento() {
   const gerarReciboPDF = (item: FolhaItem) => {
     const doc = new jsPDF({ unit: "mm", format: "a4" });
     const w = doc.internal.pageSize.getWidth();
-    const marginL = 10;
-    const marginR = w - 10;
-    const colW = marginR - marginL;
-    let y = 12;
-
-    const drawLine = (yPos: number) => { doc.setLineWidth(0.3); doc.line(marginL, yPos, marginR, yPos); };
-    const drawRect = (x: number, yPos: number, width: number, h: number) => { doc.setLineWidth(0.3); doc.rect(x, yPos, width, h); };
-
-    // === HEADER ===
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "bold");
-    drawRect(marginL, y, colW, 8);
-    doc.text("DEMONSTRATIVO DE PAGAMENTO DE SALÁRIO", w / 2, y + 5.5, { align: "center" });
-    y += 8;
-
-    // === EMPRESA / PERÍODO ===
-    drawRect(marginL, y, colW, 10);
-    doc.setFontSize(7);
-    doc.setFont("helvetica", "normal");
-    doc.text("Empresa: iEscolas Plataforma Educacional", marginL + 2, y + 4);
+    const mL = 8;
+    const mR = w - 8;
+    const cW = mR - mL;
     const mesNome = new Date(2026, parseInt(mes) - 1).toLocaleString("pt-BR", { month: "long" });
-    doc.text(`Período: 01/${mes}/${ano}  a  ${new Date(parseInt(ano), parseInt(mes), 0).getDate()}/${mes}/${ano}`, marginL + 2, y + 8);
-    doc.text(`Competência: ${mesNome.charAt(0).toUpperCase() + mesNome.slice(1)} / ${ano}`, marginR - 2, y + 4, { align: "right" });
-    y += 10;
+    const mesNomeCap = mesNome.charAt(0).toUpperCase() + mesNome.slice(1);
+    const ultimoDia = new Date(parseInt(ano), parseInt(mes), 0).getDate();
 
-    // === FUNCIONÁRIO ===
-    drawRect(marginL, y, colW, 8);
-    doc.setFont("helvetica", "bold");
-    doc.text("Funcionário:", marginL + 2, y + 5.5);
-    doc.setFont("helvetica", "normal");
-    doc.text(item.nome.toUpperCase(), marginL + 25, y + 5.5);
-    doc.text(`Cargo: ${item.cargo}`, marginR - 2, y + 5.5, { align: "right" });
-    y += 8;
-
-    // === TABLE HEADER ===
-    const colCod = marginL;
-    const colDesc = marginL + 15;
-    const colRef = marginL + 90;
-    const colVenc = marginL + 125;
-    const colDesconto = marginL + 160;
-
-    drawRect(marginL, y, colW, 7);
-    doc.setFontSize(7);
-    doc.setFont("helvetica", "bold");
-    doc.text("Cód.", colCod + 2, y + 5);
-    doc.text("Descrição", colDesc, y + 5);
-    doc.text("Referência", colRef, y + 5);
-    doc.text("Vencimentos", colVenc, y + 5);
-    doc.text("Descontos", colDesconto, y + 5);
-    // vertical lines
-    doc.line(colDesc - 2, y, colDesc - 2, y + 7);
-    doc.line(colRef - 2, y, colRef - 2, y + 7);
-    doc.line(colVenc - 2, y, colVenc - 2, y + 7);
-    doc.line(colDesconto - 2, y, colDesconto - 2, y + 7);
-    y += 7;
-
-    // === TABLE ROWS ===
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(7);
+    const colCod = mL;
+    const colDesc = mL + 14;
+    const colRef = mL + 85;
+    const colVenc = mL + 115;
+    const colDescCol = mL + 150;
 
     const rows: { cod: string; desc: string; ref: string; venc: string; desconto: string }[] = [
       { cod: "001", desc: "Salário Base", ref: "30 dias", venc: fmt(item.salarioBase), desconto: "" },
@@ -231,85 +184,182 @@ export default function AdminFolhaPagamento() {
       ...(item.outrosDescontos > 0 ? [{ cod: "199", desc: "Outros Descontos", ref: "", venc: "", desconto: fmt(item.outrosDescontos) }] : []),
     ];
 
-    const rowH = 6;
-    const tableStartY = y;
-    rows.forEach((r) => {
-      doc.text(r.cod, colCod + 2, y + 4);
-      doc.text(r.desc, colDesc, y + 4);
-      doc.text(r.ref, colRef, y + 4);
-      doc.text(r.venc, colVenc + 30, y + 4, { align: "right" });
-      doc.text(r.desconto, colDesconto + 30, y + 4, { align: "right" });
-      y += rowH;
-    });
+    const drawVia = (startY: number, viaLabel: string) => {
+      let y = startY;
+      const line = (yy: number) => { doc.setLineWidth(0.2); doc.line(mL, yy, mR, yy); };
+      const box = (x: number, yy: number, bw: number, h: number) => { doc.setLineWidth(0.2); doc.rect(x, yy, bw, h); };
+      const vLine = (x: number, y1: number, y2: number) => { doc.setLineWidth(0.2); doc.line(x, y1, x, y2); };
 
-    // fill remaining empty rows to give standard look
-    const minRows = 10;
-    const emptyRows = Math.max(0, minRows - rows.length);
-    for (let i = 0; i < emptyRows; i++) { y += rowH; }
-
-    // draw outer box and vertical lines for data area
-    const tableEndY = y;
-    drawRect(marginL, tableStartY, colW, tableEndY - tableStartY);
-    doc.line(colDesc - 2, tableStartY, colDesc - 2, tableEndY);
-    doc.line(colRef - 2, tableStartY, colRef - 2, tableEndY);
-    doc.line(colVenc - 2, tableStartY, colVenc - 2, tableEndY);
-    doc.line(colDesconto - 2, tableStartY, colDesconto - 2, tableEndY);
-
-    // === TOTALS ROW ===
-    drawRect(marginL, y, colW, 8);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(7);
-    doc.text("TOTAIS", colDesc, y + 5.5);
-    doc.text(fmt(item.totalProventos), colVenc + 30, y + 5.5, { align: "right" });
-    doc.text(fmt(item.totalDescontos), colDesconto + 30, y + 5.5, { align: "right" });
-    doc.line(colDesc - 2, y, colDesc - 2, y + 8);
-    doc.line(colRef - 2, y, colRef - 2, y + 8);
-    doc.line(colVenc - 2, y, colVenc - 2, y + 8);
-    doc.line(colDesconto - 2, y, colDesconto - 2, y + 8);
-    y += 8;
-
-    // === VALOR LÍQUIDO ===
-    drawRect(marginL, y, colW, 8);
-    doc.setFontSize(8);
-    doc.text("VALOR LÍQUIDO", marginL + 2, y + 5.5);
-    doc.text(fmt(item.liquido), marginR - 4, y + 5.5, { align: "right" });
-    y += 8;
-
-    // === BASE DE CÁLCULOS ===
-    drawRect(marginL, y, colW, 10);
-    doc.setFontSize(6);
-    doc.setFont("helvetica", "normal");
-    const bases = [
-      { label: "Salário Base", value: fmt(item.salarioBase) },
-      { label: "Sal. Contr. INSS", value: fmt(item.totalProventos) },
-      { label: "Base Cálc. FGTS", value: fmt(item.totalProventos) },
-      { label: "F.G.T.S do mês", value: fmt(item.totalProventos * 0.08) },
-      { label: "Base Cálc. IRRF", value: fmt(item.totalProventos - item.inss) },
-    ];
-    const baseColW = colW / bases.length;
-    bases.forEach((b, i) => {
-      const x = marginL + i * baseColW;
+      // Header
+      box(mL, y, cW, 7);
+      doc.setFontSize(8);
       doc.setFont("helvetica", "bold");
-      doc.text(b.label, x + 2, y + 4);
+      doc.text("DEMONSTRATIVO DE PAGAMENTO DE SALÁRIO", w / 2, y + 4.8, { align: "center" });
+      doc.setFontSize(6);
       doc.setFont("helvetica", "normal");
-      doc.text(b.value, x + 2, y + 8);
-      if (i > 0) doc.line(x, y, x, y + 10);
-    });
-    y += 10;
+      doc.text(viaLabel, mR - 2, y + 4.8, { align: "right" });
+      y += 7;
 
-    // === DECLARAÇÃO ===
-    y += 4;
-    doc.setFontSize(7);
+      // Empresa + Período
+      box(mL, y, cW / 2, 9);
+      box(mL + cW / 2, y, cW / 2, 9);
+      doc.setFontSize(6);
+      doc.setFont("helvetica", "bold");
+      doc.text("EMPREGADOR:", mL + 1.5, y + 3.5);
+      doc.setFont("helvetica", "normal");
+      doc.text("iEscolas Plataforma Educacional", mL + 22, y + 3.5);
+      doc.setFont("helvetica", "bold");
+      doc.text("CNPJ:", mL + 1.5, y + 7);
+      doc.setFont("helvetica", "normal");
+      doc.text("00.000.000/0001-00", mL + 11, y + 7);
+
+      const rxStart = mL + cW / 2;
+      doc.setFont("helvetica", "bold");
+      doc.text("COMPETÊNCIA:", rxStart + 1.5, y + 3.5);
+      doc.setFont("helvetica", "normal");
+      doc.text(`${mesNomeCap} / ${ano}`, rxStart + 22, y + 3.5);
+      doc.setFont("helvetica", "bold");
+      doc.text("PERÍODO:", rxStart + 1.5, y + 7);
+      doc.setFont("helvetica", "normal");
+      doc.text(`01/${mes}/${ano} a ${ultimoDia}/${mes}/${ano}`, rxStart + 16, y + 7);
+      y += 9;
+
+      // Funcionário
+      box(mL, y, cW, 9);
+      doc.setFont("helvetica", "bold");
+      doc.text("FUNCIONÁRIO:", mL + 1.5, y + 3.5);
+      doc.setFont("helvetica", "normal");
+      doc.text(item.nome.toUpperCase(), mL + 22, y + 3.5);
+      doc.setFont("helvetica", "bold");
+      doc.text("CARGO:", mL + 1.5, y + 7);
+      doc.setFont("helvetica", "normal");
+      doc.text(item.cargo, mL + 13, y + 7);
+      doc.setFont("helvetica", "bold");
+      doc.text("ADMISSÃO:", mR - 45, y + 7);
+      doc.setFont("helvetica", "normal");
+      const func = funcionariosMock.find(f => f.id === item.funcionarioId);
+      if (func) {
+        const [ay, am, ad] = func.admissao.split("-");
+        doc.text(`${ad}/${am}/${ay}`, mR - 30, y + 7);
+      }
+      y += 9;
+
+      // Table header
+      const thY = y;
+      box(mL, thY, cW, 6);
+      doc.setFontSize(6);
+      doc.setFont("helvetica", "bold");
+      doc.text("CÓD.", colCod + 1.5, thY + 4);
+      doc.text("DESCRIÇÃO", colDesc + 1, thY + 4);
+      doc.text("REF.", colRef + 1, thY + 4);
+      doc.text("VENCIMENTOS", colVenc + 1, thY + 4);
+      doc.text("DESCONTOS", colDescCol + 1, thY + 4);
+      vLine(colDesc, thY, thY + 6);
+      vLine(colRef, thY, thY + 6);
+      vLine(colVenc, thY, thY + 6);
+      vLine(colDescCol, thY, thY + 6);
+      y += 6;
+
+      // Table body
+      const bodyStart = y;
+      const rH = 4.5;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(6);
+      rows.forEach((r) => {
+        doc.text(r.cod, colCod + 1.5, y + 3.2);
+        doc.text(r.desc, colDesc + 1, y + 3.2);
+        doc.text(r.ref, colRef + 1, y + 3.2);
+        if (r.venc) doc.text(r.venc, colVenc + 33, y + 3.2, { align: "right" });
+        if (r.desconto) doc.text(r.desconto, colDescCol + 33, y + 3.2, { align: "right" });
+        y += rH;
+      });
+      // Empty rows
+      const minR = 8;
+      const empty = Math.max(0, minR - rows.length);
+      for (let i = 0; i < empty; i++) y += rH;
+
+      // Body box + vertical lines
+      box(mL, bodyStart, cW, y - bodyStart);
+      vLine(colDesc, bodyStart, y);
+      vLine(colRef, bodyStart, y);
+      vLine(colVenc, bodyStart, y);
+      vLine(colDescCol, bodyStart, y);
+
+      // Totals
+      box(mL, y, cW, 6);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(6);
+      doc.text("TOTAIS", colDesc + 1, y + 4);
+      doc.text(fmt(item.totalProventos), colVenc + 33, y + 4, { align: "right" });
+      doc.text(fmt(item.totalDescontos), colDescCol + 33, y + 4, { align: "right" });
+      vLine(colDesc, y, y + 6);
+      vLine(colRef, y, y + 6);
+      vLine(colVenc, y, y + 6);
+      vLine(colDescCol, y, y + 6);
+      y += 6;
+
+      // Valor Líquido
+      box(mL, y, cW, 7);
+      doc.setFontSize(7);
+      doc.setFont("helvetica", "bold");
+      doc.text("VALOR LÍQUIDO A RECEBER:", mL + 2, y + 4.8);
+      doc.setFontSize(9);
+      doc.text(fmt(item.liquido), mR - 3, y + 5, { align: "right" });
+      y += 7;
+
+      // Bases de cálculo
+      box(mL, y, cW, 8);
+      doc.setFontSize(5.5);
+      const bases = [
+        { l: "Salário Base", v: fmt(item.salarioBase) },
+        { l: "Base INSS", v: fmt(item.totalProventos) },
+        { l: "Base FGTS", v: fmt(item.totalProventos) },
+        { l: "FGTS Mês", v: fmt(item.totalProventos * 0.08) },
+        { l: "Base IRRF", v: fmt(item.totalProventos - item.inss) },
+      ];
+      const bW = cW / bases.length;
+      bases.forEach((b, i) => {
+        const x = mL + i * bW;
+        doc.setFont("helvetica", "bold");
+        doc.text(b.l, x + 1.5, y + 3.5);
+        doc.setFont("helvetica", "normal");
+        doc.text(b.v, x + 1.5, y + 6.5);
+        if (i > 0) vLine(x, y, y + 8);
+      });
+      y += 8;
+
+      // Assinatura
+      y += 3;
+      doc.setFontSize(5.5);
+      doc.setFont("helvetica", "normal");
+      doc.text("DECLARO TER RECEBIDO A IMPORTÂNCIA LÍQUIDA DISCRIMINADA NESTE RECIBO.", w / 2, y, { align: "center" });
+      y += 8;
+      doc.setLineWidth(0.15);
+      doc.line(mL + 5, y, mL + 55, y);
+      doc.line(mR - 70, y, mR - 5, y);
+      doc.setFontSize(5.5);
+      doc.text("___/___/______", mL + 30, y + 3.5, { align: "center" });
+      doc.text("ASSINATURA DO FUNCIONÁRIO", mR - 37.5, y + 3.5, { align: "center" });
+
+      return y + 6;
+    };
+
+    // 1ª Via - Empresa
+    let endY = drawVia(10, "1ª Via - Empresa");
+
+    // Linha de corte
+    endY += 3;
+    doc.setLineDashPattern([2, 2], 0);
+    doc.setLineWidth(0.3);
+    doc.line(mL, endY, mR, endY);
+    doc.setFontSize(5);
     doc.setFont("helvetica", "normal");
-    doc.text("DECLARO TER RECEBIDO A IMPORTÂNCIA LÍQUIDA DISCRIMINADA NESTE RECIBO", w / 2, y, { align: "center" });
-    y += 12;
+    doc.text("✂ Corte aqui", w / 2, endY - 1, { align: "center" });
+    doc.setLineDashPattern([], 0);
+    endY += 3;
 
-    // Signature lines
-    doc.line(marginL, y, marginL + 60, y);
-    doc.text("DATA", marginL + 25, y + 4, { align: "center" });
-
-    doc.line(marginR - 80, y, marginR, y);
-    doc.text("ASSINATURA DO FUNCIONÁRIO", marginR - 40, y + 4, { align: "center" });
+    // 2ª Via - Funcionário
+    drawVia(endY, "2ª Via - Funcionário");
 
     doc.save(`recibo_${item.nome.replace(/\s+/g, "_")}_${mes}_${ano}.pdf`);
     toast.success("Recibo gerado em PDF!");
