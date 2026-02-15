@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_usuarios: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          link_acesso: string | null
+          nome: string
+          perfil: string
+          status: string
+          ultimo_acesso: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          link_acesso?: string | null
+          nome: string
+          perfil?: string
+          status?: string
+          ultimo_acesso?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          link_acesso?: string | null
+          nome?: string
+          perfil?: string
+          status?: string
+          ultimo_acesso?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       escolas: {
         Row: {
           alunos: number

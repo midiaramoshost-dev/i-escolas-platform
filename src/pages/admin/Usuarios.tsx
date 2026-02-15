@@ -14,6 +14,7 @@ import {
   Link,
   Copy,
   ExternalLink,
+  Loader2,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -50,28 +51,21 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { useActivityLog } from "@/contexts/ActivityLogContext";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Usuario {
   id: string;
   nome: string;
   email: string;
-  perfil: "admin" | "suporte" | "comercial" | "financeiro";
-  status: "ativo" | "inativo";
+  perfil: string;
+  status: string;
   ultimoAcesso: string;
   dataCriacao: string;
-  linkAcesso?: string;
+  linkAcesso?: string | null;
 }
-
-const usuariosIniciais: Usuario[] = [
-  { id: "1", nome: "Carlos Administrador", email: "carlos@iescolas.com.br", perfil: "admin", status: "ativo", ultimoAcesso: "2025-01-25 14:30", dataCriacao: "2023-01-15" },
-  { id: "2", nome: "Ana Suporte", email: "ana.suporte@iescolas.com.br", perfil: "suporte", status: "ativo", ultimoAcesso: "2025-01-25 10:15", dataCriacao: "2023-03-20" },
-  { id: "3", nome: "Pedro Comercial", email: "pedro.comercial@iescolas.com.br", perfil: "comercial", status: "ativo", ultimoAcesso: "2025-01-24 16:45", dataCriacao: "2023-06-10" },
-  { id: "4", nome: "Maria Financeiro", email: "maria.financeiro@iescolas.com.br", perfil: "financeiro", status: "ativo", ultimoAcesso: "2025-01-25 09:00", dataCriacao: "2023-08-05" },
-  { id: "5", nome: "João Suporte", email: "joao.suporte@iescolas.com.br", perfil: "suporte", status: "inativo", ultimoAcesso: "2025-01-10 11:30", dataCriacao: "2024-01-15" },
-];
 
 const getPerfilColor = (perfil: string) => {
   switch (perfil) {
@@ -94,7 +88,8 @@ const getPerfilLabel = (perfil: string) => {
 };
 
 export default function AdminUsuarios() {
-  const [usuarios, setUsuarios] = useState<Usuario[]>(usuariosIniciais);
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [loading, setLoading] = useState(true);
   const [busca, setBusca] = useState("");
   const [filtroPerfil, setFiltroPerfil] = useState("todos");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -102,16 +97,42 @@ export default function AdminUsuarios() {
   const [formData, setFormData] = useState({
     nome: "",
     email: "",
-    perfil: "suporte" as Usuario["perfil"],
+    perfil: "suporte",
   });
   const { registrarAtividade } = useActivityLog();
 
+  const fetchUsuarios = useCallback(async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("admin_usuarios")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      toast.error("Erro ao carregar usuários");
+      console.error(error);
+    } else if (data) {
+      setUsuarios(data.map(u => ({
+        id: u.id,
+        nome: u.nome,
+        email: u.email,
+        perfil: u.perfil,
+        status: u.status,
+        ultimoAcesso: u.ultimo_acesso ? new Date(u.ultimo_acesso).toLocaleString("pt-BR") : "-",
+        dataCriacao: new Date(u.created_at).toISOString().split("T")[0],
+        linkAcesso: u.link_acesso,
+      })));
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    fetchUsuarios();
+  }, [fetchUsuarios]);
+
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1 },
-    },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
   };
 
   const itemVariants = {
@@ -129,11 +150,7 @@ export default function AdminUsuarios() {
   const handleOpenDialog = (usuario?: Usuario) => {
     if (usuario) {
       setEditando(usuario);
-      setFormData({
-        nome: usuario.nome,
-        email: usuario.email,
-        perfil: usuario.perfil,
-      });
+      setFormData({ nome: usuario.nome, email: usuario.email, perfil: usuario.perfil });
     } else {
       setEditando(null);
       setFormData({ nome: "", email: "", perfil: "suporte" });
@@ -141,18 +158,22 @@ export default function AdminUsuarios() {
     setDialogOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.nome || !formData.email) {
       toast.error("Preencha todos os campos obrigatórios");
       return;
     }
 
     if (editando) {
-      setUsuarios(usuarios.map(u => 
-        u.id === editando.id 
-          ? { ...u, nome: formData.nome, email: formData.email, perfil: formData.perfil }
-          : u
-      ));
+      const { error } = await supabase
+        .from("admin_usuarios")
+        .update({ nome: formData.nome, email: formData.email, perfil: formData.perfil })
+        .eq("id", editando.id);
+
+      if (error) {
+        toast.error("Erro ao atualizar usuário");
+        return;
+      }
       toast.success("Usuário atualizado com sucesso!");
       registrarAtividade(
         "usuario_editado",
@@ -162,31 +183,37 @@ export default function AdminUsuarios() {
         editando.id
       );
     } else {
-      const novoUsuario: Usuario = {
-        id: Date.now().toString(),
-        nome: formData.nome,
-        email: formData.email,
-        perfil: formData.perfil,
-        status: "ativo",
-        ultimoAcesso: "-",
-        dataCriacao: new Date().toISOString().split("T")[0],
-      };
-      setUsuarios([novoUsuario, ...usuarios]);
-      toast.success("Usuário criado com sucesso! Credenciais enviadas por e-mail.");
+      const { error } = await supabase
+        .from("admin_usuarios")
+        .insert({ nome: formData.nome, email: formData.email, perfil: formData.perfil });
+
+      if (error) {
+        toast.error("Erro ao criar usuário");
+        return;
+      }
+      toast.success("Usuário criado com sucesso!");
       registrarAtividade(
         "usuario_criado",
         `Novo usuário "${formData.nome}" foi criado`,
         `Perfil: ${formData.perfil}, E-mail: ${formData.email}`,
-        "Usuário",
-        novoUsuario.id
+        "Usuário"
       );
     }
     setDialogOpen(false);
+    fetchUsuarios();
   };
 
-  const handleToggleStatus = (usuario: Usuario) => {
+  const handleToggleStatus = async (usuario: Usuario) => {
     const novoStatus = usuario.status === "ativo" ? "inativo" : "ativo";
-    setUsuarios(usuarios.map(u => u.id === usuario.id ? { ...u, status: novoStatus } : u));
+    const { error } = await supabase
+      .from("admin_usuarios")
+      .update({ status: novoStatus })
+      .eq("id", usuario.id);
+
+    if (error) {
+      toast.error("Erro ao alterar status");
+      return;
+    }
     toast.success(`Usuário ${novoStatus === "ativo" ? "ativado" : "desativado"} com sucesso!`);
     registrarAtividade(
       novoStatus === "ativo" ? "usuario_ativado" : "usuario_desativado",
@@ -195,6 +222,7 @@ export default function AdminUsuarios() {
       "Usuário",
       usuario.id
     );
+    fetchUsuarios();
   };
 
   const handleResetSenha = (usuario: Usuario) => {
@@ -208,10 +236,20 @@ export default function AdminUsuarios() {
     );
   };
 
-  const gerarLinkAcesso = (usuario: Usuario) => {
+  const gerarLinkAcesso = async (usuario: Usuario) => {
     const slug = usuario.nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
     const link = `${window.location.origin}/login?user=${slug}-${usuario.id}`;
-    setUsuarios(usuarios.map(u => u.id === usuario.id ? { ...u, linkAcesso: link } : u));
+
+    const { error } = await supabase
+      .from("admin_usuarios")
+      .update({ link_acesso: link })
+      .eq("id", usuario.id);
+
+    if (error) {
+      toast.error("Erro ao salvar link de acesso");
+      return;
+    }
+
     navigator.clipboard.writeText(link);
     toast.success("Link de acesso gerado e copiado!");
     registrarAtividade(
@@ -221,6 +259,7 @@ export default function AdminUsuarios() {
       "Usuário",
       usuario.id
     );
+    fetchUsuarios();
   };
 
   const copiarLink = (link: string) => {
@@ -340,120 +379,114 @@ export default function AdminUsuarios() {
       <motion.div variants={itemVariants}>
         <Card>
           <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Usuário</TableHead>
-                  <TableHead>Perfil</TableHead>
-                   <TableHead>Status</TableHead>
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Usuário</TableHead>
+                    <TableHead>Perfil</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead>Link de Acesso</TableHead>
                     <TableHead>Último Acesso</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {usuariosFiltrados.map((usuario) => (
-                  <TableRow key={usuario.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-9 w-9">
-                          <AvatarFallback className="bg-rose-500/10 text-rose-500 text-sm">
-                            {usuario.nome.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium">{usuario.nome}</p>
-                          <p className="text-xs text-muted-foreground">{usuario.email}</p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getPerfilColor(usuario.perfil)}>
-                        {getPerfilLabel(usuario.perfil)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={usuario.status === "ativo" ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"}>
-                        {usuario.status === "ativo" ? "Ativo" : "Inativo"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {usuario.linkAcesso ? (
-                        <div className="flex items-center gap-1">
-                          <code className="text-xs bg-muted px-2 py-1 rounded max-w-[180px] truncate block">
-                            {usuario.linkAcesso}
-                          </code>
-                          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => copiarLink(usuario.linkAcesso!)}>
-                            <Copy className="h-3.5 w-3.5" />
-                          </Button>
-                          <Button size="icon" variant="ghost" className="h-7 w-7" asChild>
-                            <a href={usuario.linkAcesso} target="_blank" rel="noopener noreferrer">
-                              <ExternalLink className="h-3.5 w-3.5" />
-                            </a>
-                          </Button>
-                        </div>
-                      ) : (
-                        <Button size="sm" variant="outline" className="text-xs h-7" onClick={() => gerarLinkAcesso(usuario)}>
-                          <Link className="mr-1 h-3.5 w-3.5" />
-                          Gerar Link
-                        </Button>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
-                      {usuario.ultimoAcesso}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button size="icon" variant="ghost">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
-                          <DropdownMenuItem 
-                            className="cursor-pointer"
-                            onClick={() => handleOpenDialog(usuario)}
-                          >
-                            <Edit className="mr-2 h-4 w-4" />
-                            Editar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            className="cursor-pointer"
-                            onClick={() => handleResetSenha(usuario)}
-                          >
-                            <Key className="mr-2 h-4 w-4" />
-                            Resetar Senha
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            className="cursor-pointer"
-                            onClick={() => handleToggleStatus(usuario)}
-                          >
-                            {usuario.status === "ativo" ? (
-                              <>
-                                <UserX className="mr-2 h-4 w-4" />
-                                Desativar
-                              </>
-                            ) : (
-                              <>
-                                <UserCheck className="mr-2 h-4 w-4" />
-                                Ativar
-                              </>
-                            )}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            className="cursor-pointer"
-                            onClick={() => gerarLinkAcesso(usuario)}
-                          >
-                            <Link className="mr-2 h-4 w-4" />
-                            {usuario.linkAcesso ? "Regerar Link" : "Gerar Link de Acesso"}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
+                    <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {usuariosFiltrados.map((usuario) => (
+                    <TableRow key={usuario.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-9 w-9">
+                            <AvatarFallback className="bg-rose-500/10 text-rose-500 text-sm">
+                              {usuario.nome.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{usuario.nome}</p>
+                            <p className="text-xs text-muted-foreground">{usuario.email}</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getPerfilColor(usuario.perfil)}>
+                          {getPerfilLabel(usuario.perfil)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={usuario.status === "ativo" ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"}>
+                          {usuario.status === "ativo" ? "Ativo" : "Inativo"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {usuario.linkAcesso ? (
+                          <div className="flex items-center gap-1">
+                            <code className="text-xs bg-muted px-2 py-1 rounded max-w-[180px] truncate block">
+                              {usuario.linkAcesso}
+                            </code>
+                            <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => copiarLink(usuario.linkAcesso!)}>
+                              <Copy className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button size="icon" variant="ghost" className="h-7 w-7" asChild>
+                              <a href={usuario.linkAcesso} target="_blank" rel="noopener noreferrer">
+                                <ExternalLink className="h-3.5 w-3.5" />
+                              </a>
+                            </Button>
+                          </div>
+                        ) : (
+                          <Button size="sm" variant="outline" className="text-xs h-7" onClick={() => gerarLinkAcesso(usuario)}>
+                            <Link className="mr-1 h-3.5 w-3.5" />
+                            Gerar Link
+                          </Button>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {usuario.ultimoAcesso}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button size="icon" variant="ghost">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => handleOpenDialog(usuario)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => handleResetSenha(usuario)}>
+                              <Key className="mr-2 h-4 w-4" />
+                              Resetar Senha
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => handleToggleStatus(usuario)}>
+                              {usuario.status === "ativo" ? (
+                                <>
+                                  <UserX className="mr-2 h-4 w-4" />
+                                  Desativar
+                                </>
+                              ) : (
+                                <>
+                                  <UserCheck className="mr-2 h-4 w-4" />
+                                  Ativar
+                                </>
+                              )}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => gerarLinkAcesso(usuario)}>
+                              <Link className="mr-2 h-4 w-4" />
+                              {usuario.linkAcesso ? "Regerar Link" : "Gerar Link de Acesso"}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
       </motion.div>
@@ -489,7 +522,7 @@ export default function AdminUsuarios() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="perfil">Perfil *</Label>
-              <Select value={formData.perfil} onValueChange={(v) => setFormData({ ...formData, perfil: v as Usuario["perfil"] })}>
+              <Select value={formData.perfil} onValueChange={(v) => setFormData({ ...formData, perfil: v })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o perfil" />
                 </SelectTrigger>
