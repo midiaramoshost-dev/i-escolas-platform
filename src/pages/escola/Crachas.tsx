@@ -128,6 +128,81 @@ export default function Crachas() {
     e.target.value = "";
   };
 
+  // ── Print via browser ─────────────────────────────────────────
+  const handlePrint = (type: "carteirinha" | "cracha") => {
+    const selected = alunos.filter((a) => selectedIds.has(a.id));
+    if (selected.length === 0) {
+      toast.error("Selecione pelo menos um aluno.");
+      return;
+    }
+
+    const isCarteirinha = type === "carteirinha";
+    const cardStyle = isCarteirinha
+      ? "width:86mm;height:54mm;"
+      : "width:60mm;height:85mm;";
+
+    const cards = selected.map((aluno) => {
+      const photo = getAlunoPhoto(aluno.id);
+      const photoHtml = photo
+        ? `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;" />`
+        : `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#9ca3af;font-size:8px;">SEM<br/>FOTO</div>`;
+
+      if (isCarteirinha) {
+        return `<div style="${cardStyle}border:1px solid #3b82f6;border-radius:6px;overflow:hidden;box-sizing:border-box;page-break-inside:avoid;background:#fff;">
+          <div style="background:#3b82f6;padding:4px 8px;text-align:center;">
+            <div style="color:#fff;font-size:8px;font-weight:bold;letter-spacing:1px;">${escolaInfo.nome.toUpperCase()}</div>
+            <div style="color:rgba(255,255,255,0.8);font-size:5px;">CARTEIRA DE IDENTIFICAÇÃO ESCOLAR</div>
+          </div>
+          <div style="display:flex;gap:8px;padding:8px;">
+            <div style="width:20mm;height:20mm;border:1px solid #3b82f6;overflow:hidden;flex-shrink:0;background:#f3f4f6;">${photoHtml}</div>
+            <div style="font-size:7px;color:#1f2937;">
+              <div style="font-weight:bold;font-size:8px;">${aluno.nome}</div>
+              <div style="color:#6b7280;">Matrícula: ${aluno.matricula}</div>
+              <div style="color:#6b7280;">Turma: ${aluno.turma}</div>
+              <div style="color:#6b7280;">Turno: ${aluno.turno}</div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:0 8px 4px;font-size:5px;color:#9ca3af;">
+            <span>Ano Letivo: ${escolaInfo.anoLetivo}</span>
+            <span>Validade: 12/${escolaInfo.anoLetivo}</span>
+          </div>
+        </div>`;
+      } else {
+        return `<div style="${cardStyle}border:1px solid #3b82f6;border-radius:6px;overflow:hidden;box-sizing:border-box;page-break-inside:avoid;background:#fff;display:flex;flex-direction:column;align-items:center;">
+          <div style="background:#3b82f6;padding:4px 8px;text-align:center;width:100%;box-sizing:border-box;">
+            <div style="color:#fff;font-size:7px;font-weight:bold;letter-spacing:1px;">${escolaInfo.nome.toUpperCase()}</div>
+            <div style="color:rgba(255,255,255,0.8);font-size:5px;">ALUNO</div>
+          </div>
+          <div style="width:28mm;height:28mm;border:1px solid #3b82f6;overflow:hidden;margin-top:6px;background:#f3f4f6;">${photoHtml}</div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px;text-align:center;">
+            <div style="font-weight:bold;font-size:8px;">${aluno.nome}</div>
+            <div style="font-size:6px;color:#6b7280;margin-top:2px;">Mat: ${aluno.matricula}</div>
+            <div style="font-size:6px;color:#6b7280;">${aluno.turma} | ${aluno.turno}</div>
+          </div>
+          <div style="font-size:5px;color:#9ca3af;padding-bottom:4px;">${escolaInfo.anoLetivo}</div>
+        </div>`;
+      }
+    }).join("");
+
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      toast.error("Popup bloqueado. Permita popups para imprimir.");
+      return;
+    }
+
+    printWindow.document.write(`<!DOCTYPE html><html><head><title>Imprimir ${isCarteirinha ? "Carteirinhas" : "Crachás"}</title>
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Helvetica, Arial, sans-serif; padding: 10mm; }
+        .grid { display: flex; flex-wrap: wrap; gap: 6mm; }
+        @media print { body { padding: 5mm; } }
+      </style></head><body>
+      <div class="grid">${cards}</div>
+      <script>window.onload=function(){window.print();window.onafterprint=function(){window.close();}}<\/script>
+    </body></html>`);
+    printWindow.document.close();
+  };
+
   // ── PDF Generation ──────────────────────────────────────────
   const generatePDF = (type: "carteirinha" | "cracha") => {
     const selected = alunos.filter((a) => selectedIds.has(a.id));
@@ -326,21 +401,29 @@ export default function Crachas() {
             Gerencie fotos e gere crachás e carteirinhas dos alunos em PDF
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            onClick={() => handlePrint(tab === "cracha" ? "cracha" : "carteirinha")}
+            disabled={selectedIds.size === 0}
+          >
+            <Printer className="mr-2 h-4 w-4" />
+            Imprimir ({selectedIds.size})
+          </Button>
           <Button
             variant="outline"
             onClick={() => generatePDF("cracha")}
             disabled={selectedIds.size === 0}
           >
-            <Printer className="mr-2 h-4 w-4" />
-            Gerar Crachás ({selectedIds.size})
+            <Download className="mr-2 h-4 w-4" />
+            PDF Crachás ({selectedIds.size})
           </Button>
           <Button
             onClick={() => generatePDF("carteirinha")}
             disabled={selectedIds.size === 0}
           >
             <Download className="mr-2 h-4 w-4" />
-            Gerar Carteirinhas ({selectedIds.size})
+            PDF Carteirinhas ({selectedIds.size})
           </Button>
         </div>
       </div>
