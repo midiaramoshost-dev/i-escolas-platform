@@ -28,6 +28,29 @@ function dataUrlToUint8Array(dataUrl: string) {
   return bytes;
 }
 
+function convertToJpegDataUrl(dataUrl: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    if (/^data:image\/jpeg/i.test(dataUrl)) {
+      resolve(dataUrl);
+      return;
+    }
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) { reject(new Error("Canvas não suportado")); return; }
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+      resolve(canvas.toDataURL("image/jpeg", 0.92));
+    };
+    img.onerror = () => reject(new Error("Falha ao carregar imagem para conversão"));
+    img.src = dataUrl;
+  });
+}
+
 function escapePdfText(text: string) {
   return String(text).replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
 }
@@ -182,9 +205,10 @@ export default function Carteirinha() {
       return;
     }
     try {
-      const dataUrl = await readFileAsDataURL(file);
-      localStorage.setItem("aluno:foto", dataUrl);
-      setFotoLocal(dataUrl);
+      const rawDataUrl = await readFileAsDataURL(file);
+      const jpegDataUrl = await convertToJpegDataUrl(rawDataUrl);
+      localStorage.setItem("aluno:foto", jpegDataUrl);
+      setFotoLocal(jpegDataUrl);
       toast.success("Foto atualizada com sucesso!");
     } catch {
       toast.error("Erro ao carregar a foto.");
@@ -275,7 +299,7 @@ export default function Carteirinha() {
 
               <div className="flex items-center gap-2 pt-1">
                 <Badge variant="outline" className="text-xs">
-                  {fotoDataUrl && /^data:image\/jpeg/i.test(fotoDataUrl) ? "✅ Foto JPEG pronta" : "⚠️ Envie foto JPEG para o PDF"}
+                  {fotoDataUrl ? "✅ Foto pronta para o PDF" : "⚠️ Envie uma foto para o PDF"}
                 </Badge>
               </div>
             </div>
@@ -373,7 +397,7 @@ export default function Carteirinha() {
             </p>
             <p className="flex items-center gap-2">
               <Camera className="h-4 w-4" />
-              <span>A foto no PDF funciona melhor com formato <strong>JPEG</strong>. Imagens PNG aparecerão como placeholder.</span>
+              <span>Fotos <strong>PNG ou JPEG</strong> são aceitas — a conversão para JPEG é automática.</span>
             </p>
           </div>
         </CardContent>
