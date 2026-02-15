@@ -136,7 +136,9 @@ const App = () => (
               {/* Portal do Aluno Routes - Protected */}
               <Route path="/aluno" element={
                 <ProtectedRoute allowedRoles={['aluno']}>
-                  <AlunoLayout />
+                  <AlunosResponsaveisProvider>
+                    <AlunoLayout />
+                  </AlunosResponsaveisProvider>
                 </ProtectedRoute>
               }>
                 <Route index element={<Navigate to="/aluno/dashboard" replace />} />
