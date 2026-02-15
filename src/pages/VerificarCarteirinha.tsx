@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -68,6 +69,8 @@ export default function VerificarCarteirinha() {
   const [result, setResult] = useState<CarteirinhaData | null>(null);
   const [error, setError] = useState<string>("");
   const [scanning, setScanning] = useState(false);
+  const [showManual, setShowManual] = useState(false);
+  const [manualText, setManualText] = useState("");
   const [hasBarcodeApi, setHasBarcodeApi] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -153,17 +156,18 @@ export default function VerificarCarteirinha() {
     }
   };
 
-  const handleManualInput = () => {
-    const raw = prompt("Cole o conteúdo do QR Code (JSON):");
-    if (!raw) return;
+  const handleManualValidate = () => {
     setResult(null);
     setError("");
-    const data = parseQrPayload(raw);
+    if (!manualText.trim()) return;
+    const data = parseQrPayload(manualText.trim());
     if (!data) {
       setError("Dados inválidos. O conteúdo não corresponde a uma carteirinha do iESCOLAS.");
       return;
     }
     setResult(data);
+    setShowManual(false);
+    setManualText("");
     toast.success("Carteirinha verificada com sucesso!");
   };
 
@@ -224,9 +228,24 @@ export default function VerificarCarteirinha() {
                 </Button>
               </label>
 
-              <Button variant="ghost" size="sm" onClick={handleManualInput} className="text-xs text-muted-foreground">
-                Inserir dados manualmente
+              <Button variant="ghost" size="sm" onClick={() => setShowManual(!showManual)} className="text-xs text-muted-foreground">
+                {showManual ? "Fechar" : "Inserir dados manualmente"}
               </Button>
+
+              {showManual && (
+                <div className="space-y-2">
+                  <Textarea
+                    placeholder='Cole o JSON do QR Code aqui, ex: {"tipo":"carteirinha_aluno","nome":"...","matricula":"...","escola":"...","emitido":"2026-01-01"}'
+                    value={manualText}
+                    onChange={(e) => setManualText(e.target.value)}
+                    rows={3}
+                    className="text-xs"
+                  />
+                  <Button size="sm" onClick={handleManualValidate} className="w-full">
+                    Validar
+                  </Button>
+                </div>
+              )}
             </div>
 
             {!hasBarcodeApi && (
