@@ -7,6 +7,9 @@ export interface PlatformSettings {
   nome_plataforma: string;
   email_suporte: string;
   telefone_suporte: string;
+  cor_primaria: string;
+  cor_secundaria: string;
+  logo_url: string | null;
   updated_at: string;
 }
 
@@ -24,7 +27,7 @@ export function usePlatformSettings() {
       if (error) throw error;
       return data as unknown as PlatformSettings;
     },
-    staleTime: 5 * 60 * 1000, // cache 5 min
+    staleTime: 5 * 60 * 1000,
   });
 
   const updateSettings = useMutation({
@@ -41,6 +44,23 @@ export function usePlatformSettings() {
     },
   });
 
+  const uploadLogo = async (file: File): Promise<string> => {
+    const ext = file.name.split(".").pop();
+    const filePath = `logo/logo-${Date.now()}.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("platform-assets")
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) throw uploadError;
+
+    const { data: urlData } = supabase.storage
+      .from("platform-assets")
+      .getPublicUrl(filePath);
+
+    return urlData.publicUrl;
+  };
+
   const whatsappNumber = settings?.whatsapp_number ?? "5515997625135";
 
   const openWhatsApp = (message: string) => {
@@ -48,5 +68,5 @@ export function usePlatformSettings() {
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  return { settings, isLoading, updateSettings, whatsappNumber, openWhatsApp };
+  return { settings, isLoading, updateSettings, uploadLogo, whatsappNumber, openWhatsApp };
 }

@@ -207,27 +207,36 @@ export type Database = {
       }
       platform_settings: {
         Row: {
+          cor_primaria: string
+          cor_secundaria: string
           created_at: string
           email_suporte: string
           id: string
+          logo_url: string | null
           nome_plataforma: string
           telefone_suporte: string
           updated_at: string
           whatsapp_number: string
         }
         Insert: {
+          cor_primaria?: string
+          cor_secundaria?: string
           created_at?: string
           email_suporte?: string
           id?: string
+          logo_url?: string | null
           nome_plataforma?: string
           telefone_suporte?: string
           updated_at?: string
           whatsapp_number?: string
         }
         Update: {
+          cor_primaria?: string
+          cor_secundaria?: string
           created_at?: string
           email_suporte?: string
           id?: string
+          logo_url?: string | null
           nome_plataforma?: string
           telefone_suporte?: string
           updated_at?: string

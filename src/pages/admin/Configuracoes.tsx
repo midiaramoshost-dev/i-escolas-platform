@@ -10,6 +10,9 @@ import {
   Server,
   Save,
   RotateCcw,
+  Upload,
+  Image,
+  X,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -27,7 +30,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { usePlatformSettings } from "@/hooks/usePlatformSettings";
 
@@ -68,7 +71,12 @@ interface ConfiguracaoEmail {
 }
 
 export default function AdminConfiguracoes() {
-  const { settings, updateSettings } = usePlatformSettings();
+  const { settings, updateSettings, uploadLogo } = usePlatformSettings();
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const [corPrimaria, setCorPrimaria] = useState("#2563eb");
+  const [corSecundaria, setCorSecundaria] = useState("#7c3aed");
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   const [configGeral, setConfigGeral] = useState<ConfiguracaoGeral>({
     nomePlataforma: "i ESCOLAS",
@@ -90,6 +98,9 @@ export default function AdminConfiguracoes() {
         telefoneSuporte: settings.telefone_suporte ?? prev.telefoneSuporte,
         whatsappPlataforma: settings.whatsapp_number ?? prev.whatsappPlataforma,
       }));
+      setCorPrimaria(settings.cor_primaria ?? "#2563eb");
+      setCorSecundaria(settings.cor_secundaria ?? "#7c3aed");
+      setLogoPreview(settings.logo_url ?? null);
     }
   }, [settings]);
 
@@ -147,6 +158,48 @@ export default function AdminConfiguracoes() {
     );
   };
 
+  const handleSaveMarca = () => {
+    updateSettings.mutate(
+      { cor_primaria: corPrimaria, cor_secundaria: corSecundaria },
+      {
+        onSuccess: () => toast.success("Cores da marca salvas com sucesso!"),
+        onError: () => toast.error("Erro ao salvar cores da marca."),
+      }
+    );
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("O arquivo deve ter no máximo 2MB.");
+      return;
+    }
+    setUploadingLogo(true);
+    try {
+      const url = await uploadLogo(file);
+      await updateSettings.mutateAsync({ logo_url: url });
+      setLogoPreview(url);
+      toast.success("Logo atualizado com sucesso!");
+    } catch {
+      toast.error("Erro ao fazer upload do logo.");
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
+  const handleRemoveLogo = () => {
+    updateSettings.mutate(
+      { logo_url: null } as any,
+      {
+        onSuccess: () => {
+          setLogoPreview(null);
+          toast.success("Logo removido.");
+        },
+      }
+    );
+  };
+
   const handleSaveNotificacoes = () => {
     toast.success("Configurações de notificações salvas com sucesso!");
   };
@@ -189,10 +242,14 @@ export default function AdminConfiguracoes() {
 
       <motion.div variants={itemVariants}>
         <Tabs defaultValue="geral" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid mb-6">
+          <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid mb-6">
             <TabsTrigger value="geral" className="flex items-center gap-2">
               <Globe className="h-4 w-4" />
               <span className="hidden sm:inline">Geral</span>
+            </TabsTrigger>
+            <TabsTrigger value="marca" className="flex items-center gap-2">
+              <Palette className="h-4 w-4" />
+              <span className="hidden sm:inline">Marca</span>
             </TabsTrigger>
             <TabsTrigger value="notificacoes" className="flex items-center gap-2">
               <Bell className="h-4 w-4" />
@@ -303,6 +360,168 @@ export default function AdminConfiguracoes() {
                   <Button onClick={handleSaveGeral} className="bg-rose-500 hover:bg-rose-600">
                     <Save className="mr-2 h-4 w-4" />
                     Salvar Configurações
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tab: Marca */}
+          <TabsContent value="marca" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Palette className="h-5 w-5 text-primary" />
+                  Identidade Visual
+                </CardTitle>
+                <CardDescription>
+                  Configure as cores e o logotipo da plataforma
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Logo */}
+                <div className="space-y-3">
+                  <Label>Logotipo da Plataforma</Label>
+                  <p className="text-xs text-muted-foreground">JPG ou PNG, máximo 2MB. Usado no header, login e landing page.</p>
+                  <div className="flex items-center gap-4">
+                    {logoPreview ? (
+                      <div className="relative">
+                        <img
+                          src={logoPreview}
+                          alt="Logo da plataforma"
+                          className="h-20 w-auto max-w-[200px] rounded-lg border border-border object-contain bg-background p-2"
+                        />
+                        <button
+                          onClick={handleRemoveLogo}
+                          className="absolute -top-2 -right-2 rounded-full bg-destructive p-1 text-destructive-foreground hover:opacity-80"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex h-20 w-40 items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/50">
+                        <Image className="h-8 w-8 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div>
+                      <input
+                        ref={logoInputRef}
+                        type="file"
+                        accept="image/png,image/jpeg"
+                        className="hidden"
+                        onChange={handleLogoUpload}
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => logoInputRef.current?.click()}
+                        disabled={uploadingLogo}
+                      >
+                        <Upload className="mr-2 h-4 w-4" />
+                        {uploadingLogo ? "Enviando..." : "Enviar Logo"}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Cores */}
+                <div className="space-y-4">
+                  <Label>Cores da Marca</Label>
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="corPrimaria" className="text-sm text-muted-foreground">
+                        Cor Primária
+                      </Label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="color"
+                          id="corPrimaria"
+                          value={corPrimaria}
+                          onChange={(e) => setCorPrimaria(e.target.value)}
+                          className="h-10 w-14 cursor-pointer rounded-md border border-input"
+                        />
+                        <Input
+                          value={corPrimaria}
+                          onChange={(e) => setCorPrimaria(e.target.value)}
+                          className="w-32 font-mono text-sm"
+                          placeholder="#2563eb"
+                        />
+                        <div
+                          className="h-10 flex-1 rounded-md border border-input"
+                          style={{ backgroundColor: corPrimaria }}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="corSecundaria" className="text-sm text-muted-foreground">
+                        Cor Secundária
+                      </Label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="color"
+                          id="corSecundaria"
+                          value={corSecundaria}
+                          onChange={(e) => setCorSecundaria(e.target.value)}
+                          className="h-10 w-14 cursor-pointer rounded-md border border-input"
+                        />
+                        <Input
+                          value={corSecundaria}
+                          onChange={(e) => setCorSecundaria(e.target.value)}
+                          className="w-32 font-mono text-sm"
+                          placeholder="#7c3aed"
+                        />
+                        <div
+                          className="h-10 flex-1 rounded-md border border-input"
+                          style={{ backgroundColor: corSecundaria }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Preview */}
+                <div className="space-y-3">
+                  <Label>Pré-visualização</Label>
+                  <div className="rounded-lg border border-border p-6">
+                    <div className="flex items-center gap-4 mb-4">
+                      {logoPreview && (
+                        <img src={logoPreview} alt="Preview" className="h-10 w-auto object-contain" />
+                      )}
+                      <span className="text-lg font-bold" style={{ color: corPrimaria }}>
+                        {configGeral.nomePlataforma || "i ESCOLAS"}
+                      </span>
+                    </div>
+                    <div className="flex gap-3">
+                      <button
+                        className="rounded-md px-4 py-2 text-sm font-medium text-white"
+                        style={{ backgroundColor: corPrimaria }}
+                      >
+                        Botão Primário
+                      </button>
+                      <button
+                        className="rounded-md px-4 py-2 text-sm font-medium text-white"
+                        style={{ backgroundColor: corSecundaria }}
+                      >
+                        Botão Secundário
+                      </button>
+                      <button
+                        className="rounded-md px-4 py-2 text-sm font-medium border"
+                        style={{ borderColor: corPrimaria, color: corPrimaria }}
+                      >
+                        Botão Outline
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-4">
+                  <Button onClick={handleSaveMarca} className="bg-primary hover:bg-primary/90">
+                    <Save className="mr-2 h-4 w-4" />
+                    Salvar Cores
                   </Button>
                 </div>
               </CardContent>

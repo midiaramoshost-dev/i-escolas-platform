@@ -9,6 +9,7 @@ import { PlanosProvider } from "@/contexts/PlanosContext";
 import { ReferralProvider } from "@/contexts/ReferralContext";
 import { AlunosResponsaveisProvider } from "@/contexts/AlunosResponsaveisContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { BrandingProvider } from "@/components/BrandingProvider";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { AlunoLayout } from "@/components/layout/AlunoLayout";
 import { ResponsavelLayout } from "@/components/layout/ResponsavelLayout";
@@ -81,6 +82,7 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
+      <BrandingProvider>
       <PlanosProvider>
         <TooltipProvider>
           <Toaster />
@@ -200,6 +202,7 @@ const App = () => (
           </BrowserRouter>
         </TooltipProvider>
       </PlanosProvider>
+      </BrandingProvider>
     </ThemeProvider>
   </QueryClientProvider>
 );
