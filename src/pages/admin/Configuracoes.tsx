@@ -35,6 +35,7 @@ interface ConfiguracaoGeral {
   urlPlataforma: string;
   emailSuporte: string;
   telefoneSuporte: string;
+  whatsappPlataforma: string;
   fusoHorario: string;
   idioma: string;
 }
@@ -71,6 +72,7 @@ export default function AdminConfiguracoes() {
     urlPlataforma: "https://i-escolas-platform.lovable.app",
     emailSuporte: "suporte@iescolas.com.br",
     telefoneSuporte: "(11) 99999-9999",
+    whatsappPlataforma: "5515997625135",
     fusoHorario: "America/Sao_Paulo",
     idioma: "pt-BR",
   });
@@ -222,13 +224,25 @@ export default function AdminConfiguracoes() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="telefoneSuporte">Telefone de Suporte</Label>
-                    <Input
-                      id="telefoneSuporte"
-                      value={configGeral.telefoneSuporte}
-                      onChange={(e) => setConfigGeral({ ...configGeral, telefoneSuporte: e.target.value })}
-                    />
-                  </div>
-                </div>
+                     <Input
+                       id="telefoneSuporte"
+                       value={configGeral.telefoneSuporte}
+                       onChange={(e) => setConfigGeral({ ...configGeral, telefoneSuporte: e.target.value })}
+                     />
+                   </div>
+                 </div>
+                 <div className="grid gap-4 md:grid-cols-2">
+                   <div className="space-y-2">
+                     <Label htmlFor="whatsappPlataforma">WhatsApp da Plataforma</Label>
+                     <p className="text-xs text-muted-foreground">Número usado nos botões de contato do site (apenas números, com DDI+DDD)</p>
+                     <Input
+                       id="whatsappPlataforma"
+                       value={configGeral.whatsappPlataforma}
+                       onChange={(e) => setConfigGeral({ ...configGeral, whatsappPlataforma: e.target.value })}
+                       placeholder="5515997625135"
+                     />
+                   </div>
+                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="fusoHorario">Fuso Horário</Label>
