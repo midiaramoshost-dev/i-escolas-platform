@@ -408,15 +408,14 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
         },
       });
 
-      if (fnError) {
-        console.error("Edge function error:", fnError);
-        toast.error("Erro ao criar credenciais de acesso. Tente novamente.");
-        setIsCreating(false);
-        return;
-      }
-
-      if (fnData?.error) {
-        toast.error(fnData.error);
+      if (fnError || fnData?.error) {
+        const errorMsg = fnData?.error || fnError?.message || "Erro desconhecido";
+        console.error("Edge function error:", fnError, fnData);
+        if (errorMsg.includes("já está cadastrado") || errorMsg.includes("already been registered")) {
+          toast.error("Este e-mail já está cadastrado no sistema. Use outro e-mail para o diretor.");
+        } else {
+          toast.error(errorMsg);
+        }
         setIsCreating(false);
         return;
       }
