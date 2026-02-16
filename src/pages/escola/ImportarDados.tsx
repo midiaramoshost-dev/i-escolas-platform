@@ -11,6 +11,11 @@ import {
   Trash2,
   FileText,
   ArrowRight,
+  Package,
+  Truck,
+  BookOpen,
+  BookMarked,
+  DollarSign,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -46,6 +51,8 @@ import { toast } from "sonner";
 import * as XLSX from "xlsx";
 
 // ---------- types ----------
+type ImportType = "cadastro" | "historico" | "estoque" | "fornecedores" | "biblioteca" | "emprestimos" | "financeiro";
+
 interface ImportRecord {
   [key: string]: string | number | boolean | null;
 }
@@ -53,14 +60,26 @@ interface ImportRecord {
 interface ImportJob {
   id: string;
   fileName: string;
-  type: "cadastro" | "historico";
+  type: ImportType;
   source: "csv" | "excel" | "sql";
   status: "pendente" | "validando" | "pronto" | "importado" | "erro";
   records: ImportRecord[];
   headers: string[];
   errors: string[];
   createdAt: string;
+  detectedTables?: { table: string; count: number; suggestedType: ImportType }[];
 }
+
+// ---------- category config ----------
+const IMPORT_CATEGORIES: { type: ImportType; label: string; description: string; icon: React.ElementType }[] = [
+  { type: "cadastro", label: "Dados Cadastrais", description: "Alunos, responsáveis, turmas, endereços, contatos e matrículas.", icon: FileSpreadsheet },
+  { type: "historico", label: "Histórico Escolar", description: "Notas, frequência, resultados por disciplina e ano letivo.", icon: Database },
+  { type: "estoque", label: "Estoque / Almoxarifado", description: "Produtos, preços, quantidades e fornecedores.", icon: Package },
+  { type: "fornecedores", label: "Fornecedores", description: "Cadastro de fornecedores com contato e endereço.", icon: Truck },
+  { type: "biblioteca", label: "Biblioteca", description: "Acervo de livros com autor, editora e localização.", icon: BookOpen },
+  { type: "emprestimos", label: "Empréstimos", description: "Empréstimos de livros com datas e devoluções.", icon: BookMarked },
+  { type: "financeiro", label: "Financeiro", description: "Boletos, cobranças, valores e situação de pagamento.", icon: DollarSign },
+];
 
 // ---------- field maps ----------
 const CADASTRO_FIELDS = [
@@ -78,15 +97,101 @@ const CADASTRO_FIELDS = [
 ];
 
 const HISTORICO_FIELDS = [
-  { key: "matricula", label: "Matrícula", required: true },
-  { key: "nomeAluno", label: "Nome do Aluno", required: true },
-  { key: "disciplina", label: "Disciplina", required: true },
-  { key: "ano", label: "Ano Letivo", required: true },
+  { key: "aluno", label: "Aluno (ID ou Nome)", required: true },
+  { key: "turma", label: "Turma", required: false },
   { key: "bimestre", label: "Bimestre", required: false },
+  { key: "disciplina", label: "Disciplina", required: true },
   { key: "nota", label: "Nota", required: false },
   { key: "faltas", label: "Faltas", required: false },
-  { key: "resultado", label: "Resultado (Aprovado/Reprovado)", required: false },
+  { key: "recuperacao", label: "Recuperação", required: false },
+  { key: "media", label: "Média", required: false },
+  { key: "ano_letivo", label: "Ano Letivo", required: true },
 ];
+
+const ESTOQUE_FIELDS = [
+  { key: "nome", label: "Nome do Produto", required: true },
+  { key: "categoria", label: "Categoria", required: false },
+  { key: "preco_custo", label: "Preço de Custo", required: false },
+  { key: "preco_venda", label: "Preço de Venda", required: false },
+  { key: "estoque", label: "Qtd. em Estoque", required: false },
+  { key: "fornecedor", label: "Fornecedor", required: false },
+  { key: "qtd", label: "Quantidade", required: false },
+];
+
+const FORNECEDORES_FIELDS = [
+  { key: "nome", label: "Nome / Razão Social", required: true },
+  { key: "email", label: "E-mail", required: false },
+  { key: "telefone", label: "Telefone", required: false },
+  { key: "nome_contato", label: "Nome do Contato", required: false },
+  { key: "site", label: "Site", required: false },
+  { key: "cep", label: "CEP", required: false },
+  { key: "endereco", label: "Endereço", required: false },
+  { key: "numero", label: "Número", required: false },
+  { key: "complemento", label: "Complemento", required: false },
+  { key: "bairro", label: "Bairro", required: false },
+  { key: "estado", label: "Estado", required: false },
+  { key: "cidade", label: "Cidade", required: false },
+];
+
+const BIBLIOTECA_FIELDS = [
+  { key: "titulo", label: "Título", required: true },
+  { key: "autor", label: "Autor", required: false },
+  { key: "editora", label: "Editora", required: false },
+  { key: "ano", label: "Ano", required: false },
+  { key: "codigo", label: "Código", required: false },
+  { key: "localizacao", label: "Localização", required: false },
+  { key: "categoria", label: "Categoria", required: false },
+];
+
+const EMPRESTIMOS_FIELDS = [
+  { key: "livro", label: "Livro", required: true },
+  { key: "aluno_funcionario", label: "Aluno / Funcionário", required: true },
+  { key: "data_emprestimo", label: "Data do Empréstimo", required: false },
+  { key: "data_devolucao", label: "Data Prevista Devolução", required: false },
+  { key: "data_devolvido", label: "Data Devolvido", required: false },
+];
+
+const FINANCEIRO_FIELDS = [
+  { key: "sacado", label: "Sacado / Pagador", required: true },
+  { key: "valor", label: "Valor", required: false },
+  { key: "data_vencimento", label: "Data de Vencimento", required: false },
+  { key: "situacao", label: "Situação", required: false },
+  { key: "banco", label: "Banco", required: false },
+  { key: "observacoes", label: "Observações", required: false },
+  { key: "data_pagamento", label: "Data de Pagamento", required: false },
+];
+
+function getFieldsForType(type: ImportType) {
+  switch (type) {
+    case "cadastro": return CADASTRO_FIELDS;
+    case "historico": return HISTORICO_FIELDS;
+    case "estoque": return ESTOQUE_FIELDS;
+    case "fornecedores": return FORNECEDORES_FIELDS;
+    case "biblioteca": return BIBLIOTECA_FIELDS;
+    case "emprestimos": return EMPRESTIMOS_FIELDS;
+    case "financeiro": return FINANCEIRO_FIELDS;
+  }
+}
+
+// ---------- excluded fields from legacy SQL ----------
+const EXCLUDED_FIELDS = new Set([
+  "login", "senha", "password", "hash", "nome_meta", "foto", "txt_meta",
+  "time", "ordem", "star", "lancamentos", "cont", "lang", "status",
+  "txtcurto", "varias_categorias", "subcategorias", "categorias2",
+]);
+
+// ---------- table-to-category detection ----------
+function detectTableCategory(tableName: string): ImportType {
+  const t = tableName.toLowerCase();
+  if (t.includes("boletim") || t.includes("bimestre")) return "historico";
+  if (t.includes("almoxarifados_produto") || t.includes("produtos1_cate")) return "estoque";
+  if (t.includes("almoxarifados_fornecedor") || t.includes("fornecedores1_cate")) return "fornecedores";
+  if (t.includes("biblioteca_emprestimo")) return "emprestimos";
+  if (t.includes("biblioteca")) return "biblioteca";
+  if (t.includes("boleto") || t.includes("financeiro") || t.includes("contas")) return "financeiro";
+  if (t.includes("aluno") || t.includes("categorias1") || t.includes("cadastro")) return "cadastro";
+  return "cadastro";
+}
 
 // ---------- helpers ----------
 function parseCSV(text: string): { headers: string[]; records: ImportRecord[] } {
@@ -105,44 +210,180 @@ function parseCSV(text: string): { headers: string[]; records: ImportRecord[] } 
   return { headers, records };
 }
 
-function parseSQLInserts(sql: string): { headers: string[]; records: ImportRecord[] } {
-  const insertRegex = /INSERT\s+INTO\s+\S+\s*\(([^)]+)\)\s*VALUES\s*\(([^)]+)\)/gi;
-  let match: RegExpExecArray | null;
-  let headers: string[] = [];
-  const records: ImportRecord[] = [];
+/**
+ * Parses SQL INSERT statements including multi-row VALUES:
+ * INSERT INTO table (col1, col2) VALUES (v1, v2), (v3, v4);
+ * Also supports single-row per INSERT.
+ * Returns all tables detected with their records.
+ */
+function parseSQLInserts(sql: string): {
+  headers: string[];
+  records: ImportRecord[];
+  tables: { table: string; count: number; suggestedType: ImportType }[];
+} {
+  // Remove comments
+  const cleaned = sql
+    .replace(/--.*$/gm, "")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/^(SET|CREATE|ALTER|DROP|USE|\/\*!\d+).*?;/gims, "");
 
-  while ((match = insertRegex.exec(sql)) !== null) {
-    const cols = match[1].split(",").map((c) => c.trim().replace(/[`"[\]]/g, ""));
-    if (!headers.length) headers = cols;
-    const vals = match[2].split(",").map((v) => v.trim().replace(/^'|'$/g, ""));
-    const obj: ImportRecord = {};
+  const allRecords: ImportRecord[] = [];
+  let allHeaders: string[] = [];
+  const tableMap = new Map<string, number>();
+
+  // Match INSERT INTO ... VALUES blocks
+  const insertRegex = /INSERT\s+INTO\s+[`"']?(\w+)[`"']?\s*\(([^)]+)\)\s*VALUES\s*([\s\S]*?)(?:;\s*$|;\s*(?=INSERT|CREATE|ALTER|DROP|SET|\/\*|$))/gim;
+
+  let match: RegExpExecArray | null;
+  while ((match = insertRegex.exec(cleaned)) !== null) {
+    const tableName = match[1];
+    const cols = match[2]
+      .split(",")
+      .map((c) => c.trim().replace(/[`"'\[\]]/g, ""));
+
+    // Filter out excluded columns
+    const colIndices: number[] = [];
+    const filteredCols: string[] = [];
     cols.forEach((c, i) => {
-      obj[c] = vals[i] ?? "";
+      if (!EXCLUDED_FIELDS.has(c.toLowerCase())) {
+        colIndices.push(i);
+        filteredCols.push(c);
+      }
     });
-    records.push(obj);
+
+    if (!allHeaders.length) allHeaders = filteredCols;
+
+    // Parse the VALUES block - extract individual row tuples
+    const valuesBlock = match[3];
+    const rows = extractValueRows(valuesBlock);
+
+    let tableCount = tableMap.get(tableName) || 0;
+
+    rows.forEach((rowValues) => {
+      const obj: ImportRecord = {};
+      colIndices.forEach((origIdx, filteredIdx) => {
+        const val = rowValues[origIdx];
+        obj[filteredCols[filteredIdx]] = val !== undefined ? val : "";
+      });
+      allRecords.push(obj);
+      tableCount++;
+    });
+
+    tableMap.set(tableName, tableCount);
   }
-  return { headers, records };
+
+  const tables = Array.from(tableMap.entries()).map(([table, count]) => ({
+    table,
+    count,
+    suggestedType: detectTableCategory(table),
+  }));
+
+  // If first parse got nothing, update headers from the records
+  if (allRecords.length > 0 && !allHeaders.length) {
+    allHeaders = Object.keys(allRecords[0]);
+  }
+
+  return { headers: allHeaders, records: allRecords, tables };
 }
 
-function downloadTemplate(type: "cadastro" | "historico") {
-  const fields = type === "cadastro" ? CADASTRO_FIELDS : HISTORICO_FIELDS;
+/**
+ * Extract individual row value tuples from a VALUES block like:
+ * (val1, val2), (val3, val4), ...
+ * Handles quoted strings with commas, parentheses, and escaped quotes inside.
+ */
+function extractValueRows(valuesBlock: string): string[][] {
+  const rows: string[][] = [];
+  let i = 0;
+  const len = valuesBlock.length;
+
+  while (i < len) {
+    // Find opening paren
+    while (i < len && valuesBlock[i] !== "(") i++;
+    if (i >= len) break;
+    i++; // skip '('
+
+    // Parse values inside parens
+    const values: string[] = [];
+    let current = "";
+    let inQuote = false;
+
+    while (i < len) {
+      const ch = valuesBlock[i];
+
+      if (inQuote) {
+        if (ch === "'" && i + 1 < len && valuesBlock[i + 1] === "'") {
+          // Escaped quote
+          current += "'";
+          i += 2;
+          continue;
+        }
+        if (ch === "\\" && i + 1 < len) {
+          // Backslash escape
+          current += valuesBlock[i + 1];
+          i += 2;
+          continue;
+        }
+        if (ch === "'") {
+          inQuote = false;
+          i++;
+          continue;
+        }
+        current += ch;
+        i++;
+        continue;
+      }
+
+      if (ch === "'") {
+        inQuote = true;
+        i++;
+        continue;
+      }
+
+      if (ch === ",") {
+        values.push(current.trim());
+        current = "";
+        i++;
+        continue;
+      }
+
+      if (ch === ")") {
+        values.push(current.trim());
+        rows.push(values);
+        i++;
+        break;
+      }
+
+      current += ch;
+      i++;
+    }
+  }
+
+  return rows;
+}
+
+function downloadTemplate(type: ImportType) {
+  const fields = getFieldsForType(type);
+  const catLabel = IMPORT_CATEGORIES.find((c) => c.type === type)?.label || type;
   const ws = XLSX.utils.aoa_to_sheet([fields.map((f) => f.label)]);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, type === "cadastro" ? "Cadastro" : "Historico");
+  XLSX.utils.book_append_sheet(wb, ws, catLabel.substring(0, 31));
   XLSX.writeFile(wb, `modelo_${type}.xlsx`);
-  toast.success(`Modelo de ${type === "cadastro" ? "dados cadastrais" : "histórico"} baixado!`);
+  toast.success(`Modelo de "${catLabel}" baixado!`);
 }
 
 // ---------- component ----------
 export default function ImportarDados() {
   const [activeTab, setActiveTab] = useState<"upload" | "sql">("upload");
-  const [importType, setImportType] = useState<"cadastro" | "historico">("cadastro");
+  const [importType, setImportType] = useState<ImportType>("cadastro");
   const [jobs, setJobs] = useState<ImportJob[]>([]);
   const [previewJob, setPreviewJob] = useState<ImportJob | null>(null);
   const [sqlText, setSqlText] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fieldMapping, setFieldMapping] = useState<Record<string, string>>({});
   const [mappingJob, setMappingJob] = useState<ImportJob | null>(null);
+  const [detectedTables, setDetectedTables] = useState<{ table: string; count: number; suggestedType: ImportType }[]>([]);
+  const [showTableDialog, setShowTableDialog] = useState(false);
+  const [pendingSqlData, setPendingSqlData] = useState<{ headers: string[]; records: ImportRecord[] } | null>(null);
 
   // --- file upload ---
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -150,8 +391,8 @@ export default function ImportarDados() {
     if (!file) return;
 
     const ext = file.name.split(".").pop()?.toLowerCase();
-    if (!["csv", "xls", "xlsx"].includes(ext || "")) {
-      toast.error("Formato não suportado. Use CSV ou Excel (.xls/.xlsx).");
+    if (!["csv", "xls", "xlsx", "sql"].includes(ext || "")) {
+      toast.error("Formato não suportado. Use CSV, Excel (.xls/.xlsx) ou SQL (.sql).");
       return;
     }
 
@@ -159,11 +400,70 @@ export default function ImportarDados() {
       let headers: string[] = [];
       let records: ImportRecord[] = [];
 
-      if (ext === "csv") {
+      if (ext === "sql") {
+        const text = await file.text();
+        const parsed = parseSQLInserts(text);
+        headers = parsed.headers;
+        records = parsed.records;
+
+        if (parsed.tables.length > 0) {
+          // Show table detection dialog
+          setDetectedTables(parsed.tables);
+          setPendingSqlData({ headers, records });
+          setShowTableDialog(true);
+
+          // Auto-select suggested type from first table
+          const suggested = parsed.tables[0].suggestedType;
+          setImportType(suggested);
+        }
+
+        if (!records.length) {
+          toast.error("Nenhum INSERT válido encontrado no arquivo SQL.");
+          return;
+        }
+
+        const job: ImportJob = {
+          id: Date.now().toString(),
+          fileName: file.name,
+          type: parsed.tables.length > 0 ? parsed.tables[0].suggestedType : importType,
+          source: "sql",
+          status: "pendente",
+          records,
+          headers,
+          errors: [],
+          createdAt: new Date().toLocaleString("pt-BR"),
+          detectedTables: parsed.tables,
+        };
+
+        setJobs((prev) => [job, ...prev]);
+        openMapping(job);
+        toast.success(`${records.length} registros extraídos de ${file.name} (${parsed.tables.length} tabela(s) detectada(s))`);
+      } else if (ext === "csv") {
         const text = await file.text();
         const parsed = parseCSV(text);
         headers = parsed.headers;
         records = parsed.records;
+
+        if (!records.length) {
+          toast.error("Nenhum registro encontrado no arquivo.");
+          return;
+        }
+
+        const job: ImportJob = {
+          id: Date.now().toString(),
+          fileName: file.name,
+          type: importType,
+          source: "csv",
+          status: "pendente",
+          records,
+          headers,
+          errors: [],
+          createdAt: new Date().toLocaleString("pt-BR"),
+        };
+
+        setJobs((prev) => [job, ...prev]);
+        openMapping(job);
+        toast.success(`${records.length} registros carregados de ${file.name}`);
       } else {
         const buffer = await file.arrayBuffer();
         const wb = XLSX.read(buffer, { type: "array" });
@@ -173,28 +473,28 @@ export default function ImportarDados() {
           headers = Object.keys(data[0]);
           records = data;
         }
+
+        if (!records.length) {
+          toast.error("Nenhum registro encontrado no arquivo.");
+          return;
+        }
+
+        const job: ImportJob = {
+          id: Date.now().toString(),
+          fileName: file.name,
+          type: importType,
+          source: "excel",
+          status: "pendente",
+          records,
+          headers,
+          errors: [],
+          createdAt: new Date().toLocaleString("pt-BR"),
+        };
+
+        setJobs((prev) => [job, ...prev]);
+        openMapping(job);
+        toast.success(`${records.length} registros carregados de ${file.name}`);
       }
-
-      if (!records.length) {
-        toast.error("Nenhum registro encontrado no arquivo.");
-        return;
-      }
-
-      const job: ImportJob = {
-        id: Date.now().toString(),
-        fileName: file.name,
-        type: importType,
-        source: ext === "csv" ? "csv" : "excel",
-        status: "pendente",
-        records,
-        headers,
-        errors: [],
-        createdAt: new Date().toLocaleString("pt-BR"),
-      };
-
-      setJobs((prev) => [job, ...prev]);
-      openMapping(job);
-      toast.success(`${records.length} registros carregados de ${file.name}`);
     } catch {
       toast.error("Erro ao ler o arquivo. Verifique o formato.");
     }
@@ -208,35 +508,44 @@ export default function ImportarDados() {
       toast.error("Cole um SQL com INSERT INTO para importação.");
       return;
     }
-    const { headers, records } = parseSQLInserts(sqlText);
+    const { headers, records, tables } = parseSQLInserts(sqlText);
     if (!records.length) {
       toast.error("Nenhum INSERT válido encontrado. Use formato: INSERT INTO tabela (col1, col2) VALUES ('v1', 'v2');");
       return;
     }
+
+    const autoType = tables.length > 0 ? tables[0].suggestedType : importType;
+
+    if (tables.length > 0) {
+      setDetectedTables(tables);
+      setImportType(autoType);
+    }
+
     const job: ImportJob = {
       id: Date.now().toString(),
       fileName: "SQL importado",
-      type: importType,
+      type: autoType,
       source: "sql",
       status: "pendente",
       records,
       headers,
       errors: [],
       createdAt: new Date().toLocaleString("pt-BR"),
+      detectedTables: tables,
     };
     setJobs((prev) => [job, ...prev]);
     openMapping(job);
     setSqlText("");
-    toast.success(`${records.length} registros extraídos do SQL.`);
+    toast.success(`${records.length} registros extraídos do SQL (${tables.length} tabela(s): ${tables.map(t => t.table).join(", ")})`);
   };
 
   // --- field mapping ---
   const openMapping = (job: ImportJob) => {
-    const fields = job.type === "cadastro" ? CADASTRO_FIELDS : HISTORICO_FIELDS;
+    const fields = getFieldsForType(job.type);
     const autoMap: Record<string, string> = {};
     fields.forEach((f) => {
       const match = job.headers.find(
-        (h) => h.toLowerCase().replace(/[^a-z]/g, "") === f.key.toLowerCase().replace(/[^a-z]/g, "")
+        (h) => h.toLowerCase().replace(/[^a-z0-9]/g, "") === f.key.toLowerCase().replace(/[^a-z0-9]/g, "")
       );
       if (match) autoMap[f.key] = match;
     });
@@ -246,7 +555,7 @@ export default function ImportarDados() {
 
   const applyMapping = () => {
     if (!mappingJob) return;
-    const fields = mappingJob.type === "cadastro" ? CADASTRO_FIELDS : HISTORICO_FIELDS;
+    const fields = getFieldsForType(mappingJob.type);
     const requiredFields = fields.filter((f) => f.required);
     const missingRequired = requiredFields.filter((f) => !fieldMapping[f.key]);
 
@@ -255,14 +564,12 @@ export default function ImportarDados() {
       return;
     }
 
-    // Validate and map records
     const errors: string[] = [];
     const mappedRecords = mappingJob.records.map((r, idx) => {
       const mapped: ImportRecord = {};
       Object.entries(fieldMapping).forEach(([targetKey, sourceCol]) => {
         mapped[targetKey] = r[sourceCol] ?? "";
       });
-      // Check required
       requiredFields.forEach((f) => {
         if (!mapped[f.key] || String(mapped[f.key]).trim() === "") {
           errors.push(`Linha ${idx + 2}: campo "${f.label}" vazio`);
@@ -291,7 +598,7 @@ export default function ImportarDados() {
 
   // --- import action (localStorage mock) ---
   const executeImport = (job: ImportJob) => {
-    const storageKey = job.type === "cadastro" ? "import_cadastro" : "import_historico";
+    const storageKey = `import_${job.type}`;
     const existing = JSON.parse(localStorage.getItem(storageKey) || "[]");
     const merged = [...existing, ...job.records];
     localStorage.setItem(storageKey, JSON.stringify(merged));
@@ -319,7 +626,17 @@ export default function ImportarDados() {
     return <Badge variant={s.variant}>{s.label}</Badge>;
   };
 
-  const fields = importType === "cadastro" ? CADASTRO_FIELDS : HISTORICO_FIELDS;
+  const typeLabelMap: Record<ImportType, string> = {
+    cadastro: "Cadastral",
+    historico: "Histórico",
+    estoque: "Estoque",
+    fornecedores: "Fornecedores",
+    biblioteca: "Biblioteca",
+    emprestimos: "Empréstimos",
+    financeiro: "Financeiro",
+  };
+
+  const currentFields = getFieldsForType(mappingJob?.type || importType);
 
   return (
     <div className="space-y-6">
@@ -328,59 +645,53 @@ export default function ImportarDados() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Importar Dados</h1>
           <p className="text-muted-foreground">
-            Importe dados cadastrais e histórico escolar de outros sistemas via CSV, Excel ou SQL.
+            Importe dados de outros sistemas via CSV, Excel ou SQL. Suporta dumps MySQL com INSERT multi-row.
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" className="gap-2" onClick={() => downloadTemplate("cadastro")}>
-            <Download className="h-4 w-4" />
-            Modelo Cadastro
-          </Button>
-          <Button variant="outline" className="gap-2" onClick={() => downloadTemplate("historico")}>
-            <Download className="h-4 w-4" />
-            Modelo Histórico
-          </Button>
+        <div className="flex flex-wrap gap-2">
+          <Select onValueChange={(v) => downloadTemplate(v as ImportType)}>
+            <SelectTrigger className="w-[220px]">
+              <SelectValue placeholder="⬇ Baixar Modelo..." />
+            </SelectTrigger>
+            <SelectContent>
+              {IMPORT_CATEGORIES.map((cat) => (
+                <SelectItem key={cat.type} value={cat.type}>
+                  {cat.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
-      {/* Import Type Selection */}
+      {/* Import Type Selection - 7 categories grid */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Tipo de Importação</CardTitle>
           <CardDescription>Selecione o tipo de dado que deseja importar</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-2">
-            <button
-              type="button"
-              onClick={() => setImportType("cadastro")}
-              className={`flex items-start gap-4 rounded-lg border-2 p-4 text-left transition-all ${
-                importType === "cadastro" ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"
-              }`}
-            >
-              <FileSpreadsheet className={`mt-0.5 h-6 w-6 ${importType === "cadastro" ? "text-primary" : "text-muted-foreground"}`} />
-              <div>
-                <p className="font-semibold">Dados Cadastrais</p>
-                <p className="text-sm text-muted-foreground">
-                  Alunos, responsáveis, turmas, endereços, contatos e matrículas.
-                </p>
-              </div>
-            </button>
-            <button
-              type="button"
-              onClick={() => setImportType("historico")}
-              className={`flex items-start gap-4 rounded-lg border-2 p-4 text-left transition-all ${
-                importType === "historico" ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"
-              }`}
-            >
-              <Database className={`mt-0.5 h-6 w-6 ${importType === "historico" ? "text-primary" : "text-muted-foreground"}`} />
-              <div>
-                <p className="font-semibold">Histórico Escolar</p>
-                <p className="text-sm text-muted-foreground">
-                  Notas, frequência, resultados por disciplina e ano letivo.
-                </p>
-              </div>
-            </button>
+          <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {IMPORT_CATEGORIES.map((cat) => {
+              const Icon = cat.icon;
+              const isActive = importType === cat.type;
+              return (
+                <button
+                  key={cat.type}
+                  type="button"
+                  onClick={() => setImportType(cat.type)}
+                  className={`flex items-start gap-3 rounded-lg border-2 p-4 text-left transition-all ${
+                    isActive ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"
+                  }`}
+                >
+                  <Icon className={`mt-0.5 h-5 w-5 shrink-0 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
+                  <div className="min-w-0">
+                    <p className="font-semibold text-sm">{cat.label}</p>
+                    <p className="text-xs text-muted-foreground line-clamp-2">{cat.description}</p>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </CardContent>
       </Card>
@@ -392,11 +703,11 @@ export default function ImportarDados() {
             <TabsList className="mb-4">
               <TabsTrigger value="upload" className="gap-2">
                 <Upload className="h-4 w-4" />
-                Arquivo (CSV / Excel)
+                Arquivo (CSV / Excel / SQL)
               </TabsTrigger>
               <TabsTrigger value="sql" className="gap-2">
                 <Database className="h-4 w-4" />
-                SQL (INSERT)
+                Colar SQL (INSERT)
               </TabsTrigger>
             </TabsList>
 
@@ -405,12 +716,12 @@ export default function ImportarDados() {
                 <Upload className="h-10 w-10 text-muted-foreground" />
                 <div className="text-center">
                   <p className="font-medium">Arraste um arquivo ou clique para selecionar</p>
-                  <p className="text-sm text-muted-foreground">Formatos aceitos: .csv, .xls, .xlsx</p>
+                  <p className="text-sm text-muted-foreground">Formatos aceitos: .csv, .xls, .xlsx, .sql</p>
                 </div>
                 <Input
                   ref={fileInputRef}
                   type="file"
-                  accept=".csv,.xls,.xlsx"
+                  accept=".csv,.xls,.xlsx,.sql"
                   className="max-w-xs"
                   onChange={handleFileUpload}
                 />
@@ -420,11 +731,11 @@ export default function ImportarDados() {
             <TabsContent value="sql">
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Cole os comandos INSERT INTO do sistema legado</Label>
+                  <Label>Cole os comandos INSERT INTO do sistema legado (suporta multi-row VALUES)</Label>
                   <textarea
                     value={sqlText}
                     onChange={(e) => setSqlText(e.target.value)}
-                    placeholder={`INSERT INTO alunos (nome, cpf, turma) VALUES ('Maria Silva', '123.456.789-00', '3º Ano A');\nINSERT INTO alunos (nome, cpf, turma) VALUES ('João Santos', '987.654.321-00', '2º Ano B');`}
+                    placeholder={`INSERT INTO alunos (nome, cpf, turma) VALUES\n('Maria Silva', '123.456.789-00', '3º Ano A'),\n('João Santos', '987.654.321-00', '2º Ano B');`}
                     className="min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 font-mono text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   />
                 </div>
@@ -437,6 +748,29 @@ export default function ImportarDados() {
           </Tabs>
         </CardContent>
       </Card>
+
+      {/* Detected Tables Info */}
+      {detectedTables.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Tabelas Detectadas no SQL</CardTitle>
+            <CardDescription>O parser identificou as seguintes tabelas no arquivo importado</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {detectedTables.map((t) => (
+                <div key={t.table} className="flex items-center justify-between rounded-md border p-3">
+                  <div>
+                    <p className="font-mono text-sm font-medium">{t.table}</p>
+                    <p className="text-xs text-muted-foreground">{t.count} registro(s)</p>
+                  </div>
+                  <Badge variant="outline">{typeLabelMap[t.suggestedType]}</Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Jobs List */}
       {jobs.length > 0 && (
@@ -467,9 +801,7 @@ export default function ImportarDados() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">
-                        {job.type === "cadastro" ? "Cadastral" : "Histórico"}
-                      </Badge>
+                      <Badge variant="outline">{typeLabelMap[job.type]}</Badge>
                     </TableCell>
                     <TableCell>{job.records.length}</TableCell>
                     <TableCell>{statusBadge(job.status)}</TableCell>
@@ -515,15 +847,15 @@ export default function ImportarDados() {
             <div className="flex gap-3">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold">1</div>
               <div>
-                <p className="font-medium">Baixe o modelo</p>
-                <p className="text-sm text-muted-foreground">Use os botões acima para baixar o template Excel com as colunas corretas.</p>
+                <p className="font-medium">Escolha a categoria</p>
+                <p className="text-sm text-muted-foreground">Selecione o tipo de dado (Cadastro, Notas, Estoque, etc.) e baixe o modelo se necessário.</p>
               </div>
             </div>
             <div className="flex gap-3">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold">2</div>
               <div>
-                <p className="font-medium">Preencha e envie</p>
-                <p className="text-sm text-muted-foreground">Preencha os dados no modelo, salve e faça o upload aqui. Ou cole SQL com INSERT INTO.</p>
+                <p className="font-medium">Envie o arquivo</p>
+                <p className="text-sm text-muted-foreground">Faça upload de CSV, Excel ou arquivo .sql. Também pode colar SQL com INSERT INTO diretamente.</p>
               </div>
             </div>
             <div className="flex gap-3">
@@ -541,14 +873,14 @@ export default function ImportarDados() {
       <Dialog open={!!mappingJob} onOpenChange={() => { setMappingJob(null); setFieldMapping({}); }}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Mapeamento de Campos</DialogTitle>
+            <DialogTitle>Mapeamento de Campos — {mappingJob ? typeLabelMap[mappingJob.type] : ""}</DialogTitle>
             <DialogDescription>
               Associe as colunas do seu arquivo aos campos do sistema. Campos com * são obrigatórios.
             </DialogDescription>
           </DialogHeader>
           {mappingJob && (
             <div className="max-h-[400px] overflow-y-auto space-y-3">
-              {fields.map((f) => (
+              {getFieldsForType(mappingJob.type).map((f) => (
                 <div key={f.key} className="grid grid-cols-2 items-center gap-4">
                   <Label className="text-right">
                     {f.label} {f.required && <span className="text-destructive">*</span>}
