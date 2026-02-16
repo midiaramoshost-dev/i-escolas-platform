@@ -449,8 +449,7 @@ const Index = () => {
               />
             </div>
           ))}
-          <div className="absolute inset-0 bg-black/60" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50" />
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/60 to-black/70" />
         </div>
 
         {/* Arrow Navigation */}
@@ -489,19 +488,19 @@ const Index = () => {
 
             {/* Main Heading */}
             <motion.h1 
-              className="mb-6 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl"
+              className="mb-6 text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl"
               variants={fadeInUp}
               transition={{ duration: 0.7, delay: 0.1 }}
             >
-              <span className="block text-white drop-shadow-lg">A escola ensina.</span>
-              <span className="block mt-2 text-white drop-shadow-lg">
+              <span className="block text-white [text-shadow:_0_2px_12px_rgba(0,0,0,0.4)]">A escola ensina.</span>
+              <span className="block mt-2 text-white [text-shadow:_0_2px_12px_rgba(0,0,0,0.4)]">
                 Nós cuidamos do resto.
               </span>
             </motion.h1>
 
             {/* Subheadline */}
             <motion.p 
-              className="mb-8 text-lg text-white/85 md:text-xl max-w-3xl mx-auto leading-relaxed drop-shadow"
+              className="mb-10 text-lg text-white/95 md:text-xl max-w-3xl mx-auto leading-relaxed [text-shadow:_0_1px_6px_rgba(0,0,0,0.3)]"
               variants={fadeInUp}
               transition={{ duration: 0.7, delay: 0.2 }}
             >
@@ -532,22 +531,20 @@ const Index = () => {
 
             {/* Trust Indicators */}
             <motion.div 
-              className="mt-16 flex flex-wrap items-center justify-center gap-8 text-white/70"
+              className="mt-14 flex flex-wrap items-center justify-center gap-6"
               variants={fadeIn}
               transition={{ duration: 0.8, delay: 0.5 }}
             >
-              <div className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-white/90" />
-                <span className="text-sm">Dados 100% seguros</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-white/90" />
-                <span className="text-sm">Setup em 5 minutos</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Award className="h-5 w-5 text-white/90" />
-                <span className="text-sm">+500 escolas confiam</span>
-              </div>
+              {[
+                { icon: Shield, text: "Dados 100% seguros" },
+                { icon: Clock, text: "Setup em 5 minutos" },
+                { icon: Award, text: "+500 escolas confiam" },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-sm px-4 py-2">
+                  <item.icon className="h-4 w-4 text-white" />
+                  <span className="text-sm font-medium text-white">{item.text}</span>
+                </div>
+              ))}
             </motion.div>
 
             {/* Slide Info + Dot Indicators */}
