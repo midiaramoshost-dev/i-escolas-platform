@@ -2,3 +2,9 @@ project_id = "ocieayhwtvjhwdezkesm"
 
 [functions.create-school-user]
 verify_jwt = false
+
+[functions.create-mercadopago-payment]
+verify_jwt = false
+
+[functions.onboard-school]
+verify_jwt = false

@@ -46,6 +46,7 @@ import {
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { usePlanos } from "@/contexts/PlanosContext";
+import { SchoolOnboardingDialog } from "@/components/onboarding/SchoolOnboardingDialog";
 import { usePlatformSettings } from "@/hooks/usePlatformSettings";
 import { PlatformLogo } from "@/components/PlatformLogo";
 import { ContactForm } from "@/components/landing/ContactForm";
@@ -153,6 +154,8 @@ const Index = () => {
   const { openWhatsApp } = usePlatformSettings();
   const [isAnnual, setIsAnnual] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<{ id: string; name: string; price: number } | null>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -262,6 +265,7 @@ const Index = () => {
       ];
 
       return {
+        id: plano.id,
         name: plano.nome,
         monthlyPrice: plano.preco,
         annualPrice: plano.preco > 0 ? Math.round(plano.preco * 12 * 0.8 / 12) : 0,
@@ -930,7 +934,12 @@ const Index = () => {
                       </ul>
                     </CardContent>
                     <div className="p-6 pt-0">
-                      <Link to="/login">
+                      <Link to="/login" onClick={(e) => {
+                        e.preventDefault();
+                        const price = isAnnual ? plan.annualPrice : plan.monthlyPrice;
+                        setSelectedPlan({ id: plan.id, name: plan.name, price });
+                        setOnboardingOpen(true);
+                      }}>
                         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                           <Button 
                             className="w-full" 
@@ -1368,6 +1377,16 @@ const Index = () => {
       </footer>
 
       <WhatsAppButton />
+
+      {selectedPlan && (
+        <SchoolOnboardingDialog
+          open={onboardingOpen}
+          onOpenChange={setOnboardingOpen}
+          planId={selectedPlan.id}
+          planName={selectedPlan.name}
+          planPrice={selectedPlan.price}
+        />
+      )}
     </div>
   );
 };
