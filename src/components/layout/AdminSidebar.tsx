@@ -20,6 +20,7 @@ import {
   Briefcase,
   DollarSign,
   Clock,
+  Receipt,
 } from "lucide-react";
 import {
   Sidebar,
@@ -111,6 +112,11 @@ const menuItems = [
     title: "Log de Atividades",
     icon: ClipboardList,
     url: "/admin/log-atividades",
+  },
+  {
+    title: "Cobranças",
+    icon: Receipt,
+    url: "/admin/cobrancas",
   },
   {
     title: "Configurações",
