@@ -83,8 +83,12 @@ export default function AdminPlanos() {
     setEditDialogOpen(true);
   };
 
-  const handleSavePlano = (updatedPlano: Plano) => {
-    updatePlano(updatedPlano);
+  const handleSavePlano = async (updatedPlano: Plano) => {
+    try {
+      await updatePlano(updatedPlano);
+    } catch (error) {
+      console.error("Erro ao salvar plano:", error);
+    }
   };
 
   return (

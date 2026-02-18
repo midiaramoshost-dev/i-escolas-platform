@@ -205,6 +205,54 @@ export type Database = {
           },
         ]
       }
+      planos: {
+        Row: {
+          cor: string
+          created_at: string
+          descricao: string
+          escolas: number
+          icon_name: string
+          id: string
+          limite_alunos: number | null
+          nome: string
+          popular: boolean
+          preco: number
+          preco_aluno: number
+          recursos: Json
+          updated_at: string
+        }
+        Insert: {
+          cor?: string
+          created_at?: string
+          descricao: string
+          escolas?: number
+          icon_name?: string
+          id: string
+          limite_alunos?: number | null
+          nome: string
+          popular?: boolean
+          preco?: number
+          preco_aluno?: number
+          recursos?: Json
+          updated_at?: string
+        }
+        Update: {
+          cor?: string
+          created_at?: string
+          descricao?: string
+          escolas?: number
+          icon_name?: string
+          id?: string
+          limite_alunos?: number | null
+          nome?: string
+          popular?: boolean
+          preco?: number
+          preco_aluno?: number
+          recursos?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       platform_settings: {
         Row: {
           cor_primaria: string

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { Sparkles, Zap, Star, Crown, LucideIcon } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface PlanoRecursos {
   alunos: string;
@@ -143,66 +144,83 @@ const planosIniciais: Plano[] = [
 
 interface PlanosContextType {
   planos: Plano[];
-  updatePlano: (updatedPlano: Plano) => void;
+  updatePlano: (updatedPlano: Plano) => Promise<void>;
   getPlanoById: (id: string) => Plano | undefined;
+  isLoading: boolean;
 }
 
 const PlanosContext = createContext<PlanosContextType | undefined>(undefined);
 
-const STORAGE_KEY = "iescolas_planos";
-
-interface StoredPlano {
-  id: string;
-  nome: string;
-  descricao: string;
-  preco: number;
-  precoAluno: number;
-  cor: string;
-  iconName: string;
-  escolas: number;
-  limiteAlunos: number | null;
-  popular?: boolean;
-  recursos: PlanoRecursos;
-}
-
-const serializePlanos = (planos: Plano[]): StoredPlano[] => {
-  return planos.map((plano) => ({
-    ...plano,
-    iconName: plano.icon.displayName || "Sparkles",
-  }));
-};
-
-const deserializePlanos = (stored: StoredPlano[]): Plano[] => {
-  return stored.map((plano) => ({
-    ...plano,
-    icon: iconMap[plano.iconName] || Sparkles,
-  }));
-};
+const mapDbToPlano = (row: any): Plano => ({
+  id: row.id,
+  nome: row.nome,
+  descricao: row.descricao,
+  preco: Number(row.preco),
+  precoAluno: Number(row.preco_aluno),
+  cor: row.cor,
+  icon: iconMap[row.icon_name] || Sparkles,
+  escolas: row.escolas,
+  limiteAlunos: row.limite_alunos,
+  popular: row.popular,
+  recursos: row.recursos as PlanoRecursos,
+});
 
 export function PlanosProvider({ children }: { children: ReactNode }) {
-  const [planos, setPlanos] = useState<Plano[]>(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored) as StoredPlano[];
-        return deserializePlanos(parsed);
-      }
-    } catch (error) {
-      console.error("Erro ao carregar planos do localStorage:", error);
-    }
-    return planosIniciais;
-  });
+  const [planos, setPlanos] = useState<Plano[]>(planosIniciais);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      const serialized = serializePlanos(planos);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(serialized));
-    } catch (error) {
-      console.error("Erro ao salvar planos no localStorage:", error);
-    }
-  }, [planos]);
+    const fetchPlanos = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("planos" as any)
+          .select("*")
+          .order("preco", { ascending: true });
 
-  const updatePlano = (updatedPlano: Plano) => {
+        if (error) {
+          console.error("Erro ao carregar planos:", error);
+          return;
+        }
+
+        if (data && data.length > 0) {
+          setPlanos((data as any[]).map(mapDbToPlano));
+        }
+      } catch (error) {
+        console.error("Erro ao carregar planos:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPlanos();
+  }, []);
+
+  const updatePlano = async (updatedPlano: Plano) => {
+    const iconName = Object.entries(iconMap).find(
+      ([, icon]) => icon === updatedPlano.icon
+    )?.[0] || "Sparkles";
+
+    const { error } = await supabase
+      .from("planos" as any)
+      .update({
+        nome: updatedPlano.nome,
+        descricao: updatedPlano.descricao,
+        preco: updatedPlano.preco,
+        preco_aluno: updatedPlano.precoAluno,
+        cor: updatedPlano.cor,
+        icon_name: iconName,
+        escolas: updatedPlano.escolas,
+        limite_alunos: updatedPlano.limiteAlunos,
+        popular: updatedPlano.popular || false,
+        recursos: updatedPlano.recursos,
+      } as any)
+      .eq("id", updatedPlano.id);
+
+    if (error) {
+      console.error("Erro ao atualizar plano:", error);
+      throw error;
+    }
+
     setPlanos((prev) =>
       prev.map((p) => (p.id === updatedPlano.id ? updatedPlano : p))
     );
@@ -213,7 +231,7 @@ export function PlanosProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <PlanosContext.Provider value={{ planos, updatePlano, getPlanoById }}>
+    <PlanosContext.Provider value={{ planos, updatePlano, getPlanoById, isLoading }}>
       {children}
     </PlanosContext.Provider>
   );
