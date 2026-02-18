@@ -1,40 +1,48 @@
 
 
-# Corrigir visibilidade do menu "Cobranças" no ADM Master
+## Problema Identificado
 
-## Diagnostico
+As politicas RLS da tabela `payment_gateways` estao configuradas como **RESTRICTIVE** (restritivas), mas nao existem politicas **PERMISSIVE** (permissivas). No PostgreSQL, politicas restritivas so funcionam em conjunto com politicas permissivas -- elas servem para "restringir ainda mais" o que uma politica permissiva ja permite. Sem nenhuma politica permissiva, todo acesso e negado silenciosamente.
 
-O menu "Cobranças" **ja existe no codigo** (linha 117 do AdminSidebar.tsx) e a rota `/admin/cobrancas` tambem esta registrada no App.tsx. O problema e que o grupo "Gestao" na sidebar possui **14 itens**, e "Cobrancas" e o penultimo item -- ficando abaixo da area visivel da tela sem scroll.
+Isso explica por que o "Salvar Configuracoes" no painel nao persiste os dados: o Supabase retorna sucesso aparente (sem erro explicito), mas zero linhas sao afetadas.
 
-## Solucao
+**O mesmo problema afeta TODAS as tabelas do projeto** (`admin_usuarios`, `escolas`, `pagamentos`, `materiais_didaticos`, etc.), pois todas usam politicas RESTRICTIVE sem nenhuma PERMISSIVE.
 
-Reorganizar os itens da sidebar para melhorar a visibilidade, movendo "Cobrancas" para uma posicao mais alta (logo apos "Financeiro") e, opcionalmente, agrupando itens relacionados.
+## Plano de Correcao
 
-## Alteracoes
+### 1. Corrigir RLS da tabela `payment_gateways`
+- Remover as 4 politicas restritivas atuais
+- Recriar como politicas **PERMISSIVE** (o padrao do PostgreSQL)
+- Mesmas regras: admin pode SELECT, INSERT, UPDATE, DELETE
 
-### 1. `src/components/layout/AdminSidebar.tsx`
-- Mover o item "Cobrancas" (atualmente na posicao 13 de 14) para logo apos "Financeiro" (posicao 5-6), ja que sao temas relacionados.
-- Resultado: o item ficara visivel sem necessidade de scroll na maioria das resoluções.
+### 2. Corrigir RLS de TODAS as outras tabelas afetadas
+Aplicar a mesma correcao (RESTRICTIVE -> PERMISSIVE) para:
+- `admin_usuarios` (4 politicas)
+- `escolas` (5 politicas)
+- `pagamentos` (5 politicas)
+- `materiais_didaticos` (4 politicas)
+- `planos` (4 politicas)
+- `platform_settings` (3 politicas)
+- `profiles` (3 politicas)
+- `user_roles` (2 politicas)
 
-### Ordem proposta dos itens no grupo "Gestao":
+### 3. Re-testar o fluxo
+- Salvar o Access Token real do Mercado Pago no painel
+- Testar o onboarding com Pix
+
+### Detalhes Tecnicos
+
+A migracao SQL ira:
+1. `DROP POLICY` para cada politica restritiva existente
+2. `CREATE POLICY` com as mesmas regras, mas sem a clausula `AS RESTRICTIVE` (que faz com que sejam permissivas por padrao)
+
+Exemplo para uma tabela:
 ```text
-1. Dashboard
-2. Dashboard CEO
-3. Analytics (SaaS)
-4. Escolas
-5. Financeiro
-6. Cobrancas        <-- movido para ca
-7. Planos
-8. Suporte (Help Desk)
-9. Retencao (Anti-churn)
-10. RBAC / Permissoes
-11. Governanca / LGPD
-12. Monitoramento
-13. Modulos
-14. Usuarios
-15. Log de Atividades
-16. Configuracoes
+DROP POLICY "Admins podem ver gateways" ON payment_gateways;
+CREATE POLICY "Admins podem ver gateways"
+  ON payment_gateways FOR SELECT
+  USING (has_role(auth.uid(), 'admin'::app_role));
 ```
 
-Essa reorganizacao nao altera nenhuma funcionalidade, apenas a ordem visual dos itens no menu lateral.
+Nenhum arquivo de codigo precisa ser alterado -- o problema e exclusivamente nas politicas RLS do banco de dados.
 
