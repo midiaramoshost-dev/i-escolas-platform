@@ -12,6 +12,9 @@ import {
   UserCheck,
   AlertTriangle,
   Download,
+  UserCircle,
+  Send,
+  MessageCircle,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -60,7 +63,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { useAlunosResponsaveis, type Aluno } from "@/contexts/AlunosResponsaveisContext";
+import { useAlunosResponsaveis, type Aluno, type Responsavel } from "@/contexts/AlunosResponsaveisContext";
 
 const turmasOptions = [
   "1º Ano A", "1º Ano B", "2º Ano A", "3º Ano A", "4º Ano A",
@@ -85,13 +88,15 @@ const statsCards = [
 
 export default function Alunos() {
   // Usar dados do contexto compartilhado
-  const { alunos, responsaveis, updateAluno, deleteAluno, setAlunos } = useAlunosResponsaveis();
+  const { alunos, responsaveis, updateAluno, deleteAluno, setAlunos, getResponsavelById } = useAlunosResponsaveis();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterTurma, setFilterTurma] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isResponsavelDialogOpen, setIsResponsavelDialogOpen] = useState(false);
+  const [selectedResponsavel, setSelectedResponsavel] = useState<Responsavel | null>(null);
   const [selectedAluno, setSelectedAluno] = useState<Aluno | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -254,6 +259,39 @@ export default function Alunos() {
     }
   };
 
+  const handleViewResponsavel = (aluno: Aluno) => {
+    if (aluno.responsavelId) {
+      const resp = getResponsavelById(aluno.responsavelId);
+      if (resp) {
+        setSelectedResponsavel(resp);
+        setIsResponsavelDialogOpen(true);
+        return;
+      }
+    }
+    // Fallback: buscar por nome
+    const resp = responsaveis.find(r => r.nome === aluno.responsavel);
+    if (resp) {
+      setSelectedResponsavel(resp);
+      setIsResponsavelDialogOpen(true);
+    } else {
+      toast.error("Responsável não encontrado para este aluno");
+    }
+  };
+
+  const handleInviteResponsavel = (method: "email" | "whatsapp", responsavel: Responsavel) => {
+    const mensagem = `Olá ${responsavel.nome}, você foi convidado(a) a acessar o portal do responsável da plataforma i ESCOLAS. Acesse: ${window.location.origin}/login`;
+    
+    if (method === "whatsapp") {
+      const phone = responsavel.telefone.replace(/\D/g, "");
+      const fullPhone = phone.startsWith("55") ? phone : `55${phone}`;
+      window.open(`https://wa.me/${fullPhone}?text=${encodeURIComponent(mensagem)}`, "_blank");
+      toast.success("Convite enviado via WhatsApp!");
+    } else {
+      window.open(`mailto:${responsavel.email}?subject=${encodeURIComponent("Convite - Portal do Responsável | i ESCOLAS")}&body=${encodeURIComponent(mensagem)}`, "_blank");
+      toast.success("E-mail de convite aberto!");
+    }
+  };
+
   const formatPhone = (value: string) => {
     const numbers = value.replace(/\D/g, '');
     if (numbers.length <= 11) {
@@ -391,9 +429,13 @@ export default function Alunos() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-col">
-                      <span>{aluno.responsavel}</span>
-                      <span className="text-xs text-muted-foreground">
+                    <div
+                      className="flex flex-col cursor-pointer hover:text-primary transition-colors"
+                      onClick={() => handleViewResponsavel(aluno)}
+                      title="Clique para ver detalhes do responsável"
+                    >
+                      <span className="underline decoration-dotted underline-offset-2">{aluno.responsavel}</span>
+                      <span className="text-xs text-muted-foreground no-underline">
                         {aluno.telefone}
                       </span>
                     </div>
@@ -442,6 +484,10 @@ export default function Alunos() {
                         <DropdownMenuItem onClick={() => handleOpenEdit(aluno)}>
                           <Edit className="mr-2 h-4 w-4" />
                           Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleViewResponsavel(aluno)}>
+                          <UserCircle className="mr-2 h-4 w-4" />
+                          Ver Responsável
                         </DropdownMenuItem>
                         <DropdownMenuItem>
                           <Mail className="mr-2 h-4 w-4" />
@@ -737,6 +783,91 @@ export default function Alunos() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Dialog do Responsável */}
+      <Dialog open={isResponsavelDialogOpen} onOpenChange={setIsResponsavelDialogOpen}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserCircle className="h-5 w-5 text-primary" />
+              Dados do Responsável
+            </DialogTitle>
+            <DialogDescription>
+              Informações completas do responsável vinculado ao aluno
+            </DialogDescription>
+          </DialogHeader>
+          {selectedResponsavel && (
+            <div className="space-y-4 py-4">
+              <div className="flex items-center gap-4">
+                <Avatar className="h-14 w-14">
+                  <AvatarFallback className="bg-violet-500 text-white text-lg">
+                    {selectedResponsavel.nome.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="font-semibold text-lg">{selectedResponsavel.nome}</h3>
+                  <p className="text-sm text-muted-foreground">{selectedResponsavel.parentesco}</p>
+                  <Badge variant={selectedResponsavel.status === "ativo" ? "default" : "secondary"}>
+                    {selectedResponsavel.status === "ativo" ? "Ativo" : "Inativo"}
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 border-t pt-4">
+                <div>
+                  <Label className="text-muted-foreground text-xs">CPF</Label>
+                  <p className="font-medium">{selectedResponsavel.cpf}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground text-xs">Telefone</Label>
+                  <p className="font-medium">{selectedResponsavel.telefone}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground text-xs">E-mail</Label>
+                  <p className="font-medium">{selectedResponsavel.email}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground text-xs">Parentesco</Label>
+                  <p className="font-medium">{selectedResponsavel.parentesco}</p>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <Label className="text-muted-foreground text-xs">Endereço</Label>
+                <p className="font-medium">{selectedResponsavel.endereco}</p>
+              </div>
+
+              {selectedResponsavel.alunos.length > 0 && (
+                <div className="border-t pt-4">
+                  <Label className="text-muted-foreground text-xs mb-2 block">Dependentes</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedResponsavel.alunos.map((nome) => (
+                      <Badge key={nome} variant="outline">{nome}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={() => selectedResponsavel && handleInviteResponsavel("email", selectedResponsavel)}
+            >
+              <Send className="h-4 w-4" />
+              Enviar Convite por E-mail
+            </Button>
+            <Button
+              className="gap-2 bg-green-600 hover:bg-green-700 text-white"
+              onClick={() => selectedResponsavel && handleInviteResponsavel("whatsapp", selectedResponsavel)}
+            >
+              <MessageCircle className="h-4 w-4" />
+              Enviar Convite por WhatsApp
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
