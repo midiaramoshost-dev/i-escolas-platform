@@ -166,14 +166,37 @@ export default function ContasPagar() {
     },
   });
 
-  // Recibos/Contratos: upload + edição simples no painel + imprimir
+  // Recibos/Contratos: gestão de modelos com localStorage
+  interface DocTemplate {
+    id: string;
+    title: string;
+    fileName: string;
+    content: string;
+    isDefault: boolean;
+    createdAt: string;
+    updatedAt: string;
+  }
+
   const docsInputRef = useRef<HTMLInputElement>(null);
   const [isDocsOpen, setIsDocsOpen] = useState(false);
+  const [isDocsEditing, setIsDocsEditing] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [docsForm, setDocsForm] = useState({
     title: "",
     fileName: "",
     content: "",
   });
+  const [templates, setTemplates] = useState<DocTemplate[]>(() => {
+    try {
+      const raw = localStorage.getItem("school:docTemplates");
+      return raw ? JSON.parse(raw) : [];
+    } catch { return []; }
+  });
+
+  const saveTemplates = (updated: DocTemplate[]) => {
+    setTemplates(updated);
+    localStorage.setItem("school:docTemplates", JSON.stringify(updated));
+  };
 
   const [formData, setFormData] = useState({
     descricao: "",
@@ -361,6 +384,8 @@ export default function ContasPagar() {
 
   const handleOpenDocs = () => {
     setDocsForm({ title: "", fileName: "", content: "" });
+    setIsDocsEditing(false);
+    setSelectedTemplateId(null);
     setIsDocsOpen(true);
   };
 
@@ -371,38 +396,89 @@ export default function ContasPagar() {
   const handleDocsFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     const ext = file.name.split(".").pop()?.toLowerCase();
     if (ext !== "pdf" && ext !== "doc" && ext !== "docx") {
       toast.error("Envie um arquivo .pdf, .doc ou .docx");
       return;
     }
-
-    // mínima: se for .pdf/.doc/.docx não vamos parsear; habilitamos edição por texto (modelo)
     setDocsForm((prev) => ({
       ...prev,
       fileName: file.name,
       title: prev.title || file.name,
     }));
-    toast.success(`Arquivo "${file.name}" carregado. Você pode editar o conteúdo abaixo.`);
+    toast.success(`Arquivo "${file.name}" carregado.`);
+  };
+
+  const handleDocsSave = () => {
+    if (!docsForm.title.trim()) {
+      toast.error("Informe o título do modelo");
+      return;
+    }
+    if (isDocsEditing && selectedTemplateId) {
+      const updated = templates.map((t) =>
+        t.id === selectedTemplateId
+          ? { ...t, title: docsForm.title, fileName: docsForm.fileName, content: docsForm.content, updatedAt: new Date().toISOString() }
+          : t
+      );
+      saveTemplates(updated);
+      toast.success("Modelo atualizado!");
+    } else {
+      const newTemplate: DocTemplate = {
+        id: Date.now().toString(),
+        title: docsForm.title,
+        fileName: docsForm.fileName,
+        content: docsForm.content,
+        isDefault: templates.length === 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      saveTemplates([...templates, newTemplate]);
+      toast.success("Modelo salvo!");
+    }
+    setDocsForm({ title: "", fileName: "", content: "" });
+    setIsDocsEditing(false);
+    setSelectedTemplateId(null);
+  };
+
+  const handleDocsEdit = (t: DocTemplate) => {
+    setDocsForm({ title: t.title, fileName: t.fileName, content: t.content });
+    setIsDocsEditing(true);
+    setSelectedTemplateId(t.id);
+  };
+
+  const handleDocsDelete = (id: string) => {
+    const updated = templates.filter((t) => t.id !== id);
+    if (updated.length > 0 && !updated.some((t) => t.isDefault)) {
+      updated[0].isDefault = true;
+    }
+    saveTemplates(updated);
+    if (selectedTemplateId === id) {
+      setDocsForm({ title: "", fileName: "", content: "" });
+      setIsDocsEditing(false);
+      setSelectedTemplateId(null);
+    }
+    toast.success("Modelo excluído");
+  };
+
+  const handleDocsSetDefault = (id: string) => {
+    const updated = templates.map((t) => ({ ...t, isDefault: t.id === id }));
+    saveTemplates(updated);
+    toast.success("Modelo definido como padrão!");
   };
 
   const handleDocsPrint = () => {
     const title = docsForm.title || "Documento";
     const content = docsForm.content || "";
-
     const w = window.open("", "_blank", "noopener,noreferrer");
     if (!w) {
       toast.error("Popup bloqueado. Permita popups para imprimir.");
       return;
     }
-
     w.document.open();
     w.document.write(`<!doctype html>
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>${title}</title>
   <style>
     body{font-family: Arial, Helvetica, sans-serif; padding: 24px;}
@@ -751,44 +827,121 @@ export default function ContasPagar() {
 
       {/* Dialog Recibos e Contratos */}
       <Dialog open={isDocsOpen} onOpenChange={setIsDocsOpen}>
-        <DialogContent className="sm:max-w-[800px]">
+        <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Recibos e Contratos</DialogTitle>
+            <DialogTitle>Recibos e Contratos — Modelos</DialogTitle>
             <DialogDescription>
-              Envie um arquivo (Word/PDF), edite o conteúdo no painel e imprima.
+              Crie, edite e gerencie seus modelos de recibos e contratos. Defina um como padrão.
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-2">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Lista de modelos salvos */}
+            {templates.length > 0 && (
               <div className="space-y-2">
-                <Label>Título</Label>
-                <Input
-                  value={docsForm.title}
-                  onChange={(e) => setDocsForm((p) => ({ ...p, title: e.target.value }))}
-                  placeholder="Ex: Contrato de Prestação de Serviços"
+                <Label className="text-sm font-semibold">Modelos Salvos</Label>
+                <div className="rounded-lg border divide-y max-h-[200px] overflow-y-auto">
+                  {templates.map((t) => (
+                    <div key={t.id} className={`flex items-center justify-between px-3 py-2 text-sm ${t.id === selectedTemplateId ? "bg-primary/5" : ""}`}>
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <span className="truncate font-medium">{t.title}</span>
+                        {t.isDefault && (
+                          <Badge variant="secondary" className="text-xs shrink-0">Padrão</Badge>
+                        )}
+                        {t.fileName && (
+                          <span className="text-xs text-muted-foreground truncate">({t.fileName})</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0 ml-2">
+                        {!t.isDefault && (
+                          <Button variant="ghost" size="sm" onClick={() => handleDocsSetDefault(t.id)} title="Definir como padrão">
+                            <CheckCircle className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
+                        <Button variant="ghost" size="sm" onClick={() => handleDocsEdit(t)} title="Editar">
+                          <Edit className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => {
+                          setDocsForm({ title: t.title, fileName: t.fileName, content: t.content });
+                          setIsDocsEditing(false);
+                          setSelectedTemplateId(null);
+                          handleDocsPrint();
+                        }} title="Imprimir">
+                          <Printer className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="sm" className="text-destructive" onClick={() => handleDocsDelete(t.id)} title="Excluir">
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Formulário de criação / edição */}
+            <div className="rounded-lg border p-4 space-y-4 bg-muted/20">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-semibold">
+                  {isDocsEditing ? "Editando Modelo" : "Novo Modelo"}
+                </Label>
+                {isDocsEditing && (
+                  <Button variant="ghost" size="sm" onClick={() => {
+                    setDocsForm({ title: "", fileName: "", content: "" });
+                    setIsDocsEditing(false);
+                    setSelectedTemplateId(null);
+                  }}>
+                    Cancelar Edição
+                  </Button>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Título *</Label>
+                  <Input
+                    value={docsForm.title}
+                    onChange={(e) => setDocsForm((p) => ({ ...p, title: e.target.value }))}
+                    placeholder="Ex: Contrato de Prestação de Serviços"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Arquivo (PDF/DOC/DOCX)</Label>
+                  <div className="flex gap-2">
+                    <Input value={docsForm.fileName} readOnly placeholder="Nenhum arquivo selecionado" />
+                    <Button type="button" variant="outline" onClick={handleDocsUpload}>
+                      <Upload className="h-4 w-4 mr-2" />
+                      Enviar
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Conteúdo (edição no painel)</Label>
+                <Textarea
+                  value={docsForm.content}
+                  onChange={(e) => setDocsForm((p) => ({ ...p, content: e.target.value }))}
+                  placeholder="Cole/edite aqui o texto do recibo/contrato."
+                  className="min-h-[200px]"
                 />
               </div>
-              <div className="space-y-2">
-                <Label>Arquivo (PDF/DOC/DOCX)</Label>
-                <div className="flex gap-2">
-                  <Input value={docsForm.fileName} readOnly placeholder="Nenhum arquivo selecionado" />
-                  <Button type="button" variant="outline" onClick={handleDocsUpload}>
-                    <Upload className="h-4 w-4 mr-2" />
-                    Enviar
-                  </Button>
-                </div>
+
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={handleDocsPrint} disabled={!docsForm.content && !docsForm.title}>
+                  <Printer className="h-4 w-4 mr-2" />
+                  Imprimir
+                </Button>
+                <Button onClick={handleDocsSave}>
+                  <Save className="h-4 w-4 mr-2" />
+                  {isDocsEditing ? "Atualizar Modelo" : "Salvar Modelo"}
+                </Button>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label>Conteúdo (edição no painel)</Label>
-              <Textarea
-                value={docsForm.content}
-                onChange={(e) => setDocsForm((p) => ({ ...p, content: e.target.value }))}
-                placeholder="Cole/edite aqui o texto do recibo/contrato.\n\nObs: nesta primeira versão, o arquivo enviado serve como anexo; a edição é feita pelo texto acima."
-                className="min-h-[260px]"
-              />
+            <div className="rounded-lg border bg-muted/30 p-3 text-xs text-muted-foreground">
+              Os modelos ficam salvos no navegador (localStorage). O primeiro modelo salvo é automaticamente definido como padrão.
             </div>
           </div>
 
@@ -796,15 +949,9 @@ export default function ContasPagar() {
             <Button variant="outline" onClick={() => setIsDocsOpen(false)}>
               Fechar
             </Button>
-            <Button onClick={handleDocsPrint}>
-              <Printer className="h-4 w-4 mr-2" />
-              Imprimir
-            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* Dialog de Criar/Editar */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
