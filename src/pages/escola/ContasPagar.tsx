@@ -466,14 +466,13 @@ export default function ContasPagar() {
     toast.success("Modelo definido como padrão!");
   };
 
-  const handleDocsPrint = () => {
-    const title = docsForm.title || "Documento";
-    const content = docsForm.content || "";
-    const w = window.open("", "_blank", "noopener,noreferrer");
+  const printDocument = (title: string, content: string, fileName: string) => {
+    const w = window.open("", "_blank");
     if (!w) {
       toast.error("Popup bloqueado. Permita popups para imprimir.");
       return;
     }
+    const escaped = content.replace(/</g, "&lt;").replace(/>/g, "&gt;");
     w.document.open();
     w.document.write(`<!doctype html>
 <html lang="pt-BR">
@@ -481,21 +480,30 @@ export default function ContasPagar() {
   <meta charset="utf-8" />
   <title>${title}</title>
   <style>
-    body{font-family: Arial, Helvetica, sans-serif; padding: 24px;}
-    h1{font-size: 18px; margin: 0 0 12px;}
-    .meta{color:#666; font-size: 12px; margin-bottom: 16px;}
-    pre{white-space: pre-wrap; word-wrap: break-word; font-family: inherit;}
+    body{font-family: Arial, Helvetica, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto;}
+    h1{font-size: 20px; margin: 0 0 8px; border-bottom: 2px solid #333; padding-bottom: 8px;}
+    .meta{color:#666; font-size: 12px; margin-bottom: 24px;}
+    .content{white-space: pre-wrap; word-wrap: break-word; font-size: 14px; line-height: 1.6;}
+    @media print { body { padding: 20px; } }
   </style>
 </head>
 <body>
   <h1>${title}</h1>
-  <div class="meta">Arquivo: ${docsForm.fileName || "(sem anexo)"}</div>
-  <pre>${content.split("<").join("&lt;").split(">").join("&gt;")}</pre>
-  <script>window.print();</script>
+  <div class="meta">Arquivo: ${fileName || "(sem anexo)"} — Impresso em ${new Date().toLocaleDateString("pt-BR")}</div>
+  <div class="content">${escaped}</div>
+  <script>window.onload=function(){window.print();}</script>
 </body>
 </html>`);
     w.document.close();
     toast.success("Documento enviado para impressão");
+  };
+
+  const handleDocsPrint = () => {
+    printDocument(docsForm.title || "Documento", docsForm.content || "", docsForm.fileName);
+  };
+
+  const handleDocsPrintTemplate = (t: DocTemplate) => {
+    printDocument(t.title, t.content, t.fileName);
   };
 
   const getStatusBadge = (status: string) => {
@@ -862,12 +870,7 @@ export default function ContasPagar() {
                         <Button variant="ghost" size="sm" onClick={() => handleDocsEdit(t)} title="Editar">
                           <Edit className="h-3.5 w-3.5" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => {
-                          setDocsForm({ title: t.title, fileName: t.fileName, content: t.content });
-                          setIsDocsEditing(false);
-                          setSelectedTemplateId(null);
-                          handleDocsPrint();
-                        }} title="Imprimir">
+                        <Button variant="ghost" size="sm" onClick={() => handleDocsPrintTemplate(t)} title="Imprimir">
                           <Printer className="h-3.5 w-3.5" />
                         </Button>
                         <Button variant="ghost" size="sm" className="text-destructive" onClick={() => handleDocsDelete(t.id)} title="Excluir">
