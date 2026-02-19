@@ -7,6 +7,10 @@ import {
   Check,
   User,
   Camera,
+  Plus,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,6 +33,31 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useAlunosResponsaveis, type Aluno } from "@/contexts/AlunosResponsaveisContext";
 import jsPDF from "jspdf";
@@ -66,13 +95,31 @@ const escolaInfo = {
 };
 
 export default function Crachas() {
-  const { alunos } = useAlunosResponsaveis();
+  const { alunos, addAluno, updateAluno, deleteAluno } = useAlunosResponsaveis();
   const [search, setSearch] = useState("");
   const [turmaFilter, setTurmaFilter] = useState("Todas");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [tab, setTab] = useState("carteirinha");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadTargetId, setUploadTargetId] = useState<string | null>(null);
+
+  // CRUD state
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingAluno, setEditingAluno] = useState<Aluno | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [alunoToDelete, setAlunoToDelete] = useState<Aluno | null>(null);
+  const [formData, setFormData] = useState({
+    nome: "",
+    turma: "5º Ano A",
+    serie: "5º Ano",
+    turno: "Manhã",
+    responsavel: "",
+    telefone: "",
+    email: "",
+    cpf: "",
+    dataNascimento: "",
+    endereco: "",
+  });
 
   const filtered = alunos.filter((a) => {
     const matchSearch = a.nome.toLowerCase().includes(search.toLowerCase()) ||
@@ -96,6 +143,56 @@ export default function Crachas() {
     } else {
       setSelectedIds(new Set(filtered.map((a) => a.id)));
     }
+  };
+
+  const resetForm = () => {
+    setFormData({ nome: "", turma: "5º Ano A", serie: "5º Ano", turno: "Manhã", responsavel: "", telefone: "", email: "", cpf: "", dataNascimento: "", endereco: "" });
+  };
+
+  const handleOpenAdd = () => {
+    setEditingAluno(null);
+    resetForm();
+    setDialogOpen(true);
+  };
+
+  const handleOpenEdit = (aluno: Aluno) => {
+    setEditingAluno(aluno);
+    setFormData({
+      nome: aluno.nome,
+      turma: aluno.turma,
+      serie: aluno.serie,
+      turno: aluno.turno,
+      responsavel: aluno.responsavel,
+      telefone: aluno.telefone,
+      email: aluno.email,
+      cpf: aluno.cpf,
+      dataNascimento: aluno.dataNascimento,
+      endereco: aluno.endereco,
+    });
+    setDialogOpen(true);
+  };
+
+  const handleSave = () => {
+    if (!formData.nome.trim()) { toast.error("Informe o nome do aluno."); return; }
+    if (editingAluno) {
+      updateAluno(editingAluno.id, formData);
+      toast.success("Aluno atualizado com sucesso!");
+    } else {
+      addAluno(formData);
+      toast.success("Aluno adicionado com sucesso!");
+    }
+    setDialogOpen(false);
+    resetForm();
+  };
+
+  const handleConfirmDelete = () => {
+    if (!alunoToDelete) return;
+    deleteAluno(alunoToDelete.id);
+    selectedIds.delete(alunoToDelete.id);
+    setSelectedIds(new Set(selectedIds));
+    toast.success("Aluno excluído com sucesso!");
+    setDeleteDialogOpen(false);
+    setAlunoToDelete(null);
   };
 
   const handlePhotoUpload = (alunoId: string) => {
@@ -402,6 +499,10 @@ export default function Crachas() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Button onClick={handleOpenAdd}>
+            <Plus className="mr-2 h-4 w-4" />
+            Novo Aluno
+          </Button>
           <Button
             variant="outline"
             onClick={() => handlePrint(tab === "cracha" ? "cracha" : "carteirinha")}
@@ -622,14 +723,36 @@ export default function Crachas() {
                     <TableCell>{aluno.turma}</TableCell>
                     <TableCell>{aluno.turno}</TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handlePhotoUpload(aluno.id)}
-                      >
-                        <Camera className="mr-1 h-3 w-3" />
-                        {photo ? "Trocar Foto" : "Adicionar Foto"}
-                      </Button>
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handlePhotoUpload(aluno.id)}
+                        >
+                          <Camera className="mr-1 h-3 w-3" />
+                          {photo ? "Trocar" : "Foto"}
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button size="sm" variant="ghost">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleOpenEdit(aluno)}>
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() => { setAlunoToDelete(aluno); setDeleteDialogOpen(true); }}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Excluir
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </TableCell>
                   </TableRow>
                 );
@@ -638,6 +761,103 @@ export default function Crachas() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Add/Edit Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{editingAluno ? "Editar Aluno" : "Novo Aluno"}</DialogTitle>
+            <DialogDescription>
+              {editingAluno ? "Altere os dados do aluno." : "Preencha os dados para cadastrar um novo aluno."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-3 py-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label>Nome *</Label>
+                <Input value={formData.nome} onChange={(e) => setFormData({ ...formData, nome: e.target.value })} placeholder="Nome completo" />
+              </div>
+              <div className="space-y-1">
+                <Label>CPF</Label>
+                <Input value={formData.cpf} onChange={(e) => setFormData({ ...formData, cpf: e.target.value })} placeholder="000.000.000-00" />
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-1">
+                <Label>Turma</Label>
+                <Select value={formData.turma} onValueChange={(v) => setFormData({ ...formData, turma: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {turmasOptions.filter(t => t !== "Todas").map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label>Série</Label>
+                <Input value={formData.serie} onChange={(e) => setFormData({ ...formData, serie: e.target.value })} />
+              </div>
+              <div className="space-y-1">
+                <Label>Turno</Label>
+                <Select value={formData.turno} onValueChange={(v) => setFormData({ ...formData, turno: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Manhã">Manhã</SelectItem>
+                    <SelectItem value="Tarde">Tarde</SelectItem>
+                    <SelectItem value="Noite">Noite</SelectItem>
+                    <SelectItem value="Integral">Integral</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label>Responsável</Label>
+                <Input value={formData.responsavel} onChange={(e) => setFormData({ ...formData, responsavel: e.target.value })} />
+              </div>
+              <div className="space-y-1">
+                <Label>Telefone</Label>
+                <Input value={formData.telefone} onChange={(e) => setFormData({ ...formData, telefone: e.target.value })} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label>Email</Label>
+                <Input value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+              </div>
+              <div className="space-y-1">
+                <Label>Data de Nascimento</Label>
+                <Input type="date" value={formData.dataNascimento} onChange={(e) => setFormData({ ...formData, dataNascimento: e.target.value })} />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <Label>Endereço</Label>
+              <Input value={formData.endereco} onChange={(e) => setFormData({ ...formData, endereco: e.target.value })} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+            <Button onClick={handleSave}>{editingAluno ? "Salvar" : "Adicionar"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir aluno?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir <strong>{alunoToDelete?.nome}</strong>? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
