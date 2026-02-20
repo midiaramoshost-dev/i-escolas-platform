@@ -7,6 +7,7 @@ import {
   MessageSquare,
   FileText,
   CreditCard,
+  Apple,
   LogOut,
   UserCircle,
   UserPlus,
@@ -58,6 +59,11 @@ const menuItems = [
     title: "Comunicados",
     icon: MessageSquare,
     url: "/responsavel/comunicados",
+  },
+  {
+    title: "Nutrição",
+    icon: Apple,
+    url: "/responsavel/nutricao",
   },
   {
     title: "Financeiro",

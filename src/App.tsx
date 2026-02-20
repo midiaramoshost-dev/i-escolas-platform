@@ -47,6 +47,7 @@ import ImportarDados from "./pages/escola/ImportarDados";
 import Crachas from "./pages/escola/Crachas";
 import EscolaFolhaPagamento from "./pages/escola/FolhaPagamento";
 import EscolaPresencaFuncionarios from "./pages/escola/PresencaFuncionarios";
+import EscolaNutricao from "./pages/escola/Nutricao";
 import AlunoDashboard from "./pages/aluno/Dashboard";
 import AlunoNotas from "./pages/aluno/Notas";
 import AlunoFrequencia from "./pages/aluno/Frequencia";
@@ -62,6 +63,7 @@ import ResponsavelTarefas from "./pages/responsavel/Tarefas";
 import ResponsavelComunicados from "./pages/responsavel/Comunicados";
 import ResponsavelFinanceiro from "./pages/responsavel/Financeiro";
 import ResponsavelPerfil from "./pages/responsavel/Perfil";
+import ResponsavelNutricao from "./pages/responsavel/Nutricao";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminEscolas from "./pages/admin/Escolas";
 import AdminPlanos from "./pages/admin/Planos";
@@ -137,6 +139,7 @@ const App = () => (
                 <Route path="crachas" element={<Crachas />} />
                 <Route path="folha-pagamento" element={<EscolaFolhaPagamento />} />
                 <Route path="presenca-funcionarios" element={<EscolaPresencaFuncionarios />} />
+                <Route path="nutricao" element={<EscolaNutricao />} />
               </Route>
 
               {/* Portal do Aluno Routes - Protected */}
@@ -172,6 +175,7 @@ const App = () => (
                 <Route path="comunicados" element={<ResponsavelComunicados />} />
                 <Route path="financeiro" element={<ResponsavelFinanceiro />} />
                 <Route path="perfil" element={<ResponsavelPerfil />} />
+                <Route path="nutricao" element={<ResponsavelNutricao />} />
               </Route>
 
               {/* Admin Master Routes - Protected */}

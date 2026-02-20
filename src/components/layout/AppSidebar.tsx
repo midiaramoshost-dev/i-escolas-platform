@@ -14,6 +14,7 @@ import {
   MessageSquare,
   FileText,
   FileUp,
+  Apple,
 } from "lucide-react";
 import {
   Sidebar,
@@ -90,6 +91,11 @@ const menuItems = [
       { title: "Presença Funcionários", url: "/escola/presenca-funcionarios" },
       { title: "Importar Dados", url: "/escola/importar-dados" },
     ],
+  },
+  {
+    title: "Nutrição",
+    icon: Apple,
+    url: "/escola/nutricao",
   },
   {
     title: "Comunicação",
