@@ -21,9 +21,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { EditarPlanoDialog, PlanoRecursos } from "@/components/admin/EditarPlanoDialog";
 import { usePlanos, Plano } from "@/contexts/PlanosContext";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 const recursosLista = [
   { key: "alunos", label: "Limite de Alunos" },
@@ -62,6 +64,50 @@ export default function AdminPlanos() {
   const { planos, updatePlano } = usePlanos();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedPlano, setSelectedPlano] = useState<Plano | null>(null);
+  const [editingCell, setEditingCell] = useState<{ planoId: string; recursoKey: string } | null>(null);
+  const [editValue, setEditValue] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (editingCell && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [editingCell]);
+
+  const handleCellClick = (planoId: string, recursoKey: string, currentValue: string | boolean) => {
+    if (typeof currentValue === "boolean") return; // booleans are toggled differently
+    setEditingCell({ planoId, recursoKey });
+    setEditValue(String(currentValue));
+  };
+
+  const handleCellSave = async () => {
+    if (!editingCell) return;
+    const plano = planos.find(p => p.id === editingCell.planoId);
+    if (!plano) return;
+    const updatedRecursos = { ...plano.recursos, [editingCell.recursoKey]: editValue };
+    const updatedPlano = { ...plano, recursos: updatedRecursos };
+    try {
+      await updatePlano(updatedPlano);
+      toast.success("Recurso atualizado!");
+    } catch {
+      toast.error("Erro ao atualizar recurso");
+    }
+    setEditingCell(null);
+  };
+
+  const handleToggleRecurso = async (planoId: string, recursoKey: string, currentValue: boolean) => {
+    const plano = planos.find(p => p.id === planoId);
+    if (!plano) return;
+    const updatedRecursos = { ...plano.recursos, [recursoKey]: !currentValue };
+    const updatedPlano = { ...plano, recursos: updatedRecursos };
+    try {
+      await updatePlano(updatedPlano);
+      toast.success("Recurso atualizado!");
+    } catch {
+      toast.error("Erro ao atualizar recurso");
+    }
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -198,16 +244,38 @@ export default function AdminPlanos() {
                     <TableCell className="font-medium">{recurso.label}</TableCell>
                     {planos.map((plano) => {
                       const valor = plano.recursos[recurso.key as keyof PlanoRecursos];
+                      const isEditing = editingCell?.planoId === plano.id && editingCell?.recursoKey === recurso.key;
                       return (
                         <TableCell key={plano.id} className="text-center">
                           {typeof valor === "boolean" ? (
-                            valor ? (
-                              <Check className="h-5 w-5 text-green-500 mx-auto" />
-                            ) : (
-                              <X className="h-5 w-5 text-red-500 mx-auto" />
-                            )
+                            <button
+                              onClick={() => handleToggleRecurso(plano.id, recurso.key, valor)}
+                              className="mx-auto block cursor-pointer hover:opacity-70 transition-opacity"
+                              title="Clique para alternar"
+                            >
+                              {valor ? (
+                                <Check className="h-5 w-5 text-green-500 mx-auto" />
+                              ) : (
+                                <X className="h-5 w-5 text-red-500 mx-auto" />
+                              )}
+                            </button>
+                          ) : isEditing ? (
+                            <Input
+                              ref={inputRef}
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              onBlur={handleCellSave}
+                              onKeyDown={(e) => { if (e.key === "Enter") handleCellSave(); if (e.key === "Escape") setEditingCell(null); }}
+                              className="h-8 text-center text-sm w-28 mx-auto"
+                            />
                           ) : (
-                            <span className="text-sm">{valor}</span>
+                            <span
+                              className="text-sm cursor-pointer hover:bg-muted px-2 py-1 rounded transition-colors"
+                              onClick={() => handleCellClick(plano.id, recurso.key, valor)}
+                              title="Clique para editar"
+                            >
+                              {valor}
+                            </span>
                           )}
                         </TableCell>
                       );
