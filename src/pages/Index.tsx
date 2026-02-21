@@ -1365,16 +1365,13 @@ const Index = () => {
           
           <div className="border-t mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} i ESCOLAS. Todos os direitos reservados.
+              © {new Date().getFullYear()} i ESCOLAS. Todos os direitos reservados. | Feito por Midia Ramos
             </p>
             <div className="flex gap-6 text-sm text-muted-foreground">
               <a href="#" className="hover:text-foreground transition-colors">Termos de Uso</a>
               <a href="#" className="hover:text-foreground transition-colors">Privacidade</a>
               <a href="#" className="hover:text-foreground transition-colors">LGPD</a>
             </div>
-          </div>
-          <div className="text-center mt-6">
-            <p className="text-xs text-muted-foreground">Feito por Midia Ramos</p>
           </div>
         </div>
       </footer>
