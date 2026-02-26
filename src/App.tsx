@@ -64,6 +64,7 @@ import ResponsavelComunicados from "./pages/responsavel/Comunicados";
 import ResponsavelFinanceiro from "./pages/responsavel/Financeiro";
 import ResponsavelPerfil from "./pages/responsavel/Perfil";
 import ResponsavelNutricao from "./pages/responsavel/Nutricao";
+import ResponsavelMaternal from "./pages/responsavel/Maternal";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminEscolas from "./pages/admin/Escolas";
 import AdminPlanos from "./pages/admin/Planos";
@@ -176,6 +177,7 @@ const App = () => (
                 <Route path="financeiro" element={<ResponsavelFinanceiro />} />
                 <Route path="perfil" element={<ResponsavelPerfil />} />
                 <Route path="nutricao" element={<ResponsavelNutricao />} />
+                <Route path="maternal" element={<ResponsavelMaternal />} />
               </Route>
 
               {/* Admin Master Routes - Protected */}

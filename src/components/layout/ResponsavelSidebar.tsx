@@ -8,6 +8,7 @@ import {
   FileText,
   CreditCard,
   Apple,
+  Baby,
   LogOut,
   UserCircle,
   UserPlus,
@@ -59,6 +60,11 @@ const menuItems = [
     title: "Comunicados",
     icon: MessageSquare,
     url: "/responsavel/comunicados",
+  },
+  {
+    title: "Maternal",
+    icon: Baby,
+    url: "/responsavel/maternal",
   },
   {
     title: "Nutrição",
