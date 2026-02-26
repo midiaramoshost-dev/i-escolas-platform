@@ -20,6 +20,8 @@ import {
   Building2,
   AlertTriangle,
   Lock,
+  Baby,
+  Apple,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -225,6 +227,52 @@ const modulosIniciais: Modulo[] = [
       { id: "portal_materiais", nome: "Materiais Didáticos", ativo: true },
       { id: "portal_tarefas", nome: "Tarefas", ativo: true },
       { id: "portal_comunicados", nome: "Comunicados", ativo: true },
+    ],
+  },
+  {
+    id: "portal_responsavel",
+    nome: "Portal do Responsável",
+    descricao: "Acesso dos pais/responsáveis a notas, frequência, financeiro e acompanhamento dos filhos",
+    icone: Users,
+    categoria: "portais",
+    planoMinimo: "Start",
+    ativo: true,
+    submodulos: [
+      { id: "resp_notas", nome: "Notas e Boletins", ativo: true },
+      { id: "resp_frequencia", nome: "Frequência", ativo: true },
+      { id: "resp_financeiro", nome: "Financeiro", ativo: true },
+      { id: "resp_comunicados", nome: "Comunicados", ativo: true },
+      { id: "resp_maternal", nome: "Maternal", ativo: true },
+      { id: "resp_nutricao", nome: "Nutrição e Alimentação", ativo: true },
+    ],
+  },
+  // Maternal & Nutrição
+  {
+    id: "maternal",
+    nome: "Maternal",
+    descricao: "Gestão de rotinas, diário de recados e acompanhamento do desenvolvimento infantil",
+    icone: Baby,
+    categoria: "academico",
+    planoMinimo: "Start",
+    ativo: true,
+    submodulos: [
+      { id: "maternal_rotina", nome: "Rotina Diária", ativo: true },
+      { id: "maternal_diario", nome: "Diário de Recados", ativo: true },
+      { id: "maternal_desenvolvimento", nome: "Marcos de Desenvolvimento", ativo: true },
+    ],
+  },
+  {
+    id: "nutricao",
+    nome: "Nutrição e Alimentação",
+    descricao: "Cardápio semanal, dietas especiais, alergias e acompanhamento nutricional",
+    icone: Apple,
+    categoria: "academico",
+    planoMinimo: "Start",
+    ativo: true,
+    submodulos: [
+      { id: "nutricao_cardapio", nome: "Cardápio Semanal", ativo: true },
+      { id: "nutricao_dietas", nome: "Dietas Especiais", ativo: true },
+      { id: "nutricao_acompanhamento", nome: "Acompanhamento Nutricional", ativo: true },
     ],
   },
   // Avançado
