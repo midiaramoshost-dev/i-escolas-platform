@@ -20,6 +20,9 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { Sparkles } from "lucide-react";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Escola {
@@ -65,8 +68,8 @@ const MODULOS_OPTIONS = [
   { id: "comunicacao", label: "Comunicação" },
   { id: "folha_pagamento", label: "Folha de Pagamento" },
   { id: "portal_aluno", label: "Portal do Aluno" },
-  { id: "maternal", label: "Maternal" },
-  { id: "nutricao", label: "Nutrição e Alimentação" },
+  { id: "maternal", label: "Maternal", planoMinimo: "Start" },
+  { id: "nutricao", label: "Nutrição e Alimentação", planoMinimo: "Start" },
   { id: "importacao", label: "Importação (Migração)" },
 ];
 
@@ -404,19 +407,28 @@ export function EditarEscolaDialog({ escola, open, onOpenChange, onSave, destaca
               {MODULOS_OPTIONS.map((m) => {
                 const active = (formData.modulos || []).includes(m.id);
                 return (
-                  <button
-                    key={m.id}
-                    type="button"
-                    onClick={() => toggleModulo(m.id)}
-                    className="focus:outline-none"
-                  >
-                    <Badge
-                      variant={active ? "default" : "secondary"}
-                      className={active ? "bg-rose-500 hover:bg-rose-600" : ""}
-                    >
-                      {m.label}
-                    </Badge>
-                  </button>
+                  <Tooltip key={m.id}>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={() => toggleModulo(m.id)}
+                        className="focus:outline-none"
+                      >
+                        <Badge
+                          variant={active ? "default" : "secondary"}
+                          className={cn(active ? "bg-rose-500 hover:bg-rose-600" : "", "gap-1")}
+                        >
+                          {m.label}
+                          {m.planoMinimo && <Sparkles className="h-3 w-3" />}
+                        </Badge>
+                      </button>
+                    </TooltipTrigger>
+                    {m.planoMinimo && (
+                      <TooltipContent>
+                        <p>Opcional — requer plano {m.planoMinimo} ou superior</p>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
                 );
               })}
             </div>
