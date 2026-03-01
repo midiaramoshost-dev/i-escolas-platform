@@ -1,48 +1,28 @@
 
 
-## Problema Identificado
+## Adicionar opção "Incluir/Excluir Todos" e recurso RH no diálogo de edição de plano
 
-As politicas RLS da tabela `payment_gateways` estao configuradas como **RESTRICTIVE** (restritivas), mas nao existem politicas **PERMISSIVE** (permissivas). No PostgreSQL, politicas restritivas so funcionam em conjunto com politicas permissivas -- elas servem para "restringir ainda mais" o que uma politica permissiva ja permite. Sem nenhuma politica permissiva, todo acesso e negado silenciosamente.
+### Problema
+Na aba **Recursos** do diálogo "Editar Plano", falta:
+1. Um toggle para **ativar/desativar todos** os recursos de uma vez
+2. O recurso **RH (Recursos Humanos)** nos planos
 
-Isso explica por que o "Salvar Configuracoes" no painel nao persiste os dados: o Supabase retorna sucesso aparente (sem erro explicito), mas zero linhas sao afetadas.
+### Alteracoes
 
-**O mesmo problema afeta TODAS as tabelas do projeto** (`admin_usuarios`, `escolas`, `pagamentos`, `materiais_didaticos`, etc.), pois todas usam politicas RESTRICTIVE sem nenhuma PERMISSIVE.
+**1. Adicionar campo `rh` ao tipo `PlanoRecursos`**
+- Arquivos: `src/components/admin/EditarPlanoDialog.tsx` e `src/contexts/PlanosContext.tsx`
+- Adicionar `rh: boolean` na interface `PlanoRecursos`
+- Adicionar valores padrão nos planos iniciais (Free/Start = false, Pro/Premium = true)
 
-## Plano de Correcao
+**2. Adicionar "RH" nas listas de recursos**
+- Em `EditarPlanoDialog.tsx`: adicionar `{ key: "rh", label: "Módulo RH" }` ao array `recursosBooleanos`
+- Em `Planos.tsx`: adicionar `{ key: "rh", label: "Módulo RH" }` ao array `recursosLista`
 
-### 1. Corrigir RLS da tabela `payment_gateways`
-- Remover as 4 politicas restritivas atuais
-- Recriar como politicas **PERMISSIVE** (o padrao do PostgreSQL)
-- Mesmas regras: admin pode SELECT, INSERT, UPDATE, DELETE
+**3. Adicionar toggle "Ativar/Desativar Todos" na aba Recursos do diálogo**
+- Na aba "Recursos" do `EditarPlanoDialog`, adicionar um botão/switch no topo que liga ou desliga todos os recursos booleanos de uma vez
+- Similar ao que ja existe na secao "Modulos Disponiveis" da pagina de Planos
 
-### 2. Corrigir RLS de TODAS as outras tabelas afetadas
-Aplicar a mesma correcao (RESTRICTIVE -> PERMISSIVE) para:
-- `admin_usuarios` (4 politicas)
-- `escolas` (5 politicas)
-- `pagamentos` (5 politicas)
-- `materiais_didaticos` (4 politicas)
-- `planos` (4 politicas)
-- `platform_settings` (3 politicas)
-- `profiles` (3 politicas)
-- `user_roles` (2 politicas)
-
-### 3. Re-testar o fluxo
-- Salvar o Access Token real do Mercado Pago no painel
-- Testar o onboarding com Pix
-
-### Detalhes Tecnicos
-
-A migracao SQL ira:
-1. `DROP POLICY` para cada politica restritiva existente
-2. `CREATE POLICY` com as mesmas regras, mas sem a clausula `AS RESTRICTIVE` (que faz com que sejam permissivas por padrao)
-
-Exemplo para uma tabela:
-```text
-DROP POLICY "Admins podem ver gateways" ON payment_gateways;
-CREATE POLICY "Admins podem ver gateways"
-  ON payment_gateways FOR SELECT
-  USING (has_role(auth.uid(), 'admin'::app_role));
-```
-
-Nenhum arquivo de codigo precisa ser alterado -- o problema e exclusivamente nas politicas RLS do banco de dados.
-
+### Arquivos modificados
+- `src/components/admin/EditarPlanoDialog.tsx`
+- `src/contexts/PlanosContext.tsx`
+- `src/pages/admin/Planos.tsx`
