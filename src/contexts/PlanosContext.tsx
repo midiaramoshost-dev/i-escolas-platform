@@ -15,6 +15,7 @@ export interface PlanoRecursos {
   financeiro: boolean;
   api: boolean;
   branding: boolean;
+  rh: boolean;
 }
 
 export interface Plano {
@@ -62,6 +63,7 @@ const planosIniciais: Plano[] = [
       financeiro: false,
       api: false,
       branding: false,
+      rh: false,
     },
   },
   {
@@ -87,6 +89,7 @@ const planosIniciais: Plano[] = [
       financeiro: true,
       api: false,
       branding: false,
+      rh: false,
     },
   },
   {
@@ -113,6 +116,7 @@ const planosIniciais: Plano[] = [
       financeiro: true,
       api: true,
       branding: false,
+      rh: true,
     },
   },
   {
@@ -138,6 +142,7 @@ const planosIniciais: Plano[] = [
       financeiro: true,
       api: true,
       branding: true,
+      rh: true,
     },
   },
 ];
