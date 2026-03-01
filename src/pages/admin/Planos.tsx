@@ -67,6 +67,17 @@ export default function AdminPlanos() {
   const [editingCell, setEditingCell] = useState<{ planoId: string; recursoKey: string } | null>(null);
   const [editValue, setEditValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const [modulos, setModulos] = useState([
+    { nome: "Diário de Classe", ativo: true },
+    { nome: "Boletins Automáticos", ativo: true },
+    { nome: "Controle de Frequência", ativo: true },
+    { nome: "Portal do Aluno", ativo: true },
+    { nome: "Portal do Responsável", ativo: true },
+    { nome: "Módulo Financeiro", ativo: true },
+    { nome: "Comunicados", ativo: true },
+    { nome: "Relatórios Avançados", ativo: true },
+    { nome: "Integração API", ativo: false },
+  ]);
 
   useEffect(() => {
     if (editingCell && inputRef.current) {
@@ -292,25 +303,32 @@ export default function AdminPlanos() {
       <motion.div variants={itemVariants}>
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-yellow-500" />
-              Módulos Disponíveis
-            </CardTitle>
-            <CardDescription>Ative ou desative módulos globalmente</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-yellow-500" />
+                  Módulos Disponíveis
+                </CardTitle>
+                <CardDescription>Ative ou desative módulos globalmente</CardDescription>
+              </div>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="toggle-all" className="text-sm text-muted-foreground whitespace-nowrap">
+                  {modulos.every(m => m.ativo) ? "Desativar Todos" : "Ativar Todos"}
+                </Label>
+                <Switch
+                  id="toggle-all"
+                  checked={modulos.every(m => m.ativo)}
+                  onCheckedChange={(checked) => {
+                    setModulos(prev => prev.map(m => ({ ...m, ativo: checked })));
+                    toast.success(checked ? "Todos os módulos ativados!" : "Todos os módulos desativados!");
+                  }}
+                />
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {[
-                { nome: "Diário de Classe", ativo: true },
-                { nome: "Boletins Automáticos", ativo: true },
-                { nome: "Controle de Frequência", ativo: true },
-                { nome: "Portal do Aluno", ativo: true },
-                { nome: "Portal do Responsável", ativo: true },
-                { nome: "Módulo Financeiro", ativo: true },
-                { nome: "Comunicados", ativo: true },
-                { nome: "Relatórios Avançados", ativo: true },
-                { nome: "Integração API", ativo: false },
-              ].map((modulo, index) => (
+              {modulos.map((modulo, index) => (
                 <div
                   key={index}
                   className="flex items-center justify-between p-4 rounded-lg bg-muted/50"
@@ -318,7 +336,13 @@ export default function AdminPlanos() {
                   <Label htmlFor={`modulo-${index}`} className="font-medium">
                     {modulo.nome}
                   </Label>
-                  <Switch id={`modulo-${index}`} defaultChecked={modulo.ativo} />
+                  <Switch
+                    id={`modulo-${index}`}
+                    checked={modulo.ativo}
+                    onCheckedChange={(checked) => {
+                      setModulos(prev => prev.map((m, i) => i === index ? { ...m, ativo: checked } : m));
+                    }}
+                  />
                 </div>
               ))}
             </div>
