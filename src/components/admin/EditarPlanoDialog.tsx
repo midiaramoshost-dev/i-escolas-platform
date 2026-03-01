@@ -40,6 +40,7 @@ export interface PlanoRecursos {
   financeiro: boolean;
   api: boolean;
   branding: boolean;
+  rh: boolean;
 }
 
 export interface Plano {
@@ -71,6 +72,7 @@ const recursosBooleanos = [
   { key: "financeiro", label: "Módulo Financeiro" },
   { key: "api", label: "API de Integração" },
   { key: "branding", label: "Branding Personalizado" },
+  { key: "rh", label: "Módulo RH" },
 ];
 
 const recursosTexto = [
@@ -308,9 +310,25 @@ export function EditarPlanoDialog({ open, onOpenChange, plano, onSave }: EditarP
             </TabsContent>
 
             <TabsContent value="recursos" className="space-y-4 mt-0">
-              <p className="text-sm text-muted-foreground mb-4">
-                Ative ou desative os recursos disponíveis neste plano
-              </p>
+              <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30">
+                <div>
+                  <Label htmlFor="toggle-all-recursos" className="font-medium">Ativar/Desativar Todos</Label>
+                  <p className="text-sm text-muted-foreground">Marque ou desmarque todos os recursos de uma vez</p>
+                </div>
+                <Switch
+                  id="toggle-all-recursos"
+                  checked={recursosBooleanos.every(r => formData.recursos[r.key as keyof PlanoRecursos] as boolean)}
+                  onCheckedChange={(checked) => {
+                    const updatedRecursos = { ...formData.recursos };
+                    recursosBooleanos.forEach(r => {
+                      (updatedRecursos as any)[r.key] = checked;
+                    });
+                    setFormData(prev => prev ? { ...prev, recursos: updatedRecursos } : null);
+                  }}
+                />
+              </div>
+
+              <Separator />
               
               {recursosBooleanos.map((recurso) => (
                 <div

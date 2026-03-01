@@ -40,6 +40,7 @@ const recursosLista = [
   { key: "financeiro", label: "Módulo Financeiro" },
   { key: "api", label: "API de Integração" },
   { key: "branding", label: "Branding Personalizado" },
+  { key: "rh", label: "Módulo RH" },
 ];
 
 const getPlanoColor = (cor: string) => {
