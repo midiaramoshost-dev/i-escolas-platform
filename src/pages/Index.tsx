@@ -523,11 +523,14 @@ const Index = () => {
                 </motion.div>
               </Link>
               <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
-                <Button asChild size="lg" variant="outline" className="w-full sm:w-auto gap-2 text-lg px-8 py-6 border-white/40 bg-white/10 text-white hover:bg-white/20 group">
-                  <a href="https://www.instagram.com/iescolas.sp/" target="_blank" rel="noopener noreferrer">
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="w-full sm:w-auto gap-2 text-lg px-8 py-6 border-white/40 bg-white/10 text-white hover:bg-white/20 group"
+                  onClick={() => window.open("https://www.instagram.com/iescolas.sp/", "_blank", "noopener,noreferrer")}
+                >
                     <Play className="h-5 w-5 group-hover:text-white transition-colors" />
                     Ver Demonstração
-                  </a>
                 </Button>
               </motion.div>
             </motion.div>
@@ -1211,16 +1214,6 @@ const Index = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Phone className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold mb-1">Telefone</h3>
-                      <p className="text-muted-foreground">(11) 4000-1234</p>
-                      <p className="text-muted-foreground text-sm">Seg à Sex, 8h às 18h</p>
-                    </div>
-                  </div>
 
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
