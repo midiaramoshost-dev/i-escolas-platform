@@ -275,69 +275,69 @@ export default function AdminUsuarios() {
       animate="visible"
     >
       {/* Header */}
-      <motion.div variants={itemVariants} className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <motion.div variants={itemVariants} className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Gestão de Usuários</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Gestão de Usuários</h1>
+          <p className="text-sm text-muted-foreground">
             Gerencie os usuários administrativos da plataforma
           </p>
         </div>
-        <Button className="bg-rose-500 hover:bg-rose-600" onClick={() => handleOpenDialog()}>
+        <Button size="sm" className="bg-rose-500 hover:bg-rose-600 w-full sm:w-auto" onClick={() => handleOpenDialog()}>
           <Plus className="mr-2 h-4 w-4" />
           Novo Usuário
         </Button>
       </motion.div>
 
       {/* Resumo */}
-      <motion.div variants={itemVariants} className="grid gap-4 md:grid-cols-4">
+      <motion.div variants={itemVariants} className="grid gap-3 grid-cols-2 md:grid-cols-4">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total</p>
-                <p className="text-3xl font-bold">{usuarios.length}</p>
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Total</p>
+                <p className="text-2xl sm:text-3xl font-bold">{usuarios.length}</p>
               </div>
-              <div className="rounded-full p-3 bg-rose-500/10">
-                <Users className="h-6 w-6 text-rose-500" />
+              <div className="rounded-full p-2 sm:p-3 bg-rose-500/10">
+                <Users className="h-4 w-4 sm:h-6 sm:w-6 text-rose-500" />
               </div>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Admins</p>
-                <p className="text-3xl font-bold text-rose-500">{usuarios.filter(u => u.perfil === "admin").length}</p>
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Admins</p>
+                <p className="text-2xl sm:text-3xl font-bold text-rose-500">{usuarios.filter(u => u.perfil === "admin").length}</p>
               </div>
-              <div className="rounded-full p-3 bg-rose-500/10">
-                <Shield className="h-6 w-6 text-rose-500" />
+              <div className="rounded-full p-2 sm:p-3 bg-rose-500/10">
+                <Shield className="h-4 w-4 sm:h-6 sm:w-6 text-rose-500" />
               </div>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Ativos</p>
-                <p className="text-3xl font-bold text-green-500">{usuarios.filter(u => u.status === "ativo").length}</p>
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Ativos</p>
+                <p className="text-2xl sm:text-3xl font-bold text-green-500">{usuarios.filter(u => u.status === "ativo").length}</p>
               </div>
-              <div className="rounded-full p-3 bg-green-500/10">
-                <UserCheck className="h-6 w-6 text-green-500" />
+              <div className="rounded-full p-2 sm:p-3 bg-green-500/10">
+                <UserCheck className="h-4 w-4 sm:h-6 sm:w-6 text-green-500" />
               </div>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Inativos</p>
-                <p className="text-3xl font-bold text-red-500">{usuarios.filter(u => u.status === "inativo").length}</p>
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Inativos</p>
+                <p className="text-2xl sm:text-3xl font-bold text-red-500">{usuarios.filter(u => u.status === "inativo").length}</p>
               </div>
-              <div className="rounded-full p-3 bg-red-500/10">
-                <UserX className="h-6 w-6 text-red-500" />
+              <div className="rounded-full p-2 sm:p-3 bg-red-500/10">
+                <UserX className="h-4 w-4 sm:h-6 sm:w-6 text-red-500" />
               </div>
             </div>
           </CardContent>
