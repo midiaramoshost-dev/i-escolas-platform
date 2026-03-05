@@ -31,8 +31,8 @@ export function AdminLayout() {
         <AdminSidebar />
         <SidebarInset className="flex flex-col flex-1">
           <AppHeader />
-          <main className="flex-1 overflow-auto p-6">
-            <div className="mb-4 rounded-lg border border-border bg-card p-3 text-sm text-muted-foreground">
+          <main className="flex-1 overflow-auto p-3 sm:p-4 md:p-6">
+            <div className="mb-4 rounded-lg border border-border bg-card p-3 text-xs sm:text-sm text-muted-foreground">
               Fluxo de importação: acesse <span className="font-medium text-foreground">/escola/importar-dados</span>,
               baixe o modelo, preencha com dados de teste e faça upload para validar ponta a ponta.
             </div>
@@ -48,8 +48,8 @@ export function AdminLayout() {
                   </div>
                   <span className="text-xs rounded-full bg-primary/10 text-primary px-2.5 py-1">Executivo</span>
                 </div>
-                <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  <div className="rounded-md border border-border p-3">
+                <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
+                  <div className="rounded-md border border-border p-2 sm:p-3">
                     <p className="text-xs text-muted-foreground">MRR (Mensal)</p>
                     <p className="text-lg font-semibold text-foreground">R$ 182.450</p>
                     <p className="text-xs text-emerald-500">+8.2% vs. mês anterior</p>
@@ -100,8 +100,8 @@ export function AdminLayout() {
                   </div>
                   <span className="text-xs rounded-full bg-sky-500/10 text-sky-600 px-2.5 py-1">Insights</span>
                 </div>
-                <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  <div className="rounded-md border border-border p-3">
+                <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
+                  <div className="rounded-md border border-border p-2 sm:p-3">
                     <p className="text-xs text-muted-foreground">Usuários Ativos (MAU)</p>
                     <p className="text-lg font-semibold text-foreground">18.240</p>
                     <p className="text-xs text-emerald-500">+6.4% últimos 30 dias</p>
@@ -152,8 +152,8 @@ export function AdminLayout() {
                   </div>
                   <span className="text-xs rounded-full bg-emerald-500/10 text-emerald-600 px-2.5 py-1">Finanças</span>
                 </div>
-                <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-4">
-                  <div className="rounded-md border border-border p-3">
+                <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+                  <div className="rounded-md border border-border p-2 sm:p-3">
                     <p className="text-xs text-muted-foreground">Receita Mensal (MRR)</p>
                     <p className="text-lg font-semibold text-foreground">R$ 182.450</p>
                     <p className="text-xs text-emerald-500">+8.2% vs. mês anterior</p>
@@ -244,8 +244,8 @@ export function AdminLayout() {
                   </div>
                   <span className="text-xs rounded-full bg-orange-500/10 text-orange-600 px-2.5 py-1">Help Desk</span>
                 </div>
-                <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-4">
-                  <div className="rounded-md border border-border p-3">
+                <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+                  <div className="rounded-md border border-border p-2 sm:p-3">
                     <p className="text-xs text-muted-foreground">Tickets Abertos</p>
                     <p className="text-lg font-semibold text-foreground">38</p>
                     <p className="text-xs text-red-500">12 críticos</p>
@@ -382,8 +382,8 @@ export function AdminLayout() {
                   </div>
                   <span className="text-xs rounded-full bg-pink-500/10 text-pink-600 px-2.5 py-1">Retenção</span>
                 </div>
-                <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-4">
-                  <div className="rounded-md border border-border p-3">
+                <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+                  <div className="rounded-md border border-border p-2 sm:p-3">
                     <p className="text-xs text-muted-foreground">Churn Mensal</p>
                     <p className="text-lg font-semibold text-foreground">2.1%</p>
                     <p className="text-xs text-emerald-500">-0.4 p.p. vs. mês anterior</p>
@@ -514,8 +514,8 @@ export function AdminLayout() {
                   </div>
                   <span className="text-xs rounded-full bg-violet-500/10 text-violet-600 px-2.5 py-1">Compliance</span>
                 </div>
-                <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  <div className="rounded-md border border-border p-3">
+                <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
+                  <div className="rounded-md border border-border p-2 sm:p-3">
                     <p className="text-xs text-muted-foreground">Termos Aceitos</p>
                     <p className="text-lg font-semibold text-foreground">98.4%</p>
                     <p className="text-xs text-emerald-500">508 de 516 escolas</p>

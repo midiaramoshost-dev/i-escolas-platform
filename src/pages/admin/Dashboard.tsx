@@ -158,17 +158,18 @@ export default function AdminDashboard() {
       animate="visible"
     >
       {/* Header */}
-      <motion.div variants={itemVariants} className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <motion.div variants={itemVariants} className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Dashboard ADM Master</h1>
-          <p className="text-muted-foreground">Visão geral da plataforma i ESCOLAS</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Dashboard ADM Master</h1>
+          <p className="text-sm text-muted-foreground">Visão geral da plataforma i ESCOLAS</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => navigate("/admin/monitoramento")}>
+          <Button variant="outline" size="sm" className="flex-1 sm:flex-none" onClick={() => navigate("/admin/monitoramento")}>
             <Activity className="mr-2 h-4 w-4" />
-            Monitoramento
+            <span className="hidden xs:inline">Monitoramento</span>
+            <span className="xs:hidden">Monitor</span>
           </Button>
-          <Button className="bg-rose-500 hover:bg-rose-600" onClick={() => navigate("/admin/escolas")}>
+          <Button size="sm" className="bg-rose-500 hover:bg-rose-600 flex-1 sm:flex-none" onClick={() => navigate("/admin/escolas")}>
             <Building2 className="mr-2 h-4 w-4" />
             Nova Escola
           </Button>
@@ -176,18 +177,18 @@ export default function AdminDashboard() {
       </motion.div>
 
       {/* KPIs */}
-      <motion.div variants={itemVariants} className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <motion.div variants={itemVariants} className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         {kpis.map((kpi) => (
           <motion.div key={kpi.title} variants={itemVariants} whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }}>
             <Card>
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">{kpi.title}</p>
-                    <p className="text-2xl font-bold">{kpi.value}</p>
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{kpi.title}</p>
+                    <p className="text-xl sm:text-2xl font-bold">{kpi.value}</p>
                   </div>
-                  <div className={`rounded-full p-3 ${kpi.bgColor}`}>
-                    <kpi.icon className={`h-6 w-6 ${kpi.color}`} />
+                  <div className={`rounded-full p-2 sm:p-3 ${kpi.bgColor} shrink-0`}>
+                    <kpi.icon className={`h-4 w-4 sm:h-6 sm:w-6 ${kpi.color}`} />
                   </div>
                 </div>
               </CardContent>
@@ -196,7 +197,7 @@ export default function AdminDashboard() {
         ))}
       </motion.div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3">
         {/* Alertas */}
         <motion.div variants={itemVariants}>
           <Card className="h-full">
@@ -268,7 +269,7 @@ export default function AdminDashboard() {
                 ))}
               </div>
 
-              <div className="mt-6 grid grid-cols-4 gap-4 pt-4 border-t">
+              <div className="mt-4 sm:mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 pt-4 border-t">
                 <div className="text-center">
                   <p className="text-2xl font-bold">{totalEscolas}</p>
                   <p className="text-xs text-muted-foreground">Total</p>
@@ -308,11 +309,11 @@ export default function AdminDashboard() {
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
+           <CardContent className="overflow-x-auto">
             {escolasRecentes.length === 0 ? (
               <p className="text-center text-muted-foreground py-8">Nenhuma escola cadastrada ainda.</p>
             ) : (
-              <Table>
+              <Table className="min-w-[600px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Escola</TableHead>

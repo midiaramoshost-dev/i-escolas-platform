@@ -275,69 +275,69 @@ export default function AdminUsuarios() {
       animate="visible"
     >
       {/* Header */}
-      <motion.div variants={itemVariants} className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <motion.div variants={itemVariants} className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Gestão de Usuários</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Gestão de Usuários</h1>
+          <p className="text-sm text-muted-foreground">
             Gerencie os usuários administrativos da plataforma
           </p>
         </div>
-        <Button className="bg-rose-500 hover:bg-rose-600" onClick={() => handleOpenDialog()}>
+        <Button size="sm" className="bg-rose-500 hover:bg-rose-600 w-full sm:w-auto" onClick={() => handleOpenDialog()}>
           <Plus className="mr-2 h-4 w-4" />
           Novo Usuário
         </Button>
       </motion.div>
 
       {/* Resumo */}
-      <motion.div variants={itemVariants} className="grid gap-4 md:grid-cols-4">
+      <motion.div variants={itemVariants} className="grid gap-3 grid-cols-2 md:grid-cols-4">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total</p>
-                <p className="text-3xl font-bold">{usuarios.length}</p>
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Total</p>
+                <p className="text-2xl sm:text-3xl font-bold">{usuarios.length}</p>
               </div>
-              <div className="rounded-full p-3 bg-rose-500/10">
-                <Users className="h-6 w-6 text-rose-500" />
+              <div className="rounded-full p-2 sm:p-3 bg-rose-500/10">
+                <Users className="h-4 w-4 sm:h-6 sm:w-6 text-rose-500" />
               </div>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Admins</p>
-                <p className="text-3xl font-bold text-rose-500">{usuarios.filter(u => u.perfil === "admin").length}</p>
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Admins</p>
+                <p className="text-2xl sm:text-3xl font-bold text-rose-500">{usuarios.filter(u => u.perfil === "admin").length}</p>
               </div>
-              <div className="rounded-full p-3 bg-rose-500/10">
-                <Shield className="h-6 w-6 text-rose-500" />
+              <div className="rounded-full p-2 sm:p-3 bg-rose-500/10">
+                <Shield className="h-4 w-4 sm:h-6 sm:w-6 text-rose-500" />
               </div>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Ativos</p>
-                <p className="text-3xl font-bold text-green-500">{usuarios.filter(u => u.status === "ativo").length}</p>
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Ativos</p>
+                <p className="text-2xl sm:text-3xl font-bold text-green-500">{usuarios.filter(u => u.status === "ativo").length}</p>
               </div>
-              <div className="rounded-full p-3 bg-green-500/10">
-                <UserCheck className="h-6 w-6 text-green-500" />
+              <div className="rounded-full p-2 sm:p-3 bg-green-500/10">
+                <UserCheck className="h-4 w-4 sm:h-6 sm:w-6 text-green-500" />
               </div>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Inativos</p>
-                <p className="text-3xl font-bold text-red-500">{usuarios.filter(u => u.status === "inativo").length}</p>
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Inativos</p>
+                <p className="text-2xl sm:text-3xl font-bold text-red-500">{usuarios.filter(u => u.status === "inativo").length}</p>
               </div>
-              <div className="rounded-full p-3 bg-red-500/10">
-                <UserX className="h-6 w-6 text-red-500" />
+              <div className="rounded-full p-2 sm:p-3 bg-red-500/10">
+                <UserX className="h-4 w-4 sm:h-6 sm:w-6 text-red-500" />
               </div>
             </div>
           </CardContent>
@@ -384,21 +384,118 @@ export default function AdminUsuarios() {
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Usuário</TableHead>
-                    <TableHead>Perfil</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Link de Acesso</TableHead>
-                    <TableHead>Último Acesso</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+              <>
+                {/* Desktop Table */}
+                <div className="hidden md:block overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Usuário</TableHead>
+                        <TableHead>Perfil</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Link de Acesso</TableHead>
+                        <TableHead>Último Acesso</TableHead>
+                        <TableHead className="text-right">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {usuariosFiltrados.map((usuario) => (
+                        <TableRow key={usuario.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-9 w-9">
+                                <AvatarFallback className="bg-rose-500/10 text-rose-500 text-sm">
+                                  {usuario.nome.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium">{usuario.nome}</p>
+                                <p className="text-xs text-muted-foreground">{usuario.email}</p>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge className={getPerfilColor(usuario.perfil)}>
+                              {getPerfilLabel(usuario.perfil)}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge className={usuario.status === "ativo" ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"}>
+                              {usuario.status === "ativo" ? "Ativo" : "Inativo"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {usuario.linkAcesso ? (
+                              <div className="flex items-center gap-1">
+                                <code className="text-xs bg-muted px-2 py-1 rounded max-w-[180px] truncate block">
+                                  {usuario.linkAcesso}
+                                </code>
+                                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => copiarLink(usuario.linkAcesso!)}>
+                                  <Copy className="h-3.5 w-3.5" />
+                                </Button>
+                                <Button size="icon" variant="ghost" className="h-7 w-7" asChild>
+                                  <a href={usuario.linkAcesso} target="_blank" rel="noopener noreferrer">
+                                    <ExternalLink className="h-3.5 w-3.5" />
+                                  </a>
+                                </Button>
+                              </div>
+                            ) : (
+                              <Button size="sm" variant="outline" className="text-xs h-7" onClick={() => gerarLinkAcesso(usuario)}>
+                                <Link className="mr-1 h-3.5 w-3.5" />
+                                Gerar Link
+                              </Button>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm">
+                            {usuario.ultimoAcesso}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button size="icon" variant="ghost">
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
+                                <DropdownMenuItem className="cursor-pointer" onClick={() => handleOpenDialog(usuario)}>
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Editar
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="cursor-pointer" onClick={() => handleResetSenha(usuario)}>
+                                  <Key className="mr-2 h-4 w-4" />
+                                  Resetar Senha
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="cursor-pointer" onClick={() => handleToggleStatus(usuario)}>
+                                  {usuario.status === "ativo" ? (
+                                    <>
+                                      <UserX className="mr-2 h-4 w-4" />
+                                      Desativar
+                                    </>
+                                  ) : (
+                                    <>
+                                      <UserCheck className="mr-2 h-4 w-4" />
+                                      Ativar
+                                    </>
+                                  )}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="cursor-pointer" onClick={() => gerarLinkAcesso(usuario)}>
+                                  <Link className="mr-2 h-4 w-4" />
+                                  {usuario.linkAcesso ? "Regerar Link" : "Gerar Link de Acesso"}
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {/* Mobile Card Layout */}
+                <div className="md:hidden divide-y divide-border">
                   {usuariosFiltrados.map((usuario) => (
-                    <TableRow key={usuario.id}>
-                      <TableCell>
+                    <div key={usuario.id} className="p-4 space-y-3">
+                      <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <Avatar className="h-9 w-9">
                             <AvatarFallback className="bg-rose-500/10 text-rose-500 text-sm">
@@ -406,50 +503,13 @@ export default function AdminUsuarios() {
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="font-medium">{usuario.nome}</p>
+                            <p className="font-medium text-sm">{usuario.nome}</p>
                             <p className="text-xs text-muted-foreground">{usuario.email}</p>
                           </div>
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={getPerfilColor(usuario.perfil)}>
-                          {getPerfilLabel(usuario.perfil)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={usuario.status === "ativo" ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"}>
-                          {usuario.status === "ativo" ? "Ativo" : "Inativo"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {usuario.linkAcesso ? (
-                          <div className="flex items-center gap-1">
-                            <code className="text-xs bg-muted px-2 py-1 rounded max-w-[180px] truncate block">
-                              {usuario.linkAcesso}
-                            </code>
-                            <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => copiarLink(usuario.linkAcesso!)}>
-                              <Copy className="h-3.5 w-3.5" />
-                            </Button>
-                            <Button size="icon" variant="ghost" className="h-7 w-7" asChild>
-                              <a href={usuario.linkAcesso} target="_blank" rel="noopener noreferrer">
-                                <ExternalLink className="h-3.5 w-3.5" />
-                              </a>
-                            </Button>
-                          </div>
-                        ) : (
-                          <Button size="sm" variant="outline" className="text-xs h-7" onClick={() => gerarLinkAcesso(usuario)}>
-                            <Link className="mr-1 h-3.5 w-3.5" />
-                            Gerar Link
-                          </Button>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {usuario.ultimoAcesso}
-                      </TableCell>
-                      <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button size="icon" variant="ghost">
+                            <Button size="icon" variant="ghost" className="h-8 w-8">
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -477,15 +537,36 @@ export default function AdminUsuarios() {
                             </DropdownMenuItem>
                             <DropdownMenuItem className="cursor-pointer" onClick={() => gerarLinkAcesso(usuario)}>
                               <Link className="mr-2 h-4 w-4" />
-                              {usuario.linkAcesso ? "Regerar Link" : "Gerar Link de Acesso"}
+                              {usuario.linkAcesso ? "Regerar Link" : "Gerar Link"}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <Badge className={getPerfilColor(usuario.perfil)}>
+                          {getPerfilLabel(usuario.perfil)}
+                        </Badge>
+                        <Badge className={usuario.status === "ativo" ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"}>
+                          {usuario.status === "ativo" ? "Ativo" : "Inativo"}
+                        </Badge>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Último acesso: {usuario.ultimoAcesso}
+                      </div>
+                      {usuario.linkAcesso && (
+                        <div className="flex items-center gap-1">
+                          <code className="text-xs bg-muted px-2 py-1 rounded truncate flex-1">
+                            {usuario.linkAcesso}
+                          </code>
+                          <Button size="icon" variant="ghost" className="h-7 w-7 shrink-0" onClick={() => copiarLink(usuario.linkAcesso!)}>
+                            <Copy className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   ))}
-                </TableBody>
-              </Table>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
