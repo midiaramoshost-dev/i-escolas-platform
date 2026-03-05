@@ -81,24 +81,29 @@ export function ContactForm() {
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Log for demo purposes (in production, this would be an API call)
-    console.log("Form submitted:", data);
-    
-    setIsSubmitting(false);
-    setIsSuccess(true);
-    
-    toast.success("Mensagem enviada com sucesso!", {
-      description: "Nossa equipe entrará em contato em até 24 horas.",
-    });
+    try {
+      const subject = encodeURIComponent(`[iEscolas] Contato de ${data.nome} - ${data.escola}`);
+      const body = encodeURIComponent(
+        `Nome: ${data.nome}\nE-mail: ${data.email}\nTelefone: ${data.telefone}\nEscola: ${data.escola}\nCargo: ${data.cargo}\n\nMensagem:\n${data.mensagem}`
+      );
+      
+      window.open(`mailto:iescolas.sp@gmail.com?subject=${subject}&body=${body}`, '_blank');
+      
+      setIsSubmitting(false);
+      setIsSuccess(true);
+      
+      toast.success("Redirecionado para o e-mail!", {
+        description: "Envie a mensagem pelo seu cliente de e-mail.",
+      });
 
-    // Reset form after 2 seconds
-    setTimeout(() => {
-      form.reset();
-      setIsSuccess(false);
-    }, 3000);
+      setTimeout(() => {
+        form.reset();
+        setIsSuccess(false);
+      }, 3000);
+    } catch {
+      setIsSubmitting(false);
+      toast.error("Erro ao abrir o e-mail. Tente novamente.");
+    }
   };
 
   if (isSuccess) {
