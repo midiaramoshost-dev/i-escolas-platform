@@ -87,7 +87,7 @@ export function ContactForm() {
         `Nome: ${data.nome}\nE-mail: ${data.email}\nTelefone: ${data.telefone}\nEscola: ${data.escola}\nCargo: ${data.cargo}\n\nMensagem:\n${data.mensagem}`
       );
       
-      window.open(`mailto:iescolas.sp@gmail.com?subject=${subject}&body=${body}`, '_blank');
+      window.location.href = `mailto:iescolas.sp@gmail.com?subject=${subject}&body=${body}`;
       
       setIsSubmitting(false);
       setIsSuccess(true);
