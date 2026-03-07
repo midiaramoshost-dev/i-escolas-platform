@@ -42,7 +42,11 @@ import {
   Check,
   X,
   ArrowUpRight,
-  MousePointer2
+  MousePointer2,
+  UserCog,
+  Receipt,
+  BadgeCheck,
+  Package
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { usePlanos } from "@/contexts/PlanosContext";
@@ -936,6 +940,11 @@ const Index = () => {
                     { icon: Users, nome: "Gestão de Turmas", desc: "Cadastro e gerenciamento de turmas e séries" },
                     { icon: Users, nome: "Gestão de Professores", desc: "Cadastro e gestão de docentes" },
                     { icon: School, nome: "Configurações da Escola", desc: "Personalização de logo, cores e dados" },
+                    { icon: UserCog, nome: "Gestão de Funcionários", desc: "Cadastro, contratos e gestão completa de colaboradores" },
+                    { icon: Receipt, nome: "Folha de Pagamento", desc: "Holerites, cálculos de INSS, FGTS, IRRF e proventos" },
+                    { icon: Clock, nome: "Presença de Funcionários", desc: "Controle de ponto e relatórios de frequência" },
+                    { icon: BadgeCheck, nome: "Crachás", desc: "Geração e impressão de crachás com foto e QR Code" },
+                    { icon: Package, nome: "Controle de Estoque", desc: "Gestão de materiais e suprimentos escolares" },
                   ].map((mod, i) => (
                     <motion.div
                       key={i}

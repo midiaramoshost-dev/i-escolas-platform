@@ -1,28 +1,28 @@
 
 
-## Detalhar módulo RH na seção de módulos da landing page
+## Adicionar opção "Incluir/Excluir Todos" e recurso RH no diálogo de edição de plano
 
-### Situação atual
-O módulo RH **não está** listado na home page. A plataforma possui funcionalidades de RH espalhadas nas páginas da escola (Funcionários, Folha de Pagamento, Presença de Funcionários, Crachás), mas não estão representadas na landing page nem no cadastro de módulos.
+### Problema
+Na aba **Recursos** do diálogo "Editar Plano", falta:
+1. Um toggle para **ativar/desativar todos** os recursos de uma vez
+2. O recurso **RH (Recursos Humanos)** nos planos
 
-### Alterações
+### Alteracoes
 
-**1. `src/pages/Index.tsx` — Adicionar módulo RH na categoria Administrativo**
+**1. Adicionar campo `rh` ao tipo `PlanoRecursos`**
+- Arquivos: `src/components/admin/EditarPlanoDialog.tsx` e `src/contexts/PlanosContext.tsx`
+- Adicionar `rh: boolean` na interface `PlanoRecursos`
+- Adicionar valores padrão nos planos iniciais (Free/Start = false, Pro/Premium = true)
 
-Expandir o array de módulos da categoria "Administrativo" (linha ~935) adicionando os seguintes itens:
+**2. Adicionar "RH" nas listas de recursos**
+- Em `EditarPlanoDialog.tsx`: adicionar `{ key: "rh", label: "Módulo RH" }` ao array `recursosBooleanos`
+- Em `Planos.tsx`: adicionar `{ key: "rh", label: "Módulo RH" }` ao array `recursosLista`
 
-- **Gestão de Funcionários** — Cadastro, contratos e gestão completa de colaboradores
-- **Folha de Pagamento** — Holerites, cálculos de INSS, FGTS, IRRF e proventos
-- **Presença de Funcionários** — Controle de ponto e relatórios de frequência
-- **Crachás** — Geração e impressão de crachás com foto e QR Code
-- **Controle de Estoque** — Gestão de materiais e suprimentos escolares
-
-Usar ícones Lucide apropriados (`UserCog`, `Receipt`, `Clock`, `BadgeCheck`, `Package`).
-
-**2. `src/pages/Index.tsx` — Importar ícones adicionais**
-
-Adicionar os ícones necessários na linha de imports do Lucide.
+**3. Adicionar toggle "Ativar/Desativar Todos" na aba Recursos do diálogo**
+- Na aba "Recursos" do `EditarPlanoDialog`, adicionar um botão/switch no topo que liga ou desliga todos os recursos booleanos de uma vez
+- Similar ao que ja existe na secao "Modulos Disponiveis" da pagina de Planos
 
 ### Arquivos modificados
-- `src/pages/Index.tsx`
-
+- `src/components/admin/EditarPlanoDialog.tsx`
+- `src/contexts/PlanosContext.tsx`
+- `src/pages/admin/Planos.tsx`
