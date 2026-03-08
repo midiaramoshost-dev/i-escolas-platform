@@ -1501,7 +1501,7 @@ const Index = () => {
             
             <FadeUp delay={0.4}>
               <p className="text-xl text-muted-foreground mb-10">
-                Junte-se a mais de 500 escolas que já modernizaram sua gestão. 
+                Junte-se a mais de 500 escolas em Sorocaba e interior de SP que já modernizaram sua gestão. 
                 Comece gratuitamente e veja os resultados.
               </p>
             </FadeUp>
