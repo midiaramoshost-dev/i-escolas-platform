@@ -119,12 +119,20 @@ const slideInRight = {
 
 const faqData = [
   {
+    question: "Qual o melhor sistema de gestão escolar em Sorocaba?",
+    answer: "O i ESCOLAS é a plataforma #1 de gestão escolar em Sorocaba e região. Com diário digital, portal do aluno, comunicação com pais, gestão financeira e muito mais. Atendemos escolas de educação infantil, fundamental e médio em Sorocaba, Votorantim, Itu, Salto, Indaiatuba e toda a região metropolitana."
+  },
+  {
+    question: "O i ESCOLAS atende escolas em Sorocaba e região?",
+    answer: "Sim! Atendemos escolas em Sorocaba, Votorantim, Itu, Salto, Indaiatuba, Araçoiaba da Serra, Piedade, São Roque, Mairinque, Alumínio, Ibiúna, Tatuí, Boituva, Cerquilho, Capela do Alto e toda a região metropolitana de Sorocaba."
+  },
+  {
     question: "Como funciona o período de teste gratuito?",
-    answer: "Oferecemos um plano Free permanente com até 50 alunos, ideal para escolas pequenas ou para testar a plataforma. Não é necessário cartão de crédito. Você pode migrar para um plano pago quando precisar de mais recursos ou capacidade."
+    answer: "Oferecemos um plano Free permanente com até 50 alunos, ideal para escolas pequenas de Sorocaba e região ou para testar a plataforma. Não é necessário cartão de crédito. Você pode migrar para um plano pago quando precisar de mais recursos ou capacidade."
   },
   {
     question: "Posso migrar meus dados de outro sistema?",
-    answer: "Sim! Nossa equipe de suporte oferece assistência gratuita para migração de dados. Importamos alunos, professores, turmas, notas e históricos de planilhas Excel ou de outros sistemas de gestão escolar."
+    answer: "Sim! Nossa equipe de suporte oferece assistência gratuita para migração de dados de escolas em Sorocaba e interior de SP. Importamos alunos, professores, turmas, notas e históricos de planilhas Excel ou de outros sistemas de gestão escolar."
   },
   {
     question: "O sistema funciona em dispositivos móveis?",
@@ -144,7 +152,7 @@ const faqData = [
   },
   {
     question: "Qual o prazo de implementação?",
-    answer: "A maioria das escolas está operando em menos de uma semana. O setup inicial leva cerca de 5 minutos, e nossa equipe oferece treinamento online gratuito para toda a equipe."
+    answer: "A maioria das escolas de Sorocaba e região está operando em menos de uma semana. O setup inicial leva cerca de 5 minutos, e nossa equipe oferece treinamento online gratuito para toda a equipe."
   },
   {
     question: "Posso cancelar a qualquer momento?",
