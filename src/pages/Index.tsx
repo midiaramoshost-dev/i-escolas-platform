@@ -509,7 +509,7 @@ const Index = () => {
               variants={fadeInUp}
               transition={{ duration: 0.7, delay: 0.2 }}
             >
-              Automatize processos, melhore a comunicação e transforme a gestão da sua escola com a plataforma mais completa do mercado.
+              A plataforma mais completa para escolas de Sorocaba e região. Automatize processos, melhore a comunicação com pais e alunos, e foque no que importa: a educação.
             </motion.p>
 
             {/* CTA Buttons */}
