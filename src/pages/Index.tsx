@@ -1551,8 +1551,12 @@ const Index = () => {
                 <PlatformLogo size="lg" />
               </div>
               <p className="text-muted-foreground max-w-sm mb-6">
-                Plataforma completa de gestão escolar para educação infantil, fundamental e médio. 
+              Plataforma completa de gestão escolar para educação infantil, fundamental e médio em Sorocaba e região. 
                 Simplifique processos e foque na educação.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                <MapPin className="inline h-4 w-4 mr-1" />
+                Atendemos escolas em Sorocaba, Votorantim, Itu, Salto, Indaiatuba, Araçoiaba da Serra, Piedade, São Roque, Mairinque, Alumínio, Ibiúna, Tatuí, Boituva e toda a região metropolitana.
               </p>
               <div className="flex gap-4">
                 {['facebook', 'instagram', 'linkedin', 'twitter'].map((social) => (
