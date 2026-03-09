@@ -49,6 +49,10 @@ import EscolaFolhaPagamento from "./pages/escola/FolhaPagamento";
 import EscolaPresencaFuncionarios from "./pages/escola/PresencaFuncionarios";
 import EscolaNutricao from "./pages/escola/Nutricao";
 import IAEducacional from "./pages/escola/IAEducacional";
+import LMSCursos from "./pages/escola/LMSCursos";
+import LMSProvas from "./pages/escola/LMSProvas";
+import LMSForum from "./pages/escola/LMSForum";
+import LMSProgresso from "./pages/escola/LMSProgresso";
 import AlunoDashboard from "./pages/aluno/Dashboard";
 import AlunoNotas from "./pages/aluno/Notas";
 import AlunoFrequencia from "./pages/aluno/Frequencia";
@@ -143,6 +147,10 @@ const App = () => (
                 <Route path="presenca-funcionarios" element={<EscolaPresencaFuncionarios />} />
                 <Route path="nutricao" element={<EscolaNutricao />} />
                 <Route path="ia-educacional" element={<IAEducacional />} />
+                <Route path="lms/cursos" element={<LMSCursos />} />
+                <Route path="lms/provas" element={<LMSProvas />} />
+                <Route path="lms/forum" element={<LMSForum />} />
+                <Route path="lms/progresso" element={<LMSProgresso />} />
               </Route>
 
               {/* Portal do Aluno Routes - Protected */}

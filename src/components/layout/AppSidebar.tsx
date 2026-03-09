@@ -16,6 +16,7 @@ import {
   FileUp,
   Apple,
   Brain,
+  MonitorPlay,
 } from "lucide-react";
 import {
   Sidebar,
@@ -102,6 +103,16 @@ const menuItems = [
     title: "IA Educacional",
     icon: Brain,
     url: "/escola/ia-educacional",
+  },
+  {
+    title: "LMS",
+    icon: MonitorPlay,
+    submenu: [
+      { title: "Cursos", url: "/escola/lms/cursos" },
+      { title: "Provas Online", url: "/escola/lms/provas" },
+      { title: "Fórum", url: "/escola/lms/forum" },
+      { title: "Progresso", url: "/escola/lms/progresso" },
+    ],
   },
   {
     title: "Comunicação",
