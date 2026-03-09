@@ -781,6 +781,12 @@ export default function Relatorios() {
           </div>
         </CardContent>
       </Card>
+        </TabsContent>
+
+        <TabsContent value="dashboard">
+          <DashboardAnalitico />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
