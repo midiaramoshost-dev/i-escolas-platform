@@ -192,9 +192,13 @@ const formatPhone = (value: string): string => {
 // Herdado por padrão quando o ADM MASTER implanta uma nova escola.
 // (Mínimo para nascer operacional + migração estratégica)
 const DEFAULT_MODULOS_ESCOLA = [
-  "academico",
-  "comunicacao",
-  "financeiro",
+  "diario_classe",
+  "notas",
+  "frequencia",
+  "comunicados",
+  "gestao_turmas",
+  "gestao_professores",
+  "configuracoes_escola",
   "importacao",
 ];
 
