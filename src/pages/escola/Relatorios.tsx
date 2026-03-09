@@ -13,6 +13,8 @@ import {
   Loader2,
   Search,
 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import DashboardAnalitico from "@/components/relatorios/DashboardAnalitico";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -537,8 +539,17 @@ export default function Relatorios() {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Relatórios</h1>
-          <p className="text-muted-foreground">Selecione, filtre e baixe relatórios detalhados da sua escola</p>
+          <p className="text-muted-foreground">Relatórios detalhados, rankings e análises avançadas</p>
         </div>
+      </div>
+
+      <Tabs defaultValue="relatorios" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="relatorios">Relatórios</TabsTrigger>
+          <TabsTrigger value="dashboard">Dashboard Analítico</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="relatorios" className="space-y-6">
         {selectedReports.length > 0 && (
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className="text-sm">
@@ -566,7 +577,6 @@ export default function Relatorios() {
             </Button>
           </div>
         )}
-      </div>
 
       {/* Filters */}
       <Card className="shadow-card">
@@ -770,6 +780,12 @@ export default function Relatorios() {
           </div>
         </CardContent>
       </Card>
+        </TabsContent>
+
+        <TabsContent value="dashboard">
+          <DashboardAnalitico />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
