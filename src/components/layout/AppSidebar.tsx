@@ -121,6 +121,11 @@ const menuItems = [
     url: "/escola/crm-matricula",
   },
   {
+    title: "Integração MEC",
+    icon: FileUp,
+    url: "/escola/integracao-mec",
+  },
+  {
     title: "Comunicação",
     icon: MessageSquare,
     url: "/escola/comunicados",

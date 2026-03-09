@@ -54,6 +54,7 @@ import LMSProvas from "./pages/escola/LMSProvas";
 import LMSForum from "./pages/escola/LMSForum";
 import LMSProgresso from "./pages/escola/LMSProgresso";
 import CRMMatricula from "./pages/escola/CRMMatricula";
+import IntegracaoMEC from "./pages/escola/IntegracaoMEC";
 import AlunoDashboard from "./pages/aluno/Dashboard";
 import AlunoNotas from "./pages/aluno/Notas";
 import AlunoFrequencia from "./pages/aluno/Frequencia";
@@ -153,6 +154,7 @@ const App = () => (
                 <Route path="lms/forum" element={<LMSForum />} />
                 <Route path="lms/progresso" element={<LMSProgresso />} />
                 <Route path="crm-matricula" element={<CRMMatricula />} />
+                <Route path="integracao-mec" element={<IntegracaoMEC />} />
               </Route>
 
               {/* Portal do Aluno Routes - Protected */}
