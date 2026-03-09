@@ -115,6 +115,11 @@ const menuItems = [
     ],
   },
   {
+    title: "CRM Matrícula",
+    icon: Target,
+    url: "/escola/crm-matricula",
+  },
+  {
     title: "Comunicação",
     icon: MessageSquare,
     url: "/escola/comunicados",
