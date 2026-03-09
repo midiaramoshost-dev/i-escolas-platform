@@ -92,6 +92,11 @@ export async function streamAIEducational({
 
     onDone();
   } catch (e) {
-    onError(e instanceof Error ? e.message : "Erro de conexão");
+    const msg = e instanceof Error ? e.message : "Erro de conexão";
+    if (msg.includes("Failed to fetch") || msg.includes("NetworkError")) {
+      onError("Não foi possível conectar ao serviço de IA. Verifique sua conexão e tente novamente.");
+    } else {
+      onError(msg);
+    }
   }
 }
