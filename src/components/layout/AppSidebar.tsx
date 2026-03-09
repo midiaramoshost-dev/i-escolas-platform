@@ -16,6 +16,7 @@ import {
   FileUp,
   Apple,
   Brain,
+  MonitorPlay,
 } from "lucide-react";
 import {
   Sidebar,
