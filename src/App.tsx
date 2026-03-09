@@ -54,6 +54,7 @@ import LMSProvas from "./pages/escola/LMSProvas";
 import LMSForum from "./pages/escola/LMSForum";
 import LMSProgresso from "./pages/escola/LMSProgresso";
 import CRMMatricula from "./pages/escola/CRMMatricula";
+import IntegracaoMEC from "./pages/escola/IntegracaoMEC";
 import AlunoDashboard from "./pages/aluno/Dashboard";
 import AlunoNotas from "./pages/aluno/Notas";
 import AlunoFrequencia from "./pages/aluno/Frequencia";
