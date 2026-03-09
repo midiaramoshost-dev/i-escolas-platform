@@ -104,6 +104,16 @@ const menuItems = [
     url: "/escola/ia-educacional",
   },
   {
+    title: "LMS",
+    icon: MonitorPlay,
+    submenu: [
+      { title: "Cursos", url: "/escola/lms/cursos" },
+      { title: "Provas Online", url: "/escola/lms/provas" },
+      { title: "Fórum", url: "/escola/lms/forum" },
+      { title: "Progresso", url: "/escola/lms/progresso" },
+    ],
+  },
+  {
     title: "Comunicação",
     icon: MessageSquare,
     url: "/escola/comunicados",
