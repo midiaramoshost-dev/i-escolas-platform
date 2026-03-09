@@ -424,35 +424,36 @@ export function EditarEscolaDialog({ escola, open, onOpenChange, onSave, destaca
           {/* Módulos (implantação) */}
           <div className="space-y-2">
             <Label>Módulos implantados</Label>
-            <div className="flex flex-wrap gap-2">
-              {MODULOS_OPTIONS.map((m) => {
-                const active = (formData.modulos || []).includes(m.id);
-                return (
-                  <Tooltip key={m.id}>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        onClick={() => toggleModulo(m.id)}
-                        className="focus:outline-none"
-                      >
-                        <Badge
-                          variant={active ? "default" : "secondary"}
-                          className={cn(active ? "bg-rose-500 hover:bg-rose-600" : "", "gap-1")}
-                        >
-                          {m.label}
-                          {m.planoMinimo && <Sparkles className="h-3 w-3" />}
-                        </Badge>
-                      </button>
-                    </TooltipTrigger>
-                    {m.planoMinimo && (
-                      <TooltipContent>
-                        <p>Opcional — requer plano {m.planoMinimo} ou superior</p>
-                      </TooltipContent>
-                    )}
-                  </Tooltip>
-                );
-              })}
-            </div>
+            {(() => {
+              const categorias = [...new Set(MODULOS_OPTIONS.map(m => m.categoria))];
+              return categorias.map((cat) => (
+                <div key={cat} className="space-y-1.5">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{cat}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {MODULOS_OPTIONS.filter(m => m.categoria === cat).map((m) => {
+                      const active = (formData.modulos || []).includes(m.id);
+                      return (
+                        <Tooltip key={m.id}>
+                          <TooltipTrigger asChild>
+                            <button type="button" onClick={() => toggleModulo(m.id)} className="focus:outline-none">
+                              <Badge variant={active ? "default" : "secondary"} className={cn(active ? "bg-rose-500 hover:bg-rose-600" : "", "gap-1")}>
+                                {m.label}
+                                {m.planoMinimo && <Sparkles className="h-3 w-3" />}
+                              </Badge>
+                            </button>
+                          </TooltipTrigger>
+                          {m.planoMinimo && (
+                            <TooltipContent>
+                              <p>Opcional — requer plano {m.planoMinimo} ou superior</p>
+                            </TooltipContent>
+                          )}
+                        </Tooltip>
+                      );
+                    })}
+                  </div>
+                </div>
+              ));
+            })()}
             <p className="text-xs text-muted-foreground">
               Selecione quais módulos ficam disponíveis para esta escola.
             </p>
