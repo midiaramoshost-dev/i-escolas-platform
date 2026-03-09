@@ -18,6 +18,7 @@ import {
   Brain,
   MonitorPlay,
   Target,
+  Bus,
 } from "lucide-react";
 import {
   Sidebar,
