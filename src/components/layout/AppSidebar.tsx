@@ -17,6 +17,7 @@ import {
   Apple,
   Brain,
   MonitorPlay,
+  Target,
 } from "lucide-react";
 import {
   Sidebar,
