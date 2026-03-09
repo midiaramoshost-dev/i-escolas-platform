@@ -53,16 +53,36 @@ const PORTE_OPTIONS = ["Pequeno", "Médio", "Grande"];
 const PLANO_OPTIONS = ["Free", "Start", "Pro", "Premium"];
 
 const MODULOS_OPTIONS = [
-  { id: "academico", label: "Acadêmico" },
-  { id: "financeiro", label: "Financeiro" },
-  { id: "biblioteca", label: "Biblioteca" },
-  { id: "comunicacao", label: "Comunicação" },
-  { id: "folha_pagamento", label: "Folha de Pagamento" },
-  { id: "portal_aluno", label: "Portal do Aluno" },
-  { id: "maternal", label: "Maternal", planoMinimo: "Start" },
-  { id: "nutricao", label: "Nutrição e Alimentação", planoMinimo: "Start" },
-  // Módulo estratégico de migração (deve viver no ADM Master e ser herdado por padrão quando ativo)
-  { id: "importacao", label: "Importação (Migração)" },
+  // Acadêmico
+  { id: "diario_classe", label: "Diário de Classe", categoria: "Acadêmico" },
+  { id: "notas", label: "Gestão de Notas", categoria: "Acadêmico" },
+  { id: "frequencia", label: "Controle de Frequência", categoria: "Acadêmico" },
+  { id: "boletins", label: "Boletins Automáticos", categoria: "Acadêmico", planoMinimo: "Start" },
+  { id: "matriculas", label: "Gestão de Matrículas", categoria: "Acadêmico", planoMinimo: "Pro" },
+  { id: "maternal", label: "Maternal", categoria: "Acadêmico", planoMinimo: "Start" },
+  { id: "nutricao", label: "Nutrição e Alimentação", categoria: "Acadêmico", planoMinimo: "Start" },
+  // Financeiro
+  { id: "mensalidades", label: "Gestão de Mensalidades", categoria: "Financeiro", planoMinimo: "Start" },
+  { id: "inadimplencia", label: "Gestão de Inadimplência", categoria: "Financeiro", planoMinimo: "Pro" },
+  { id: "relatorios_financeiros", label: "Relatórios Financeiros", categoria: "Financeiro", planoMinimo: "Pro" },
+  { id: "folha_pagamento", label: "Folha de Pagamento", categoria: "Financeiro", planoMinimo: "Pro" },
+  // Comunicação
+  { id: "comunicados", label: "Central de Comunicados", categoria: "Comunicação" },
+  { id: "notificacoes_push", label: "Notificações Push", categoria: "Comunicação", planoMinimo: "Pro" },
+  { id: "chat_escola", label: "Chat Escola-Família", categoria: "Comunicação", planoMinimo: "Premium" },
+  // Administrativo
+  { id: "gestao_turmas", label: "Gestão de Turmas", categoria: "Administrativo" },
+  { id: "gestao_professores", label: "Gestão de Professores", categoria: "Administrativo" },
+  { id: "configuracoes_escola", label: "Configurações da Escola", categoria: "Administrativo" },
+  { id: "biblioteca", label: "Biblioteca", categoria: "Administrativo" },
+  // Portais
+  { id: "portal_aluno", label: "Portal do Aluno", categoria: "Portais", planoMinimo: "Start" },
+  { id: "portal_responsavel", label: "Portal do Responsável", categoria: "Portais", planoMinimo: "Start" },
+  // Avançado
+  { id: "api_integracao", label: "API de Integração", categoria: "Avançado", planoMinimo: "Premium" },
+  { id: "sso", label: "Single Sign-On (SSO)", categoria: "Avançado", planoMinimo: "Premium" },
+  // Migração
+  { id: "importacao", label: "Importação (Migração)", categoria: "Migração" },
 ];
 
 interface PaymentProvider {
@@ -172,9 +192,13 @@ const formatPhone = (value: string): string => {
 // Herdado por padrão quando o ADM MASTER implanta uma nova escola.
 // (Mínimo para nascer operacional + migração estratégica)
 const DEFAULT_MODULOS_ESCOLA = [
-  "academico",
-  "comunicacao",
-  "financeiro",
+  "diario_classe",
+  "notas",
+  "frequencia",
+  "comunicados",
+  "gestao_turmas",
+  "gestao_professores",
+  "configuracoes_escola",
   "importacao",
 ];
 
@@ -750,28 +774,36 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
                     Se nenhum for selecionado, a escola herdará automaticamente os módulos ativos padrão (inclui Importação/Migração).
                   </p>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {MODULOS_OPTIONS.map((m) => {
-                    const active = formData.modulos.includes(m.id);
-                    return (
-                      <Tooltip key={m.id}>
-                        <TooltipTrigger asChild>
-                          <button type="button" onClick={() => toggleModulo(m.id)} className="focus:outline-none">
-                            <Badge variant={active ? "default" : "secondary"} className={cn(active ? "bg-rose-500 hover:bg-rose-600" : "", "gap-1")}>
-                              {m.label}
-                              {m.planoMinimo && <Sparkles className="h-3 w-3" />}
-                            </Badge>
-                          </button>
-                        </TooltipTrigger>
-                        {m.planoMinimo && (
-                          <TooltipContent>
-                            <p>Opcional — requer plano {m.planoMinimo} ou superior</p>
-                          </TooltipContent>
-                        )}
-                      </Tooltip>
-                    );
-                  })}
-                </div>
+                {(() => {
+                  const categorias = [...new Set(MODULOS_OPTIONS.map(m => m.categoria))];
+                  return categorias.map((cat) => (
+                    <div key={cat} className="space-y-1.5">
+                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{cat}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {MODULOS_OPTIONS.filter(m => m.categoria === cat).map((m) => {
+                          const active = formData.modulos.includes(m.id);
+                          return (
+                            <Tooltip key={m.id}>
+                              <TooltipTrigger asChild>
+                                <button type="button" onClick={() => toggleModulo(m.id)} className="focus:outline-none">
+                                  <Badge variant={active ? "default" : "secondary"} className={cn(active ? "bg-rose-500 hover:bg-rose-600" : "", "gap-1")}>
+                                    {m.label}
+                                    {m.planoMinimo && <Sparkles className="h-3 w-3" />}
+                                  </Badge>
+                                </button>
+                              </TooltipTrigger>
+                              {m.planoMinimo && (
+                                <TooltipContent>
+                                  <p>Opcional — requer plano {m.planoMinimo} ou superior</p>
+                                </TooltipContent>
+                              )}
+                            </Tooltip>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ));
+                })()}
               </CardContent>
             </Card>
           </TabsContent>
