@@ -1583,22 +1583,30 @@ const Index = () => {
             </div>
             
             <div>
-              <h3 className="font-semibold mb-4">Produto</h3>
-              <ul className="space-y-3 text-muted-foreground">
-                <li><a href="#recursos" className="hover:text-foreground transition-colors">Recursos</a></li>
-                <li><a href="#planos" className="hover:text-foreground transition-colors">Planos</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Integrações</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Atualizações</a></li>
+              <h3 className="font-semibold mb-4">Funcionalidades</h3>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><Link to="/funcionalidades/diario-classe" className="hover:text-foreground transition-colors">Diário de Classe</Link></li>
+                <li><Link to="/funcionalidades/gestao-financeira" className="hover:text-foreground transition-colors">Gestão Financeira</Link></li>
+                <li><Link to="/funcionalidades/portal-aluno" className="hover:text-foreground transition-colors">Portal do Aluno</Link></li>
+                <li><Link to="/funcionalidades/portal-responsavel" className="hover:text-foreground transition-colors">Portal do Responsável</Link></li>
+                <li><Link to="/funcionalidades/boletins-notas" className="hover:text-foreground transition-colors">Boletins e Notas</Link></li>
+                <li><Link to="/funcionalidades/controle-frequencia" className="hover:text-foreground transition-colors">Controle de Frequência</Link></li>
+                <li><Link to="/funcionalidades/comunicacao-escola-familia" className="hover:text-foreground transition-colors">Comunicação</Link></li>
+                <li><Link to="/funcionalidades/matricula-crm" className="hover:text-foreground transition-colors">CRM de Matrícula</Link></li>
               </ul>
             </div>
             
             <div>
-              <h3 className="font-semibold mb-4">Suporte</h3>
-              <ul className="space-y-3 text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">Central de Ajuda</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Documentação</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Status</a></li>
-                <li><a href="#contato" className="hover:text-foreground transition-colors">Contato</a></li>
+              <h3 className="font-semibold mb-4">Cidades Atendidas</h3>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><Link to="/gestao-escolar-sorocaba" className="hover:text-foreground transition-colors">Sorocaba</Link></li>
+                <li><Link to="/gestao-escolar-votorantim" className="hover:text-foreground transition-colors">Votorantim</Link></li>
+                <li><Link to="/gestao-escolar-itu" className="hover:text-foreground transition-colors">Itu</Link></li>
+                <li><Link to="/gestao-escolar-indaiatuba" className="hover:text-foreground transition-colors">Indaiatuba</Link></li>
+                <li><Link to="/gestao-escolar-salto" className="hover:text-foreground transition-colors">Salto</Link></li>
+                <li><Link to="/gestao-escolar-tatui" className="hover:text-foreground transition-colors">Tatuí</Link></li>
+                <li><Link to="/gestao-escolar-sao-roque" className="hover:text-foreground transition-colors">São Roque</Link></li>
+                <li><a href="#contato" className="hover:text-foreground transition-colors">+ 8 cidades</a></li>
               </ul>
             </div>
           </div>
