@@ -427,7 +427,7 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
 
     try {
       // 1) Criar usuário no Supabase Auth via edge function
-      const { data: fnData, error: fnError } = await supabase.functions.invoke("create-school-user", {
+      const response = await supabase.functions.invoke("create-school-user", {
         body: {
           email: formData.emailDiretor,
           password: formData.senhaProvisoria,
@@ -436,8 +436,25 @@ export function CadastrarEscolaDialog({ open, onOpenChange, onSave }: CadastrarE
         },
       });
 
+      const fnData = response.data;
+      const fnError = response.error;
+
       if (fnError || fnData?.error) {
-        const errorMsg = fnData?.error || fnError?.message || "Erro desconhecido";
+        // When edge function returns non-2xx, supabase-js puts the parsed body in fnError.context
+        let errorMsg = fnData?.error || "Erro desconhecido";
+        if (fnError && !fnData?.error) {
+          try {
+            const ctx = (fnError as any)?.context;
+            if (ctx?.json) {
+              const parsed = await ctx.json();
+              errorMsg = parsed?.error || fnError.message || errorMsg;
+            } else {
+              errorMsg = fnError.message || errorMsg;
+            }
+          } catch {
+            errorMsg = fnError.message || errorMsg;
+          }
+        }
         console.error("Edge function error:", fnError, fnData);
         if (errorMsg.includes("já está cadastrado") || errorMsg.includes("already been registered")) {
           toast.error("Este e-mail já está cadastrado no sistema. Use outro e-mail para o diretor.");
