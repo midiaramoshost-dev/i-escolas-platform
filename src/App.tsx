@@ -114,7 +114,7 @@ const App = () => (
               <Route path="/redefinir-senha" element={<ResetPassword />} />
               <Route path="/indicacao" element={<Indicacao />} />
               <Route path="/verificar-carteirinha" element={<VerificarCarteirinha />} />
-              <Route path="/gestao-escolar-:cidade" element={<CidadeLanding />} />
+              <Route path="/gestao-escolar-:cidade/*" element={<CidadeLanding />} />
               <Route path="/funcionalidades/:slug" element={<FuncionalidadeLanding />} />
               
               {/* Escola Routes - Protected */}
