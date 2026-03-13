@@ -43,6 +43,9 @@ export interface Escola {
   // Logo (URL)
   logoUrl?: string;
 
+  // Auth user ID (from escolas.user_id)
+  userId?: string;
+
   // Credenciais (para o painel ADM Master conseguir ajustar)
   emailDiretor?: string;
   novaSenha?: string;
