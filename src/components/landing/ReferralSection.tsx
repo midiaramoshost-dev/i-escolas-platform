@@ -36,7 +36,7 @@ export function ReferralSection() {
             <Gift className="h-4 w-4" />
             <span className="text-sm font-medium">Programa de Indicação</span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-black drop-shadow-md">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
             A escola ensina. Nós cuidamos do resto
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">

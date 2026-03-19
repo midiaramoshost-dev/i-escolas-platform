@@ -462,7 +462,7 @@ const Index = () => {
               />
             </div>
           ))}
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/60 to-black/70" />
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/40 to-black/60" />
         </div>
 
         {/* Arrow Navigation */}
@@ -493,7 +493,7 @@ const Index = () => {
           >
             {/* Badge */}
             <motion.div variants={fadeInUp} transition={{ duration: 0.6 }}>
-              <Badge className="mb-6 py-2 px-4 text-sm bg-white/15 text-white border-white/25 hover:bg-white/20 backdrop-blur-sm">
+              <Badge className="mb-6 py-2 px-4 text-sm bg-white/10 text-white border-white/20 hover:bg-white/15 backdrop-blur-sm">
                 <Sparkles className="mr-2 h-4 w-4" />
                 Plataforma #1 em Gestão Escolar — Sorocaba e Região
               </Badge>
@@ -505,15 +505,15 @@ const Index = () => {
               variants={fadeInUp}
               transition={{ duration: 0.7, delay: 0.1 }}
             >
-              <span className="block text-white [text-shadow:_0_2px_12px_rgba(0,0,0,0.4)]">A escola ensina.</span>
-              <span className="block mt-2 text-white [text-shadow:_0_2px_12px_rgba(0,0,0,0.4)]">
+              <span className="block text-white/95 [text-shadow:_0_1px_6px_rgba(0,0,0,0.3)]">A escola ensina.</span>
+              <span className="block mt-2 text-white/95 [text-shadow:_0_1px_6px_rgba(0,0,0,0.3)]">
                 Nós cuidamos do resto.
               </span>
             </motion.h1>
 
             {/* Subheadline */}
             <motion.p 
-              className="mb-10 text-lg text-white/95 md:text-xl max-w-3xl mx-auto leading-relaxed [text-shadow:_0_1px_6px_rgba(0,0,0,0.3)]"
+              className="mb-10 text-lg text-white/90 md:text-xl max-w-3xl mx-auto leading-relaxed [text-shadow:_0_1px_4px_rgba(0,0,0,0.25)]"
               variants={fadeInUp}
               transition={{ duration: 0.7, delay: 0.2 }}
             >
@@ -528,7 +528,7 @@ const Index = () => {
             >
               <Link to="/login">
                 <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
-                  <Button size="lg" className="w-full sm:w-auto gap-2 text-lg px-8 py-6 shadow-xl shadow-primary/30">
+                  <Button size="lg" className="w-full sm:w-auto gap-2 text-lg px-8 py-6 shadow-lg shadow-primary/20">
                     Começar Gratuitamente
                     <ArrowRight className="h-5 w-5" />
                   </Button>
@@ -558,7 +558,7 @@ const Index = () => {
                 { icon: Clock, text: "Setup em 5 minutos" },
                 { icon: Award, text: "+500 escolas em Sorocaba e SP" },
               ].map((item, i) => (
-                <div key={i} className="flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-sm px-4 py-2">
+                <div key={i} className="flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-sm px-4 py-2">
                   <item.icon className="h-4 w-4 text-white" />
                   <span className="text-sm font-medium text-white">{item.text}</span>
                 </div>
@@ -571,7 +571,7 @@ const Index = () => {
               variants={fadeIn}
               transition={{ duration: 0.8, delay: 0.6 }}
             >
-              <div className="inline-flex items-center rounded-full bg-white/15 backdrop-blur-sm px-5 py-2 text-white text-sm font-medium mb-4">
+              <div className="inline-flex items-center rounded-full bg-white/10 backdrop-blur-sm px-5 py-2 text-white text-sm font-medium mb-4">
                 {heroSlides[activeSlide]?.title} — {heroSlides[activeSlide]?.description}
               </div>
               <div className="flex justify-center gap-2">
