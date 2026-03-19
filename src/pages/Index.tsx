@@ -462,7 +462,7 @@ const Index = () => {
               />
             </div>
           ))}
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/40 to-black/60" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
         </div>
 
         {/* Arrow Navigation */}
@@ -493,7 +493,7 @@ const Index = () => {
           >
             {/* Badge */}
             <motion.div variants={fadeInUp} transition={{ duration: 0.6 }}>
-              <Badge className="mb-6 py-2 px-4 text-sm bg-white/10 text-white border-white/20 hover:bg-white/15 backdrop-blur-sm">
+              <Badge className="mb-6 py-2 px-4 text-sm bg-white/5 text-white border-white/20 hover:bg-white/10 backdrop-blur-sm">
                 <Sparkles className="mr-2 h-4 w-4" />
                 Plataforma #1 em Gestão Escolar — Sorocaba e Região
               </Badge>
@@ -505,15 +505,15 @@ const Index = () => {
               variants={fadeInUp}
               transition={{ duration: 0.7, delay: 0.1 }}
             >
-              <span className="block text-white/95 [text-shadow:_0_1px_6px_rgba(0,0,0,0.3)]">A escola ensina.</span>
-              <span className="block mt-2 text-white/95 [text-shadow:_0_1px_6px_rgba(0,0,0,0.3)]">
+              <span className="block text-white/95">A escola ensina.</span>
+              <span className="block mt-2 text-white/95">
                 Nós cuidamos do resto.
               </span>
             </motion.h1>
 
             {/* Subheadline */}
             <motion.p 
-              className="mb-10 text-lg text-white/90 md:text-xl max-w-3xl mx-auto leading-relaxed [text-shadow:_0_1px_4px_rgba(0,0,0,0.25)]"
+              className="mb-10 text-lg text-white/85 md:text-xl max-w-3xl mx-auto leading-relaxed"
               variants={fadeInUp}
               transition={{ duration: 0.7, delay: 0.2 }}
             >
@@ -558,9 +558,9 @@ const Index = () => {
                 { icon: Clock, text: "Setup em 5 minutos" },
                 { icon: Award, text: "+500 escolas em Sorocaba e SP" },
               ].map((item, i) => (
-                <div key={i} className="flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-sm px-4 py-2">
-                  <item.icon className="h-4 w-4 text-white" />
-                  <span className="text-sm font-medium text-white">{item.text}</span>
+                <div key={i} className="flex items-center gap-2 text-white/80">
+                  <item.icon className="h-4 w-4" />
+                  <span className="text-sm font-medium">{item.text}</span>
                 </div>
               ))}
             </motion.div>
@@ -571,7 +571,7 @@ const Index = () => {
               variants={fadeIn}
               transition={{ duration: 0.8, delay: 0.6 }}
             >
-              <div className="inline-flex items-center rounded-full bg-white/10 backdrop-blur-sm px-5 py-2 text-white text-sm font-medium mb-4">
+              <div className="inline-flex items-center text-white/80 text-sm font-medium mb-4">
                 {heroSlides[activeSlide]?.title} — {heroSlides[activeSlide]?.description}
               </div>
               <div className="flex justify-center gap-2">
@@ -603,13 +603,13 @@ const Index = () => {
       </section>
 
       {/* Stats Section - Floating Cards with Enhanced Animations */}
-      <section className="relative py-20 -mt-20">
+      <section className="relative py-20">
         <div className="container">
           <StaggerContainer className="grid grid-cols-2 md:grid-cols-4 gap-4" staggerDelay={0.15}>
             {stats.map((stat, index) => (
               <StaggerItem key={index} animation="bounce">
                 <motion.div whileHover={{ y: -12, scale: 1.05 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}>
-                  <Card className="relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm group">
+                  <Card className="relative overflow-hidden border-border/50 bg-card group">
                     <CardContent className="p-6 text-center">
                       <motion.div 
                         className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 text-primary mb-4"
@@ -638,7 +638,7 @@ const Index = () => {
       </section>
 
       {/* Partners/Clients Section */}
-      <section className="py-16 border-y bg-muted/30">
+      <section className="py-16 border-y bg-background">
         <div className="container">
           <FadeUp delay={0.1}>
             <div className="text-center mb-10">
