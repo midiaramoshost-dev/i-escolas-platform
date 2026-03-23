@@ -17,7 +17,7 @@ const heroSlides = [
     title: "Decisões rápidas com dados em tempo real",
     description:
       "Acompanhe matrículas, frequência e desempenho em uma visão unificada e moderna.",
-    gradient: "from-indigo-500/70 via-violet-500/60 to-sky-500/70",
+    gradient: "from-indigo-400/50 via-violet-400/50 to-sky-400/50",
     primaryAction: "Ver indicadores",
     secondaryAction: "Criar relatório",
   },
