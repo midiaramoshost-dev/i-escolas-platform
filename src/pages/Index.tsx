@@ -117,6 +117,11 @@ const Index = () => {
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<{ id: string; name: string; price: number } | null>(null);
 
+  const homeLogoProps = {
+    iconClassName: "bg-secondary text-foreground ring-1 ring-border/70 shadow-card",
+    textClassName: "text-foreground",
+  } as const;
+
   useEffect(() => {
     const faqSchema = {
       "@context": "https://schema.org",
@@ -176,7 +181,7 @@ const Index = () => {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-border/40 bg-background/90 backdrop-blur-xl">
         <nav className="container flex h-16 items-center justify-between">
-          <PlatformLogo size="lg" />
+          <PlatformLogo size="lg" {...homeLogoProps} />
           <div className="hidden md:flex items-center gap-8">
             {[
               { href: "#recursos", label: "Recursos" },
@@ -204,12 +209,12 @@ const Index = () => {
       </header>
 
       {/* Hero */}
-      <section className="relative pt-32 pb-16 md:pt-40 md:pb-24 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.04] via-transparent to-muted/60" />
+      <section className="relative overflow-hidden bg-secondary/10 pt-32 pb-16 md:pt-40 md:pb-24">
+        <div className="absolute inset-0 bg-gradient-to-br from-secondary/80 via-background to-muted/40" />
         <div className="container relative text-center max-w-3xl mx-auto">
           <motion.div initial="hidden" animate="visible" variants={stagger}>
             <motion.div variants={fadeUp}>
-              <Badge variant="outline" className="mb-6 border-border/70 bg-card/80 px-4 py-2 text-foreground shadow-soft">
+              <Badge variant="outline" className="mb-6 border-border/70 bg-secondary/70 px-4 py-2 text-foreground shadow-soft">
                 <Sparkles className="mr-2 h-3.5 w-3.5" />
                 Gestão Escolar — Sorocaba e Região
               </Badge>
@@ -248,7 +253,7 @@ const Index = () => {
       </section>
 
       {/* Features */}
-      <section id="recursos" className="bg-secondary/30 py-16">
+      <section id="recursos" className="bg-muted/40 py-16">
         <div className="container">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold sm:text-4xl mb-3">Tudo que sua escola precisa</h2>
@@ -259,7 +264,7 @@ const Index = () => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {features.map((feature, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}>
-                <Card className="h-full border-border/60 bg-card/90 transition-all hover:-translate-y-1 hover:border-border hover:shadow-soft">
+                <Card className="h-full border-border/60 bg-card transition-all hover:-translate-y-1 hover:border-border hover:shadow-soft">
                   <CardHeader className="pb-2">
                     <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-foreground">
                       <feature.icon className="h-5 w-5" />
@@ -296,7 +301,7 @@ const Index = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
             {plans.map((plan, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }} className="h-full">
-                <Card className={`relative h-full flex flex-col ${plan.highlighted ? "scale-[1.02] border-foreground/15 bg-muted/20 shadow-soft" : "border-border/50"}`}>
+                <Card className={`relative h-full flex flex-col ${plan.highlighted ? "scale-[1.02] border-border/70 bg-secondary/60 shadow-soft" : "border-border/50 bg-card"}`}>
                   {plan.highlighted && (
                     <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-foreground px-3 text-background">
                       <Star className="h-3 w-3 mr-1" /> Popular
@@ -322,7 +327,7 @@ const Index = () => {
                     </ul>
                   </CardContent>
                   <div className="p-6 pt-0">
-                    <Button className={plan.highlighted ? "w-full bg-foreground text-background hover:bg-foreground/90" : "w-full"} variant={plan.highlighted ? "default" : "outline"} onClick={() => { setSelectedPlan({ id: plan.id, name: plan.name, price: isAnnual ? plan.annualPrice : plan.monthlyPrice }); setOnboardingOpen(true); }}>
+                    <Button className={plan.highlighted ? "w-full bg-foreground text-background hover:bg-foreground/90" : "w-full border-border/70 bg-card hover:bg-secondary hover:text-foreground"} variant={plan.highlighted ? "default" : "outline"} onClick={() => { setSelectedPlan({ id: plan.id, name: plan.name, price: isAnnual ? plan.annualPrice : plan.monthlyPrice }); setOnboardingOpen(true); }}>
                       {plan.cta} <ChevronRight className="h-4 w-4 ml-1" />
                     </Button>
                   </div>
@@ -334,7 +339,7 @@ const Index = () => {
       </section>
 
       {/* Testimonials + FAQ */}
-      <section id="depoimentos" className="bg-secondary/30 py-16">
+      <section id="depoimentos" className="bg-muted/40 py-16">
         <div className="container">
           <div className="grid lg:grid-cols-2 gap-12">
             {/* Testimonials */}
@@ -342,7 +347,7 @@ const Index = () => {
               <h2 className="text-2xl font-bold mb-6">O que dizem nossos clientes</h2>
               <div className="space-y-4">
                 {testimonials.map((t, i) => (
-                  <Card key={i} className="border-border/50">
+                  <Card key={i} className="border-border/60 bg-card/95 shadow-card">
                     <CardContent className="p-5">
                       <div className="flex gap-0.5 mb-3">
                         {Array.from({ length: 5 }).map((_, si) => (
@@ -351,7 +356,7 @@ const Index = () => {
                       </div>
                       <blockquote className="text-sm leading-relaxed mb-4">"{t.quote}"</blockquote>
                       <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-foreground">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-xs font-semibold text-foreground">
                           {t.avatar}
                         </div>
                         <div>
@@ -370,7 +375,7 @@ const Index = () => {
               <h2 className="text-2xl font-bold mb-6">Perguntas Frequentes</h2>
               <Accordion type="single" collapsible className="space-y-2">
                 {faqData.map((faq, i) => (
-                  <AccordionItem key={i} value={`faq-${i}`} className="bg-card border rounded-xl px-5 shadow-sm">
+                  <AccordionItem key={i} value={`faq-${i}`} className="rounded-xl border border-border/60 bg-card/90 px-5 shadow-card">
                     <AccordionTrigger className="text-left text-sm font-medium hover:no-underline py-3.5">
                       {faq.question}
                     </AccordionTrigger>
@@ -381,7 +386,7 @@ const Index = () => {
                 ))}
               </Accordion>
               <div className="mt-6">
-                <Button variant="outline" size="sm" className="gap-2" onClick={() => openWhatsApp("Olá! Tenho uma dúvida.")}>
+                <Button variant="secondary" size="sm" className="gap-2" onClick={() => openWhatsApp("Olá! Tenho uma dúvida.")}>
                   <MessageSquare className="h-4 w-4" /> Falar com Especialista
                 </Button>
               </div>
@@ -391,7 +396,7 @@ const Index = () => {
       </section>
 
       {/* CTA */}
-      <section className="bg-secondary/60 py-16">
+      <section className="bg-muted/50 py-16">
         <div className="container text-center max-w-2xl">
           <h2 className="text-3xl font-bold mb-4">Pronto para modernizar sua escola?</h2>
           <p className="mb-6 text-muted-foreground">
@@ -406,11 +411,11 @@ const Index = () => {
       </section>
 
       {/* Footer */}
-      <footer className="border-t bg-card/50 py-12">
+      <footer className="border-t bg-muted/20 py-12">
         <div className="container">
           <div className="grid md:grid-cols-4 gap-8">
             <div className="md:col-span-2">
-              <PlatformLogo size="lg" />
+              <PlatformLogo size="lg" {...homeLogoProps} />
               <p className="text-sm text-muted-foreground mt-3 max-w-sm">
                 Plataforma completa de gestão escolar para Sorocaba e região.
               </p>
