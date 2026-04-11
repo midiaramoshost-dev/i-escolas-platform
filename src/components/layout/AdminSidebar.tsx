@@ -21,6 +21,7 @@ import {
   DollarSign,
   Clock,
   Receipt,
+  Megaphone,
 } from "lucide-react";
 import {
   Sidebar,
@@ -120,6 +121,11 @@ const menuItems = [
     title: "Configurações",
     icon: Settings,
     url: "/admin/configuracoes",
+  },
+  {
+    title: "Anunciantes",
+    icon: Megaphone,
+    url: "/admin/anunciantes",
   },
 ];
 

@@ -50,6 +50,123 @@ export type Database = {
         }
         Relationships: []
       }
+      anunciantes: {
+        Row: {
+          ativo: boolean
+          categoria: string
+          contato_email: string | null
+          contato_nome: string | null
+          contato_telefone: string | null
+          created_at: string
+          descricao: string | null
+          id: string
+          logo_url: string | null
+          nome: string
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          ativo?: boolean
+          categoria?: string
+          contato_email?: string | null
+          contato_nome?: string | null
+          contato_telefone?: string | null
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          logo_url?: string | null
+          nome: string
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          ativo?: boolean
+          categoria?: string
+          contato_email?: string | null
+          contato_nome?: string | null
+          contato_telefone?: string | null
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          logo_url?: string | null
+          nome?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      campanhas_anuncio: {
+        Row: {
+          anunciante_id: string
+          ativo: boolean
+          cliques: number
+          created_at: string
+          data_fim: string | null
+          data_inicio: string
+          descricao: string | null
+          escola_id: string | null
+          id: string
+          imagem_url: string | null
+          impressoes: number
+          link_destino: string | null
+          posicao: string
+          prioridade: number
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          anunciante_id: string
+          ativo?: boolean
+          cliques?: number
+          created_at?: string
+          data_fim?: string | null
+          data_inicio?: string
+          descricao?: string | null
+          escola_id?: string | null
+          id?: string
+          imagem_url?: string | null
+          impressoes?: number
+          link_destino?: string | null
+          posicao?: string
+          prioridade?: number
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          anunciante_id?: string
+          ativo?: boolean
+          cliques?: number
+          created_at?: string
+          data_fim?: string | null
+          data_inicio?: string
+          descricao?: string | null
+          escola_id?: string | null
+          id?: string
+          imagem_url?: string | null
+          impressoes?: number
+          link_destino?: string | null
+          posicao?: string
+          prioridade?: number
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campanhas_anuncio_anunciante_id_fkey"
+            columns: ["anunciante_id"]
+            isOneToOne: false
+            referencedRelation: "anunciantes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campanhas_anuncio_escola_id_fkey"
+            columns: ["escola_id"]
+            isOneToOne: false
+            referencedRelation: "escolas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       centros_custo: {
         Row: {
           ativo: boolean

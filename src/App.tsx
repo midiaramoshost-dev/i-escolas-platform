@@ -86,6 +86,8 @@ import AdminLogAtividades from "./pages/admin/LogAtividades";
 import AdminFolhaPagamento from "./pages/admin/FolhaPagamento";
 import AdminPresencaFuncionarios from "./pages/admin/PresencaFuncionarios";
 import AdminCobrancas from "./pages/admin/Cobrancas";
+import AdminAnunciantes from "./pages/admin/Anunciantes";
+import Parceiros from "./pages/Parceiros";
 import NotFound from "./pages/NotFound";
 import CidadeLanding from "./pages/cidades/CidadeLanding";
 import FuncionalidadeLanding from "./pages/funcionalidades/FuncionalidadeLanding";
@@ -117,6 +119,7 @@ const App = () => (
               <Route path="/verificar-carteirinha" element={<VerificarCarteirinha />} />
               <Route path="/gestao-escolar/:cidade" element={<CidadeLanding />} />
               <Route path="/funcionalidades/:slug" element={<FuncionalidadeLanding />} />
+              <Route path="/parceiros" element={<Parceiros />} />
               
               {/* Escola Routes - Protected */}
               <Route path="/escola" element={
@@ -221,6 +224,7 @@ const App = () => (
                 <Route path="folha-pagamento" element={<AdminFolhaPagamento />} />
                 <Route path="presenca-funcionarios" element={<AdminPresencaFuncionarios />} />
                 <Route path="cobrancas" element={<AdminCobrancas />} />
+                <Route path="anunciantes" element={<AdminAnunciantes />} />
               </Route>
 
               <Route path="*" element={<NotFound />} />
