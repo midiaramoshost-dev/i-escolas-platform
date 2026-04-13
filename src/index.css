@@ -24,7 +24,7 @@
     --popover-foreground: 220 15% 13%;
 
     /* Primary - Azul discreto */
-    --primary: 220 65% 44%;
+    --primary: 220 40% 38%;
     --primary-foreground: 0 0% 100%;
 
     /* Secondary - Cinza puro */
@@ -37,7 +37,7 @@
 
     /* Accent - Cinza neutro */
     --accent: 220 10% 95%;
-    --accent-foreground: 220 65% 44%;
+    --accent-foreground: 220 40% 38%;
 
     /* Destrutivo */
     --destructive: 0 84% 60%;
@@ -58,29 +58,29 @@
     /* Bordas e Inputs */
     --border: 220 13% 90%;
     --input: 220 13% 90%;
-    --ring: 220 65% 44%;
+    --ring: 220 40% 38%;
 
     --radius: 0.625rem;
 
     /* Sidebar */
     --sidebar-background: 220 15% 11%;
     --sidebar-foreground: 220 10% 88%;
-    --sidebar-primary: 220 65% 55%;
+    --sidebar-primary: 220 35% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 220 13% 16%;
     --sidebar-accent-foreground: 220 10% 88%;
     --sidebar-border: 220 13% 16%;
-    --sidebar-ring: 220 65% 55%;
+    --sidebar-ring: 220 35% 45%;
 
     /* Brand Colors */
-    --brand-primary: 220 65% 44%;
-    --brand-secondary: 199 60% 48%;
-    --brand-gradient-start: 220 65% 44%;
-    --brand-gradient-end: 199 60% 48%;
+    --brand-primary: 220 40% 38%;
+    --brand-secondary: 210 30% 42%;
+    --brand-gradient-start: 220 40% 38%;
+    --brand-gradient-end: 210 30% 42%;
 
     /* Chart Colors */
-    --chart-1: 220 65% 44%;
-    --chart-2: 199 60% 48%;
+    --chart-1: 220 40% 38%;
+    --chart-2: 210 30% 42%;
     --chart-3: 142 76% 36%;
     --chart-4: 38 92% 50%;
     --chart-5: 0 84% 60%;
@@ -99,7 +99,7 @@
     --popover-foreground: 220 10% 90%;
 
     /* Primary */
-    --primary: 220 65% 58%;
+    --primary: 220 35% 55%;
     --primary-foreground: 220 15% 7%;
 
     /* Secondary */
@@ -112,7 +112,7 @@
 
     /* Accent */
     --accent: 220 13% 16%;
-    --accent-foreground: 220 65% 58%;
+    --accent-foreground: 220 35% 55%;
 
     /* Destrutivo */
     --destructive: 0 63% 31%;
@@ -133,25 +133,25 @@
     /* Bordas e Inputs */
     --border: 220 13% 16%;
     --input: 220 13% 16%;
-    --ring: 220 65% 58%;
+    --ring: 220 35% 55%;
 
     /* Sidebar */
     --sidebar-background: 220 15% 5%;
     --sidebar-foreground: 220 10% 88%;
-    --sidebar-primary: 220 65% 58%;
+    --sidebar-primary: 220 35% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 220 13% 11%;
     --sidebar-accent-foreground: 220 10% 88%;
     --sidebar-border: 220 13% 11%;
-    --sidebar-ring: 220 65% 58%;
+    --sidebar-ring: 220 35% 55%;
 
     /* Brand Colors */
-    --brand-primary: 220 65% 58%;
-    --brand-secondary: 199 60% 48%;
+    --brand-primary: 220 35% 55%;
+    --brand-secondary: 210 25% 50%;
 
     /* Chart Colors */
-    --chart-1: 220 65% 58%;
-    --chart-2: 199 60% 48%;
+    --chart-1: 220 35% 55%;
+    --chart-2: 210 25% 50%;
     --chart-3: 142 70% 45%;
     --chart-4: 38 92% 55%;
     --chart-5: 0 70% 50%;
