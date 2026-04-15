@@ -472,74 +472,115 @@ export default function AdminEscolas() {
                   escolasFiltradas.map((escola) => (
                     <TableRow key={escola.id}>
                       <TableCell>
-                        <div>
-                          <p className="font-medium">{escola.nome}</p>
-                          <p className="text-xs text-muted-foreground">{escola.cnpj}</p>
-                        </div>
+                        <InlineEditCell value={escola.nome} field="nome" onSave={(f, v) => handleInlineFieldSave(escola, f, v)}>
+                          <div>
+                            <p className="font-medium">{escola.nome}</p>
+                            <p className="text-xs text-muted-foreground">{escola.cnpj}</p>
+                          </div>
+                        </InlineEditCell>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-1 text-muted-foreground">
-                          <MapPin className="h-3 w-3" />
-                          <span className="text-sm">
-                            {escola.cidade} - {escola.uf}
-                          </span>
-                        </div>
+                        <InlineEditCell value={escola.cidade} field="cidade" onSave={(f, v) => handleInlineFieldSave(escola, f, v)}>
+                          <div className="flex items-center gap-1 text-muted-foreground">
+                            <MapPin className="h-3 w-3" />
+                            <span className="text-sm">
+                              {escola.cidade} - {escola.uf}
+                            </span>
+                          </div>
+                        </InlineEditCell>
                       </TableCell>
                       <TableCell>
-                        <Badge className={getPlanoColor(escola.plano)}>{escola.plano}</Badge>
+                        <InlineEditCell
+                          value={escola.plano}
+                          field="plano"
+                          type="select"
+                          options={[
+                            { value: "Free", label: "Free" },
+                            { value: "Start", label: "Start" },
+                            { value: "Pro", label: "Pro" },
+                            { value: "Premium", label: "Premium" },
+                          ]}
+                          onSave={(f, v) => handleInlineFieldSave(escola, f, v)}
+                        >
+                          <Badge className={getPlanoColor(escola.plano)}>{escola.plano}</Badge>
+                        </InlineEditCell>
                       </TableCell>
                       <TableCell className="text-center">
-                        <div className="flex items-center justify-center gap-1">
-                          <GraduationCap className="h-4 w-4 text-muted-foreground" />
-                          <span>{escola.alunos.toLocaleString()}</span>
-                        </div>
+                        <InlineEditCell value={escola.alunos} field="alunos" type="number" onSave={(f, v) => handleInlineFieldSave(escola, f, v)}>
+                          <div className="flex items-center justify-center gap-1">
+                            <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                            <span>{escola.alunos.toLocaleString()}</span>
+                          </div>
+                        </InlineEditCell>
                       </TableCell>
                       <TableCell className="text-center">
-                        <div className="flex items-center justify-center gap-1">
-                          <Users className="h-4 w-4 text-muted-foreground" />
-                          <span>{escola.professores}</span>
-                        </div>
+                        <InlineEditCell value={escola.professores} field="professores" type="number" onSave={(f, v) => handleInlineFieldSave(escola, f, v)}>
+                          <div className="flex items-center justify-center gap-1">
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                            <span>{escola.professores}</span>
+                          </div>
+                        </InlineEditCell>
                       </TableCell>
                       <TableCell>
-                        <Badge className={`${getStatusColor(escola.status)} flex items-center gap-1 w-fit`}>
-                          {getStatusIcon(escola.status)}
-                          {escola.status === "ativo" ? "Ativo" : escola.status === "trial" ? "Trial" : "Inativo"}
-                        </Badge>
+                        <InlineEditCell
+                          value={escola.status}
+                          field="status"
+                          type="select"
+                          options={[
+                            { value: "ativo", label: "Ativo" },
+                            { value: "trial", label: "Trial" },
+                            { value: "inativo", label: "Inativo" },
+                          ]}
+                          onSave={(f, v) => handleInlineFieldSave(escola, f, v)}
+                        >
+                          <Badge className={`${getStatusColor(escola.status)} flex items-center gap-1 w-fit`}>
+                            {getStatusIcon(escola.status)}
+                            {escola.status === "ativo" ? "Ativo" : escola.status === "trial" ? "Trial" : "Inativo"}
+                          </Badge>
+                        </InlineEditCell>
                       </TableCell>
                       <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button size="icon" variant="ghost">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
-                            <DropdownMenuItem className="cursor-pointer" onClick={() => handleVerDetalhes(escola)}>
-                              <Eye className="mr-2 h-4 w-4" />
-                              Ver Detalhes
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="cursor-pointer" onClick={() => handleEditEscola(escola)}>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Editar
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="cursor-pointer"
-                              onClick={() => {
-                                if (escola.linkAcesso) {
-                                  navigator.clipboard.writeText(escola.linkAcesso);
-                                  toast.success("Link de acesso copiado!");
-                                }
-                              }}
-                            >
-                              <Link2 className="mr-2 h-4 w-4" />
-                              Copiar Link de Acesso
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-red-500 cursor-pointer" onClick={() => handleDesativarEscola(escola)}>
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              {escola.status === "inativo" ? "Ativar" : "Desativar"}
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <div className="flex items-center justify-end gap-1">
+                          <Switch
+                            checked={escola.status === "ativo"}
+                            onCheckedChange={() => handleDesativarEscola(escola)}
+                            title={escola.status === "inativo" ? "Ativar escola" : "Desativar escola"}
+                            className="data-[state=checked]:bg-green-500"
+                          />
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button size="icon" variant="ghost">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
+                              <DropdownMenuItem className="cursor-pointer" onClick={() => handleVerDetalhes(escola)}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                Ver Detalhes
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="cursor-pointer" onClick={() => handleEditEscola(escola)}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Editar Completo
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="cursor-pointer"
+                                onClick={() => {
+                                  if (escola.linkAcesso) {
+                                    navigator.clipboard.writeText(escola.linkAcesso);
+                                    toast.success("Link de acesso copiado!");
+                                  }
+                                }}
+                              >
+                                <Link2 className="mr-2 h-4 w-4" />
+                                Copiar Link de Acesso
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="text-red-500 cursor-pointer" onClick={() => handleDesativarEscola(escola)}>
+                                <Power className="mr-2 h-4 w-4" />
+                                {escola.status === "inativo" ? "Ativar" : "Desativar"}
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
