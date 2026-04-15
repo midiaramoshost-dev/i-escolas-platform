@@ -66,7 +66,7 @@ export function InlineEditCell({
         value={editValue}
         onValueChange={(v) => {
           setEditValue(v);
-          const finalValue = type === "number" ? Number(v) : v;
+          const finalValue = v;
           if (finalValue !== value) onSave(field, v);
           setEditing(false);
         }}
